@@ -37,12 +37,15 @@ def list_user_submissions(
     user_id: UUID,
     *,
     problem_id: UUID | None = None,
+    status: str | None = None,
     offset: int = 0,
     limit: int = 50,
 ) -> list[Submission]:
     query = select(Submission).where(Submission.user_id == user_id)
     if problem_id is not None:
         query = query.where(Submission.problem_id == problem_id)
+    if status is not None:
+        query = query.where(Submission.status == status)
     return list(
         db.scalars(
             query.order_by(Submission.created_at.desc(), Submission.id.desc())

@@ -7,7 +7,12 @@ from app.db.session import get_db
 from app.dependencies.auth import get_current_user
 from app.models.submission import Submission
 from app.models.user import User
-from app.schemas.submissions import SubmissionCreate, SubmissionListItem, SubmissionResponse
+from app.schemas.submissions import (
+    SubmissionCreate,
+    SubmissionListItem,
+    SubmissionResponse,
+    SubmissionStatus,
+)
 from app.services.submissions import (
     create_submission,
     get_user_submission,
@@ -49,18 +54,26 @@ def submission_create(
     summary="List the current user's submissions",
     description=(
         "Returns only the authenticated user's submissions, newest first. Source code is omitted "
-        "from list items. Use problem_id to filter and offset/limit for pagination."
+        "from list items. Use problem_id and/or status to filter and offset/limit for pagination."
     ),
     responses={401: {"description": "Authentication required"}},
 )
 def submissions_index(
     problem_id: UUID | None = Query(default=None),
+    status: SubmissionStatus | None = Query(default=None),
     offset: int = Query(default=0, ge=0),
     limit: int = Query(default=50, ge=1, le=100),
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
 ) -> list[Submission]:
-    return list_user_submissions(db, user.id, problem_id=problem_id, offset=offset, limit=limit)
+    return list_user_submissions(
+        db,
+        user.id,
+        problem_id=problem_id,
+        status=status.value if status else None,
+        offset=offset,
+        limit=limit,
+    )
 
 
 @router.get(

@@ -6,6 +6,7 @@ from sqlalchemy import (
     DateTime,
     Float,
     ForeignKey,
+    Index,
     Integer,
     String,
     Text,
@@ -21,6 +22,7 @@ from app.db.base import Base
 class Submission(Base):
     __tablename__ = "submissions"
     __table_args__ = (
+        Index("ix_submissions_status_problem_user", "status", "problem_id", "user_id"),
         CheckConstraint(
             "status IN ('pending', 'running', 'completed', 'failed', 'accepted', "
             "'wrong_answer', 'compilation_error', 'runtime_error', 'timeout', "

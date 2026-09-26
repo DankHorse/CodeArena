@@ -7,6 +7,7 @@ from app.db.session import get_db
 from app.dependencies.authorization import get_admin_user
 from app.models.problem import Problem
 from app.schemas.problems import ProblemCreate, ProblemDetail, ProblemSummary, ProblemUpdate
+from app.schemas.statistics import ProblemStatisticsResponse
 from app.services.problems import (
     create_problem,
     deactivate_problem,
@@ -14,6 +15,7 @@ from app.services.problems import (
     list_problems,
     update_problem,
 )
+from app.services.statistics import get_problem_statistics
 
 router = APIRouter()
 
@@ -52,6 +54,20 @@ def problems_index(
 )
 def problem_detail(slug: str, db: Session = Depends(get_db)) -> ProblemDetail:
     return get_problem(db, slug)
+
+
+@router.get(
+    "/{slug}/statistics",
+    response_model=ProblemStatisticsResponse,
+    summary="Get public aggregate statistics for a problem",
+    description=(
+        "Returns submission and solve aggregates for an active problem only. Acceptance rate excludes "
+        "pending/running, system errors, and legacy process-only results. No test-case data is returned."
+    ),
+    responses={404: {"description": "Problem not found"}},
+)
+def problem_statistics(slug: str, db: Session = Depends(get_db)) -> ProblemStatisticsResponse:
+    return get_problem_statistics(db, slug)
 
 
 @router.post(

@@ -180,13 +180,66 @@ stdout, stderr, and per-test results. Status values include `pending`,
 The server owns status and result fields. A newly created submission returns
 `201` with `status: "pending"` and null result fields.
 
-`GET /api/v1/submissions` accepts optional `problem_id`, `offset` (default
-`0`, minimum `0`) and `limit` (default `50`, range `1`-`100`). The problem
+`GET /api/v1/submissions` accepts optional `problem_id`, `status`, `offset`
+(default `0`, minimum `0`), and `limit` (default `50`, range `1`-`100`). The problem
 history endpoint accepts `offset` and `limit` with the same bounds. Both lists
 are newest first and never include another user's rows. Responses use the
 shared structured error envelope: `401 UNAUTHORIZED`, `404 PROBLEM_NOT_FOUND`
 or `SUBMISSION_NOT_FOUND`, `409 PROBLEM_NOT_PUBLISHED`, and `422
 UNSUPPORTED_LANGUAGE` or `VALIDATION_ERROR`.
+
+## Statistics and Leaderboard
+
+| Method | Path | Auth | Purpose |
+|---|---|---|---|
+| `GET` | `/api/v1/statistics/me` | Required | Current user's submission totals and progress |
+| `GET` | `/api/v1/problems/{slug}/statistics` | Public | Aggregate counts for an active problem |
+| `GET` | `/api/v1/leaderboard` | Public | Paginated coding leaderboard |
+
+`GET /api/v1/statistics/me` returns `total_submissions`,
+`judged_submissions`, `accepted_submissions`, `solved_problems`, and
+`acceptance_rate`. Personal statistics count every owned submission in the
+total and accepted attempts across all existing problems in solved progress.
+Judged attempts are accepted, wrong answer, compilation error, runtime error,
+time limit exceeded, and output limit exceeded. Pending/running submissions,
+infrastructure `system_error` results, and legacy process-only statuses are
+excluded from the acceptance-rate denominator. The rate is accepted judged
+submissions divided by judged submissions, as a percentage rounded to two
+decimal places (zero when there are no judged submissions). This endpoint
+returns only the authenticated user's aggregates and requires the same HttpOnly
+authentication cookie as submission history.
+
+`GET /api/v1/problems/{slug}/statistics` returns `total_submissions`,
+`judged_submissions`, `accepted_submissions`, `unique_solvers`, and
+`acceptance_rate`, along with the problem slug. It is available only for active
+problems. Counts are aggregates only; no user identities, source, test inputs,
+expected outputs, or hidden-case data are returned. `unique_solvers` counts
+distinct users with an accepted submission.
+
+`GET /api/v1/leaderboard` accepts `offset` (default `0`, minimum `0`) and
+`limit` (default `50`, range `1`-`100`). Only active users and active problems
+are considered. A user appears after accepting at least one active problem;
+the metric is the number of distinct active problems accepted. Equal solve
+counts share a dense rank. Rows within a rank are ordered by display name and
+an internal user ID for stable pagination. The response exposes only rank,
+display name, and solved-problem count; it never exposes email, user ID,
+password data, source code, or test-case data. This is a global platform
+leaderboard; no event-specific ranking exists yet.
+
+Example leaderboard response:
+
+```json
+{
+  "items": [
+    {"rank": 1, "display_name": "Ada", "solved_problems": 12},
+    {"rank": 1, "display_name": "Grace", "solved_problems": 12},
+    {"rank": 2, "display_name": "Linus", "solved_problems": 10}
+  ],
+  "total": 3,
+  "offset": 0,
+  "limit": 50
+}
+```
 
 ## Isolated Execution Worker
 
