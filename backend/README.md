@@ -75,3 +75,62 @@ Run only the authentication tests with:
 ```sh
 pytest app/tests/test_auth.py
 ```
+
+## Problems API
+
+FastAPI's interactive contract is available at `/docs` and the machine-readable
+OpenAPI document at `/openapi.json`.
+
+| Method | Path | Authentication | Success |
+| --- | --- | --- | --- |
+| `GET` | `/api/v1/problems` | Public | `200`, array of problem summaries |
+| `GET` | `/api/v1/problems/{slug}` | Public | `200`, problem detail with public examples |
+| `POST` | `/api/v1/problems` | Authenticated admin | `201`, created problem detail |
+| `PATCH` | `/api/v1/problems/{problem_id}` | Authenticated admin | `200`, updated problem detail |
+| `DELETE` | `/api/v1/problems/{problem_id}` | Authenticated admin | `204`, problem deactivated |
+
+List query parameters are optional `difficulty` (`easy`, `medium`, `hard`),
+`category` (case-insensitive exact match), `search` (matches title or
+description), `offset` (default `0`) and `limit` (default `50`, maximum `100`).
+Inactive problems are omitted. A summary contains `id`, `title`, `slug`,
+`difficulty`, `category`, `supported_languages`, `created_at`, and
+`updated_at`. Detail adds `description`, nullable `constraints`,
+`input_description`, `output_description`, `starter_code`, and `examples`.
+An example has `input_data`, `expected_output`, and `position`. Hidden test
+cases and execution constraints are never returned from public endpoints or
+authoring responses.
+
+Create request body:
+
+```json
+{
+  "title": "Add Two Numbers",
+  "slug": "add-two-numbers",
+  "description": "Read two integers and print their sum.",
+  "difficulty": "easy",
+  "category": "Math",
+  "constraints": "-1000 <= a, b <= 1000",
+  "input_description": "Two space-separated integers.",
+  "output_description": "Their sum.",
+  "starter_code": {"python": "a, b = map(int, input().split())"},
+  "supported_languages": ["python"],
+  "test_cases": [
+    {"input_data": "2 3\\n", "expected_output": "5\\n", "is_hidden": false},
+    {"input_data": "20 22\\n", "expected_output": "42\\n", "is_hidden": true, "time_limit_ms": 1000, "memory_limit_mb": 128}
+  ]
+}
+```
+
+`slug` is optional and generated from `title` when omitted. Each test case also
+accepts `position` (default `0`); test case input/output are each limited to
+100,000 characters and at most 500 cases can be supplied. `PATCH` accepts any
+subset of problem fields. Supplying `test_cases` replaces the full test-case
+set; omitting it leaves cases unchanged. `DELETE` is a soft delete (`is_active`
+becomes false) so future submissions can retain their problem reference.
+
+Errors use the shared shape `{"error":{"code":"...","message":"...","details":...}}`.
+Relevant responses are `401 UNAUTHORIZED`, `403 FORBIDDEN`, `404
+PROBLEM_NOT_FOUND`, `409 PROBLEM_SLUG_CONFLICT`, and `422 VALIDATION_ERROR`.
+Create/update/delete are restricted to accounts whose backend role is `admin`;
+registration always creates a participant account. Admin account provisioning
+is intentionally not exposed as a public API.
