@@ -166,3 +166,74 @@ progress::-moz-progress-bar { background: var(--accent-cyan); }
   .metric-label { font-size: 9px; }
   .project-row { padding: 16px; }
 }
+
+/* Temporary route placeholders */
+.placeholder-page {
+  min-height: 100vh;
+  padding: 72px;
+  background-color: var(--bg-primary);
+  background-image:
+    linear-gradient(var(--border-default) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border-default) 1px, transparent 1px);
+  background-size: 48px 48px;
+  color: var(--text-primary);
+}
+
+.placeholder-page h1 {
+  margin: 18px 0 14px;
+  font-size: clamp(2.5rem, 7vw, 5.5rem);
+  line-height: 0.95;
+}
+
+.placeholder-page > p:last-child {
+  max-width: 620px;
+  color: var(--text-secondary);
+  font-size: 1rem;
+}
+
+/* Organizer routed placeholder pages */
+
+.organizer-placeholder {
+  min-height: calc(100vh - 72px);
+  padding-top: 12px;
+}
+
+.organizer-placeholder-title {
+  margin: 18px 0 16px;
+  color: var(--text-primary);
+  font-size: clamp(3rem, 6vw, 5.4rem);
+  line-height: 0.92;
+  letter-spacing: -0.045em;
+}
+
+/* Organizer routed placeholder pages */
+
+.organizer-placeholder {
+  min-height: calc(100vh - 72px);
+  padding-top: 12px;
+}
+
+.organizer-placeholder-title {
+  margin: 18px 0 16px;
+  color: var(--text-primary);
+  font-size: clamp(3rem, 6vw, 5.4rem);
+  line-height: 0.92;
+  letter-spacing: -0.045em;
+}
+EOf npm --prefix frontend run build
+cat >> frontend/src/styles.css <<'EOF'
+
+/* Organizer routed placeholder pages */
+
+.organizer-placeholder {
+  min-height: calc(100vh - 72px);
+  padding-top: 12px;
+}
+
+.organizer-placeholder-title {
+  margin: 18px 0 16px;
+  color: var(--text-primary);
+  font-size: clamp(3rem, 6vw, 5.4rem);
+  line-height: 0.92;
+  letter-spacing: -0.045em;
+}( quit
