@@ -21,8 +21,8 @@ class Submission(Base):
     __tablename__ = "submissions"
     __table_args__ = (
         CheckConstraint(
-            "status IN ('pending', 'running', 'accepted', 'wrong_answer', "
-            "'compilation_error', 'runtime_error', 'timeout', 'system_error')",
+            "status IN ('pending', 'running', 'completed', 'failed', 'accepted', "
+            "'wrong_answer', 'compilation_error', 'runtime_error', 'timeout', 'system_error')",
             name="ck_submissions_status",
         ),
         CheckConstraint("execution_time_ms IS NULL OR execution_time_ms >= 0", name="ck_submissions_execution_time_nonnegative"),
@@ -44,6 +44,9 @@ class Submission(Base):
     )
     execution_time_ms: Mapped[int | None] = mapped_column(Integer)
     memory_usage_kb: Mapped[int | None] = mapped_column(Integer)
+    stdout: Mapped[str | None] = mapped_column(Text)
+    stderr: Mapped[str | None] = mapped_column(Text)
+    exit_code: Mapped[int | None] = mapped_column(Integer)
     score: Mapped[float | None] = mapped_column(Float)
     error_message: Mapped[str | None] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(

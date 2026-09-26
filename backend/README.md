@@ -163,16 +163,18 @@ Create request body (the only accepted client-controlled fields):
 that problem's `supported_languages` (case-insensitive). Source code must be
 nonblank and at most 65,536 UTF-8 bytes. Unknown request fields are rejected,
 so clients cannot set `user_id`, `status`, `score`, execution time, memory
-usage, or error fields. New submissions have status `pending`; this milestone
-does not execute code or change that status.
+usage, output, or error fields. New submissions initially have status `pending`;
+the independent execution worker later changes it to a process result status.
 
 Create and detail responses contain `id`, `problem_id`, `language`,
 `source_code`, `status`, nullable `execution_time_ms`, `memory_usage_kb`,
-`score`, and `error_message`, plus `created_at` and `updated_at`. List responses
-omit `source_code`. Status values are `pending`, `running`, `accepted`,
-`wrong_answer`, `compilation_error`, `runtime_error`, `timeout`, and
-`system_error`; the server owns status and result fields. A newly created
-submission returns `201` with `status: "pending"` and null result fields.
+`score`, `error_message`, `stdout`, `stderr`, and `exit_code`, plus
+`created_at` and `updated_at`. List responses omit `source_code`, stdout, and
+stderr. Status values include `pending`, `running`, `completed`, `failed`,
+`timeout`, and `system_error`, plus reserved judging statuses (`accepted`,
+`wrong_answer`, `compilation_error`, and `runtime_error`). The server owns
+status and result fields. A newly created submission returns `201` with
+`status: "pending"` and null result fields.
 
 `GET /api/v1/submissions` accepts optional `problem_id`, `offset` (default
 `0`, minimum `0`) and `limit` (default `50`, range `1`-`100`). The problem
@@ -181,3 +183,43 @@ are newest first and never include another user's rows. Responses use the
 shared structured error envelope: `401 UNAUTHORIZED`, `404 PROBLEM_NOT_FOUND`
 or `SUBMISSION_NOT_FOUND`, `409 PROBLEM_NOT_PUBLISHED`, and `422
 UNSUPPORTED_LANGUAGE` or `VALIDATION_ERROR`.
+
+## Isolated Execution Worker
+
+Submission creation only persists a `pending` job; FastAPI never executes source
+code. Run one or more independent worker processes from `backend/` after Docker
+Engine is installed and running and the configured trusted image is available:
+
+```sh
+docker pull python:3.12-slim
+python -m app.worker
+```
+
+The worker polls PostgreSQL and claims pending rows with row-level locking, so
+multiple worker processes do not claim the same job. It runs each Python job in
+a disposable Docker container. The runner currently passes empty stdin and
+does not evaluate output against examples or hidden cases. A zero exit code
+sets `completed`; a nonzero exit sets `failed`; wall-time expiration sets
+`timeout`; inability to start Docker sets `system_error`. It persists stdout,
+stderr, exit code, and execution duration. Memory usage remains null because
+this initial worker does not collect container metrics.
+
+Execution limits are environment-configurable: `EXECUTION_DOCKER_BINARY`,
+`EXECUTION_DOCKER_IMAGE`, `EXECUTION_TIMEOUT_SECONDS` (default 5, maximum 30),
+`EXECUTION_MEMORY_LIMIT_MB` (default 128, maximum 512),
+`EXECUTION_CPU_LIMIT` (default 0.5 cores, maximum 2), `EXECUTION_PIDS_LIMIT`
+(default 32), `EXECUTION_MAX_OUTPUT_BYTES` (default 65,536),
+`EXECUTION_MAX_INPUT_BYTES` (default 65,536), and
+`WORKER_POLL_INTERVAL_SECONDS` (default 1). The container has no network,
+read-only root and source mount, no capabilities, no-new-privileges, a
+non-root UID, bounded `/tmp`, and a PID/memory/CPU cap. stdout/stderr are
+drained with a combined byte limit; exceeding it terminates the container.
+Only trusted operators should configure the Docker binary/image or grant the
+worker access to the Docker daemon. Do not run untrusted submitted code directly
+on the host.
+
+Execution result fields are returned by the existing owned submission detail
+endpoint `GET /api/v1/submissions/{submission_id}`: `status`, `stdout`,
+`stderr`, `exit_code`, `execution_time_ms`, and `error_message`. List APIs omit
+source code and execution output. This milestone does not implement judging,
+test-case evaluation, or correctness scoring.

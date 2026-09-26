@@ -10,6 +10,8 @@ MAX_SOURCE_CODE_BYTES = 65_536
 class SubmissionStatus(str, Enum):
     PENDING = "pending"
     RUNNING = "running"
+    COMPLETED = "completed"
+    FAILED = "failed"
     ACCEPTED = "accepted"
     WRONG_ANSWER = "wrong_answer"
     COMPILATION_ERROR = "compilation_error"
@@ -60,3 +62,6 @@ class SubmissionListItem(BaseModel):
 
 class SubmissionResponse(SubmissionListItem):
     source_code: str
+    stdout: str | None
+    stderr: str | None
+    exit_code: int | None
