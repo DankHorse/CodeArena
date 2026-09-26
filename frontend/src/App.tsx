@@ -10,6 +10,7 @@ import { LoginPage } from './pages/auth/LoginPage';
 import { RegisterPage } from './pages/auth/RegisterPage';
 import { ParticipantDashboard } from './pages/participant/ParticipantDashboard';
 import { ParticipantLayout } from './pages/participant/ParticipantLayout';
+import { TeamPage } from './pages/participant/TeamPage';
 import { ParticipantPlaceholderPage } from './pages/participant/ParticipantPlaceholderPage';
 
 import { OrganizerDashboard } from './pages/organizer/OrganizerDashboard';
@@ -86,16 +87,7 @@ export default function App() {
             element={<ParticipantDashboard />}
           />
 
-          <Route
-            path="team"
-            element={
-              <ParticipantPlaceholderPage
-                eyebrow="[ PARTICIPANT / TEAM ]"
-                title="TEAM CONTROL"
-                description="Create, join and manage your hackathon team."
-              />
-            }
-          />
+          <Route path="team" element={<TeamPage />} />
 
           <Route
             path="submission"

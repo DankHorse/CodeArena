@@ -591,3 +591,220 @@ EOf npm --prefix frontend run build
     border-bottom: 0;
   }
 }
+
+/* ========================================
+   PARTICIPANT TEAM CONTROL
+======================================== */
+
+.team-state-panel {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-top: 28px;
+  padding: 24px 28px;
+  border: 1px solid var(--border-default);
+  border-left: 3px solid var(--accent-cyan);
+  background: var(--bg-panel);
+}
+
+.team-state-panel > svg {
+  color: var(--accent-cyan);
+}
+
+.team-state-panel h2 {
+  margin: 6px 0;
+  font-size: 1.5rem;
+}
+
+.team-state-panel p:last-child {
+  margin: 0;
+  color: var(--text-secondary);
+}
+
+.team-actions-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 24px;
+  border: 1px solid var(--border-default);
+}
+
+.team-action-panel {
+  padding: 30px;
+  background: var(--bg-panel);
+}
+
+.team-action-panel + .team-action-panel {
+  border-left: 1px solid var(--border-default);
+}
+
+.team-action-heading {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.team-action-heading > svg {
+  margin-top: 3px;
+  color: var(--accent-pink);
+}
+
+.team-action-heading h2 {
+  margin: 7px 0 0;
+  font-size: 1.65rem;
+}
+
+.team-action-description {
+  margin: 18px 0 28px;
+  color: var(--text-secondary);
+}
+
+.team-form {
+  display: grid;
+  gap: 20px;
+}
+
+.team-form label {
+  display: grid;
+  gap: 9px;
+}
+
+.team-form label > span {
+  color: var(--text-muted);
+  font-family: monospace;
+  font-size: 0.75rem;
+  letter-spacing: 0.09em;
+}
+
+.team-form input {
+  min-height: 52px;
+  padding: 0 15px;
+  border: 1px solid var(--border-default);
+  border-radius: 0;
+  outline: none;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  font: inherit;
+}
+
+.team-form input:focus {
+  border-color: var(--accent-cyan);
+  box-shadow: inset 3px 0 0 var(--accent-pink);
+}
+
+.team-message {
+  margin-top: 20px;
+  padding: 14px 16px;
+  border: 1px solid var(--border-default);
+  border-left: 3px solid var(--accent-cyan);
+  background: var(--bg-panel);
+  color: var(--accent-cyan);
+  font-family: monospace;
+  font-size: 0.8rem;
+}
+
+@media (max-width: 900px) {
+  .team-actions-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .team-action-panel + .team-action-panel {
+    border-left: 0;
+    border-top: 1px solid var(--border-default);
+  }
+}
+
+/* Team workspace preview */
+
+.team-join-button,
+.team-copy-button {
+  min-height: 52px;
+  justify-content: center;
+  border: 1px solid var(--accent-cyan);
+  background: transparent;
+  color: var(--accent-cyan);
+}
+
+.team-join-button:hover,
+.team-copy-button:hover {
+  background: var(--accent-cyan);
+  color: var(--bg-primary);
+}
+
+.team-workspace-panel {
+  margin-top: 28px;
+  border: 1px solid var(--border-default);
+  border-top: 2px solid var(--accent-cyan);
+  background: var(--bg-panel);
+}
+
+.team-workspace-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 28px;
+  border-bottom: 1px solid var(--border-default);
+}
+
+.team-workspace-header h2 {
+  margin: 8px 0;
+  font-size: 2rem;
+}
+
+.team-workspace-header p:last-child {
+  margin: 0;
+  color: var(--text-secondary);
+}
+
+.team-workspace-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+}
+
+.team-members-panel,
+.team-invite-panel {
+  padding: 28px;
+}
+
+.team-invite-panel {
+  border-left: 1px solid var(--border-default);
+}
+
+.team-member-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.team-member {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--border-default);
+  color: var(--text-primary);
+}
+
+.team-member svg {
+  color: var(--accent-pink);
+}
+
+.team-invite-panel strong {
+  display: block;
+  margin: 16px 0 22px;
+  color: var(--accent-cyan);
+  font-family: monospace;
+  font-size: 1.5rem;
+  letter-spacing: 0.08em;
+}
+
+@media (max-width: 900px) {
+  .team-workspace-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .team-invite-panel {
+    border-left: 0;
+    border-top: 1px solid var(--border-default);
+  }
+}
