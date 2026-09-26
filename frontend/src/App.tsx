@@ -8,6 +8,7 @@ import {
 import { PlaceholderPage } from './components/common/PlaceholderPage';
 import { LoginPage } from './pages/auth/LoginPage';
 import { RegisterPage } from './pages/auth/RegisterPage';
+import { GalleryPage } from './pages/public/GalleryPage';
 import { ParticipantDashboard } from './pages/participant/ParticipantDashboard';
 import { ParticipantLayout } from './pages/participant/ParticipantLayout';
 import { TeamPage } from './pages/participant/TeamPage';
@@ -47,16 +48,7 @@ export default function App() {
           }
         />
 
-        <Route
-          path="/gallery"
-          element={
-            <PlaceholderPage
-              eyebrow="[ PUBLIC / PROJECT ARENA ]"
-              title="PROJECT GALLERY"
-              description="Browse submitted hackathon projects."
-            />
-          }
-        />
+        <Route path="/gallery" element={<GalleryPage />} />
 
         <Route
           path="/projects/:projectId"
