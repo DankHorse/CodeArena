@@ -8,6 +8,9 @@ import {
 import { PlaceholderPage } from './components/common/PlaceholderPage';
 import { LoginPage } from './pages/auth/LoginPage';
 import { RegisterPage } from './pages/auth/RegisterPage';
+import { ParticipantDashboard } from './pages/participant/ParticipantDashboard';
+import { ParticipantLayout } from './pages/participant/ParticipantLayout';
+import { ParticipantPlaceholderPage } from './pages/participant/ParticipantPlaceholderPage';
 
 import { OrganizerDashboard } from './pages/organizer/OrganizerDashboard';
 import { OrganizerLayout } from './pages/organizer/OrganizerLayout';
@@ -76,36 +79,35 @@ export default function App() {
 
         <Route
           path="/participant"
-          element={
-            <PlaceholderPage
-              eyebrow="[ PARTICIPANT WORKSPACE ]"
-              title="SUBMISSION CONTROL"
-              description="Participant dashboard."
-            />
-          }
-        />
+          element={<ParticipantLayout />}
+        >
+          <Route
+            index
+            element={<ParticipantDashboard />}
+          />
 
-        <Route
-          path="/participant/team"
-          element={
-            <PlaceholderPage
-              eyebrow="[ PARTICIPANT / TEAM ]"
-              title="TEAM"
-              description="Team management will appear here."
-            />
-          }
-        />
+          <Route
+            path="team"
+            element={
+              <ParticipantPlaceholderPage
+                eyebrow="[ PARTICIPANT / TEAM ]"
+                title="TEAM CONTROL"
+                description="Create, join and manage your hackathon team."
+              />
+            }
+          />
 
-        <Route
-          path="/participant/submission"
-          element={
-            <PlaceholderPage
-              eyebrow="[ PARTICIPANT / SUBMISSION ]"
-              title="PROJECT SUBMISSION"
-              description="Submission editor will appear here."
-            />
-          }
-        />
+          <Route
+            path="submission"
+            element={
+              <ParticipantPlaceholderPage
+                eyebrow="[ PARTICIPANT / SUBMISSION ]"
+                title="PROJECT SUBMISSION"
+                description="Build and manage your project submission."
+              />
+            }
+          />
+        </Route>
 
 
         {/* JUDGE */}
