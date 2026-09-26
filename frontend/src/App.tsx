@@ -6,6 +6,8 @@ import {
 } from 'react-router-dom';
 
 import { PlaceholderPage } from './components/common/PlaceholderPage';
+import { LoginPage } from './pages/auth/LoginPage';
+import { RegisterPage } from './pages/auth/RegisterPage';
 
 import { OrganizerDashboard } from './pages/organizer/OrganizerDashboard';
 import { OrganizerLayout } from './pages/organizer/OrganizerLayout';
@@ -65,27 +67,9 @@ export default function App() {
 
         {/* AUTH */}
 
-        <Route
-          path="/login"
-          element={
-            <PlaceholderPage
-              eyebrow="[ ACCESS / LOGIN ]"
-              title="LOGIN"
-              description="CodeArena authentication."
-            />
-          }
-        />
+        <Route path="/login" element={<LoginPage />} />
 
-        <Route
-          path="/register"
-          element={
-            <PlaceholderPage
-              eyebrow="[ ACCESS / REGISTER ]"
-              title="REGISTER"
-              description="Create a CodeArena account."
-            />
-          }
-        />
+        <Route path="/register" element={<RegisterPage />} />
 
 
         {/* PARTICIPANT */}
