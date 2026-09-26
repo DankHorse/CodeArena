@@ -134,3 +134,50 @@ PROBLEM_NOT_FOUND`, `409 PROBLEM_SLUG_CONFLICT`, and `422 VALIDATION_ERROR`.
 Create/update/delete are restricted to accounts whose backend role is `admin`;
 registration always creates a participant account. Admin account provisioning
 is intentionally not exposed as a public API.
+
+## Submissions API
+
+All submission endpoints require the HttpOnly authentication cookie. Every read
+is restricted in the backend to the current user; fetching another user's
+submission returns the same `404 SUBMISSION_NOT_FOUND` response as an unknown
+submission.
+
+| Method | Path | Success | Response |
+| --- | --- | --- | --- |
+| `POST` | `/api/v1/submissions` | `201` | Created submission detail |
+| `GET` | `/api/v1/submissions` | `200` | Current user's paginated submission summaries |
+| `GET` | `/api/v1/submissions/{submission_id}` | `200` | Owned submission detail, including source code |
+| `GET` | `/api/v1/problems/{slug}/submissions` | `200` | Current user's paginated summaries for that problem |
+
+Create request body (the only accepted client-controlled fields):
+
+```json
+{
+  "problem_id": "8cf6a4c5-8c6f-4bb0-8fd9-11365ed21a98",
+  "language": "python",
+  "source_code": "print(input())\\n"
+}
+```
+
+`problem_id` must identify an active problem and `language` must match one of
+that problem's `supported_languages` (case-insensitive). Source code must be
+nonblank and at most 65,536 UTF-8 bytes. Unknown request fields are rejected,
+so clients cannot set `user_id`, `status`, `score`, execution time, memory
+usage, or error fields. New submissions have status `pending`; this milestone
+does not execute code or change that status.
+
+Create and detail responses contain `id`, `problem_id`, `language`,
+`source_code`, `status`, nullable `execution_time_ms`, `memory_usage_kb`,
+`score`, and `error_message`, plus `created_at` and `updated_at`. List responses
+omit `source_code`. Status values are `pending`, `running`, `accepted`,
+`wrong_answer`, `compilation_error`, `runtime_error`, `timeout`, and
+`system_error`; the server owns status and result fields. A newly created
+submission returns `201` with `status: "pending"` and null result fields.
+
+`GET /api/v1/submissions` accepts optional `problem_id`, `offset` (default
+`0`, minimum `0`) and `limit` (default `50`, range `1`-`100`). The problem
+history endpoint accepts `offset` and `limit` with the same bounds. Both lists
+are newest first and never include another user's rows. Responses use the
+shared structured error envelope: `401 UNAUTHORIZED`, `404 PROBLEM_NOT_FOUND`
+or `SUBMISSION_NOT_FOUND`, `409 PROBLEM_NOT_PUBLISHED`, and `422
+UNSUPPORTED_LANGUAGE` or `VALIDATION_ERROR`.
