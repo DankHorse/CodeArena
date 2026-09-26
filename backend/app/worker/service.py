@@ -1,6 +1,5 @@
 import logging
 import time
-from uuid import UUID
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session, sessionmaker
@@ -12,10 +11,9 @@ from app.schemas.submissions import SubmissionStatus
 from app.worker.execution import (
     DockerExecutionRunner,
     ExecutionJob,
-    ExecutionResult,
     ExecutionRunner,
-    ExecutionStatus,
 )
+from app.services.evaluation import evaluate_submission
 
 logger = logging.getLogger(__name__)
 
@@ -43,23 +41,6 @@ def _claim_next_submission(session_factory: sessionmaker[Session]) -> ExecutionJ
         return job
 
 
-def _persist_result(
-    session_factory: sessionmaker[Session], submission_id: UUID, result: ExecutionResult
-) -> None:
-    with session_factory(bind=get_engine()) as db:
-        submission = db.get(Submission, submission_id)
-        if submission is None:
-            logger.error("Submission %s disappeared while execution was running", submission_id)
-            return
-        submission.status = result.status.value
-        submission.stdout = result.stdout
-        submission.stderr = result.stderr
-        submission.exit_code = result.exit_code
-        submission.execution_time_ms = result.execution_time_ms
-        submission.error_message = result.error_message
-        db.commit()
-
-
 def process_next_submission(
     runner: ExecutionRunner | None = None,
     *,
@@ -69,22 +50,11 @@ def process_next_submission(
     if job is None:
         return False
 
-    try:
-        result = (runner or DockerExecutionRunner()).execute(job)
-    except Exception as exc:
-        logger.warning(
-            "Execution failed for submission %s (%s)", job.submission_id, type(exc).__name__
-        )
-        result = ExecutionResult(
-            status=ExecutionStatus.SYSTEM_ERROR,
-            stdout="",
-            stderr="",
-            exit_code=None,
-            execution_time_ms=0,
-            error_message="The isolated execution worker failed to run this submission.",
-        )
-
-    _persist_result(session_factory, job.submission_id, result)
+    evaluate_submission(
+        job.submission_id,
+        runner or DockerExecutionRunner(),
+        session_factory=session_factory,
+    )
     return True
 
 

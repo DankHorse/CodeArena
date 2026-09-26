@@ -17,6 +17,8 @@ class SubmissionStatus(str, Enum):
     COMPILATION_ERROR = "compilation_error"
     RUNTIME_ERROR = "runtime_error"
     TIMEOUT = "timeout"
+    TIME_LIMIT_EXCEEDED = "time_limit_exceeded"
+    OUTPUT_LIMIT_EXCEEDED = "output_limit_exceeded"
     SYSTEM_ERROR = "system_error"
 
 
@@ -60,8 +62,22 @@ class SubmissionListItem(BaseModel):
     updated_at: datetime
 
 
+class SubmissionTestResultResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    position: int
+    is_hidden: bool
+    status: SubmissionStatus
+    execution_time_ms: int | None
+    stdout: str | None
+    stderr: str | None
+    exit_code: int | None
+    error_message: str | None
+
+
 class SubmissionResponse(SubmissionListItem):
     source_code: str
     stdout: str | None
     stderr: str | None
     exit_code: int | None
+    test_results: list[SubmissionTestResultResponse] = Field(default_factory=list)

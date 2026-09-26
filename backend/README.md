@@ -164,17 +164,21 @@ that problem's `supported_languages` (case-insensitive). Source code must be
 nonblank and at most 65,536 UTF-8 bytes. Unknown request fields are rejected,
 so clients cannot set `user_id`, `status`, `score`, execution time, memory
 usage, output, or error fields. New submissions initially have status `pending`;
-the independent execution worker later changes it to a process result status.
+the independent execution worker later evaluates the submission against test cases.
 
 Create and detail responses contain `id`, `problem_id`, `language`,
 `source_code`, `status`, nullable `execution_time_ms`, `memory_usage_kb`,
 `score`, `error_message`, `stdout`, `stderr`, and `exit_code`, plus
-`created_at` and `updated_at`. List responses omit `source_code`, stdout, and
-stderr. Status values include `pending`, `running`, `completed`, `failed`,
-`timeout`, and `system_error`, plus reserved judging statuses (`accepted`,
-`wrong_answer`, `compilation_error`, and `runtime_error`). The server owns
-status and result fields. A newly created submission returns `201` with
-`status: "pending"` and null result fields.
+`created_at` and `updated_at`. Detail responses also contain ordered
+`test_results` with position, visibility, status, duration, and safe output
+fields. Test result responses never include test input or expected output;
+stdout/stderr are null for hidden cases. List responses omit `source_code`,
+stdout, stderr, and per-test results. Status values include `pending`,
+`running`, `accepted`, `wrong_answer`, `compilation_error`, `runtime_error`,
+`time_limit_exceeded`, `output_limit_exceeded`, and `system_error`. Legacy
+`completed`, `failed`, and `timeout` values remain accepted for existing rows.
+The server owns status and result fields. A newly created submission returns
+`201` with `status: "pending"` and null result fields.
 
 `GET /api/v1/submissions` accepts optional `problem_id`, `offset` (default
 `0`, minimum `0`) and `limit` (default `50`, range `1`-`100`). The problem
@@ -196,13 +200,16 @@ python -m app.worker
 ```
 
 The worker polls PostgreSQL and claims pending rows with row-level locking, so
-multiple worker processes do not claim the same job. It runs each Python job in
-a disposable Docker container. The runner currently passes empty stdin and
-does not evaluate output against examples or hidden cases. A zero exit code
-sets `completed`; a nonzero exit sets `failed`; wall-time expiration sets
-`timeout`; inability to start Docker sets `system_error`. It persists stdout,
-stderr, exit code, and execution duration. Memory usage remains null because
-this initial worker does not collect container metrics.
+multiple worker processes do not claim the same job. It runs each Python test
+case in a disposable Docker container, passing that case's input on stdin.
+Cases run in position order and stop at the first non-accepted result. A
+submission is `accepted` only when all configured cases pass. Output comparison
+normalizes CRLF/CR to LF and strips trailing whitespace at the end of the
+complete output; internal spaces and line breaks remain significant. The
+submission score is the percentage of cases passed, rounded to two decimal
+places. Timeouts, output-limit failures, runtime failures, syntax/indentation
+errors, and worker/runtime failures map to distinct statuses. Memory usage
+remains null because the runner does not collect container metrics.
 
 Execution limits are environment-configurable: `EXECUTION_DOCKER_BINARY`,
 `EXECUTION_DOCKER_IMAGE`, `EXECUTION_TIMEOUT_SECONDS` (default 5, maximum 30),
@@ -218,8 +225,10 @@ Only trusted operators should configure the Docker binary/image or grant the
 worker access to the Docker daemon. Do not run untrusted submitted code directly
 on the host.
 
-Execution result fields are returned by the existing owned submission detail
-endpoint `GET /api/v1/submissions/{submission_id}`: `status`, `stdout`,
-`stderr`, `exit_code`, `execution_time_ms`, and `error_message`. List APIs omit
-source code and execution output. This milestone does not implement judging,
-test-case evaluation, or correctness scoring.
+Evaluation result fields are returned by the owned submission detail endpoint
+`GET /api/v1/submissions/{submission_id}`: overall `status`, `score`, aggregate
+`execution_time_ms`, safe output/error fields, and ordered `test_results`.
+Hidden case inputs and expected outputs are never included in API responses;
+hidden case stdout and stderr are also omitted. List APIs omit source code and
+execution output. The per-case table stores only result metadata and safe
+outputs, and cascades when its submission is removed.

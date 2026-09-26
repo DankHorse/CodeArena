@@ -2,6 +2,6 @@
 
 from app.models.user import User
 from app.models.problem import Problem, ProblemTestCase
-from app.models.submission import Submission
+from app.models.submission import Submission, SubmissionTestResult
 
-__all__ = ["Problem", "ProblemTestCase", "Submission", "User"]
+__all__ = ["Problem", "ProblemTestCase", "Submission", "SubmissionTestResult", "User"]

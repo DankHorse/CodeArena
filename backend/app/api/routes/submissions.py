@@ -26,7 +26,7 @@ problem_submissions_router = APIRouter()
     summary="Create a code submission",
     description=(
         "Authenticated users submit only problem_id, language, and source_code. The server assigns "
-        "pending status and persists the submission. Code is not executed by this endpoint."
+        "pending status and persists the submission. The isolated worker evaluates cases asynchronously."
     ),
     responses={
         401: {"description": "Authentication required"},
@@ -67,7 +67,10 @@ def submissions_index(
     "/{submission_id}",
     response_model=SubmissionResponse,
     summary="Get one of the current user's submissions",
-    description="Returns source code and result fields only to the submission owner.",
+    description=(
+        "Returns source code and result fields only to the submission owner. Per-test results "
+        "never include test inputs or expected outputs; hidden-case stdout and stderr are omitted."
+    ),
     responses={401: {"description": "Authentication required"}, 404: {"description": "Submission not found"}},
 )
 def submission_detail(

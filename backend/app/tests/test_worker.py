@@ -8,7 +8,7 @@ from sqlalchemy import delete, or_, select
 
 from app.core.config import Settings, get_settings
 from app.db.session import SessionLocal, get_engine
-from app.models.problem import Problem
+from app.models.problem import Problem, ProblemTestCase
 from app.models.submission import Submission
 from app.models.user import User
 from app.worker.execution import (
@@ -58,6 +58,14 @@ def enqueue_submission() -> Submission:
         )
         db.add_all([user, problem])
         db.flush()
+        db.add(
+            ProblemTestCase(
+                problem_id=problem.id,
+                input_data="",
+                expected_output="isolated\n",
+                position=0,
+            )
+        )
         submission = Submission(
             user_id=user.id,
             problem_id=problem.id,
@@ -88,7 +96,7 @@ class FakeRunner:
         return self.result
 
 
-def test_worker_claims_submission_and_persists_completed_process_result() -> None:
+def test_worker_claims_submission_and_persists_evaluation_result() -> None:
     submission = enqueue_submission()
     runner = FakeRunner(
         ExecutionResult(
@@ -108,14 +116,14 @@ def test_worker_claims_submission_and_persists_completed_process_result() -> Non
     assert runner.observed_status == "running"
     with SessionLocal(bind=get_engine()) as db:
         result = db.get(Submission, submission.id)
-    assert result.status == "completed"
+    assert result.status == "accepted"
     assert result.stdout == "isolated\n"
     assert result.stderr == ""
     assert result.exit_code == 0
     assert result.execution_time_ms == 18
 
 
-def test_worker_persists_process_failure_without_judging() -> None:
+def test_worker_maps_process_failure_to_runtime_error() -> None:
     submission = enqueue_submission()
     runner = FakeRunner(
         ExecutionResult(
@@ -131,11 +139,11 @@ def test_worker_persists_process_failure_without_judging() -> None:
     assert process_next_submission(runner)
     with SessionLocal(bind=get_engine()) as db:
         result = db.get(Submission, submission.id)
-    assert result.status == "failed"
+    assert result.status == "runtime_error"
     assert result.exit_code == 1
     assert result.stderr == "Traceback: example failure"
     assert result.error_message == "Execution process exited with code 1."
-    assert result.score is None
+    assert result.score == 0
 
 
 def test_worker_persists_timeout_result() -> None:
@@ -154,7 +162,7 @@ def test_worker_persists_timeout_result() -> None:
     assert process_next_submission(runner)
     with SessionLocal(bind=get_engine()) as db:
         result = db.get(Submission, submission.id)
-    assert result.status == "timeout"
+    assert result.status == "time_limit_exceeded"
     assert result.execution_time_ms == 5_000
     assert result.error_message == "Execution exceeded 5 seconds."
 
@@ -166,7 +174,7 @@ def test_worker_exception_is_persisted_as_system_error() -> None:
     with SessionLocal(bind=get_engine()) as db:
         result = db.get(Submission, submission.id)
     assert result.status == "system_error"
-    assert result.error_message == "The isolated execution worker failed to run this submission."
+    assert result.error_message == "The isolated execution worker failed to run this test case."
     assert "runtime secret" not in result.error_message
 
 
