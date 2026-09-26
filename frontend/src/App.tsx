@@ -24,6 +24,13 @@ import { ParticipantPlaceholderPage } from './pages/participant/ParticipantPlace
 import { OrganizerDashboard } from './pages/organizer/OrganizerDashboard';
 import { OrganizerLayout } from './pages/organizer/OrganizerLayout';
 import { OrganizerPlaceholderPage } from './pages/organizer/OrganizerPlaceholderPage';
+import { EventSettingsPage } from './pages/organizer/EventSettingsPage';
+import { OrganizerTeamsPage } from './pages/organizer/OrganizerTeamsPage';
+import { OrganizerProjectsPage } from './pages/organizer/OrganizerProjectsPage';
+import { OrganizerRubricPage } from './pages/organizer/OrganizerRubricPage';
+import { OrganizerJudgeAssignmentsPage } from './pages/organizer/OrganizerJudgeAssignmentsPage';
+import { OrganizerResultsPage } from './pages/organizer/OrganizerResultsPage';
+import { OrganizerActivityPage } from './pages/organizer/OrganizerActivityPage';
 
 export default function App() {
   return (
@@ -128,82 +135,22 @@ export default function App() {
             element={<OrganizerDashboard />}
           />
 
-          <Route
-            path="events"
-            element={
-              <OrganizerPlaceholderPage
-                eyebrow="[ ORGANIZER / EVENT ]"
-                title="EVENT SETTINGS"
-                description="Configure the current event, tracks and deadlines."
-              />
-            }
-          />
+          <Route path="events" element={<EventSettingsPage />} />
 
-          <Route
-            path="teams"
-            element={
-              <OrganizerPlaceholderPage
-                eyebrow="[ ORGANIZER / TEAMS ]"
-                title="TEAMS"
-                description="Manage participating teams and memberships."
-              />
-            }
-          />
+          <Route path="teams" element={<OrganizerTeamsPage />} />
 
-          <Route
-            path="projects"
-            element={
-              <OrganizerPlaceholderPage
-                eyebrow="[ ORGANIZER / PROJECTS ]"
-                title="PROJECTS"
-                description="Review submitted projects across the event."
-              />
-            }
-          />
+          <Route path="projects" element={<OrganizerProjectsPage />} />
 
-          <Route
-            path="rubric"
-            element={
-              <OrganizerPlaceholderPage
-                eyebrow="[ ORGANIZER / RUBRIC ]"
-                title="SCORING RUBRIC"
-                description="Configure judging criteria and weights."
-              />
-            }
-          />
+          <Route path="rubric" element={<OrganizerRubricPage />} />
 
           <Route
             path="judges"
-            element={
-              <OrganizerPlaceholderPage
-                eyebrow="[ ORGANIZER / JUDGES ]"
-                title="JUDGE ASSIGNMENTS"
-                description="Assign judges and monitor judging coverage."
-              />
-            }
+            element={<OrganizerJudgeAssignmentsPage />}
           />
 
-          <Route
-            path="results"
-            element={
-              <OrganizerPlaceholderPage
-                eyebrow="[ ORGANIZER / RESULTS ]"
-                title="RESULTS & EXPORTS"
-                description="Review results and export judging data."
-              />
-            }
-          />
+          <Route path="results" element={<OrganizerResultsPage />} />
 
-          <Route
-            path="activity"
-            element={
-              <OrganizerPlaceholderPage
-                eyebrow="[ ORGANIZER / ACTIVITY ]"
-                title="ACTIVITY LOG"
-                description="Review important platform activity."
-              />
-            }
-          />
+          <Route path="activity" element={<OrganizerActivityPage />} />
         </Route>
 
 
