@@ -808,3 +808,192 @@ EOf npm --prefix frontend run build
     border-top: 1px solid var(--border-default);
   }
 }
+
+/* ========================================
+   PARTICIPANT PROJECT SUBMISSION
+======================================== */
+
+.submission-deadline-panel {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-top: 28px;
+  padding: 22px 26px;
+  border: 1px solid var(--border-default);
+  border-left: 3px solid var(--accent-cyan);
+  background: var(--bg-panel);
+}
+
+.submission-deadline-panel > svg {
+  color: var(--accent-cyan);
+}
+
+.submission-deadline-panel strong {
+  display: block;
+  margin: 6px 0;
+  color: var(--accent-cyan);
+  font-size: 1.25rem;
+}
+
+.submission-deadline-panel span {
+  color: var(--text-secondary);
+}
+
+.submission-form {
+  margin-top: 24px;
+}
+
+.submission-panel {
+  border: 1px solid var(--border-default);
+  background: var(--bg-panel);
+}
+
+.submission-panel-heading {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 24px 28px;
+  border-bottom: 1px solid var(--border-default);
+}
+
+.submission-panel-heading > svg {
+  margin-top: 3px;
+  color: var(--accent-pink);
+}
+
+.submission-panel-heading h2 {
+  margin: 7px 0 0;
+  font-size: 1.55rem;
+}
+
+.submission-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px;
+  padding: 28px;
+}
+
+.submission-field {
+  display: grid;
+  gap: 9px;
+}
+
+.submission-field-wide {
+  grid-column: 1 / -1;
+}
+
+.submission-field > span {
+  color: var(--text-muted);
+  font-family: monospace;
+  font-size: 0.75rem;
+  letter-spacing: 0.09em;
+}
+
+.submission-field input,
+.submission-field textarea,
+.submission-field select {
+  width: 100%;
+  border: 1px solid var(--border-default);
+  border-radius: 0;
+  outline: none;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  font: inherit;
+}
+
+.submission-field input,
+.submission-field select {
+  min-height: 52px;
+  padding: 0 15px;
+}
+
+.submission-field textarea {
+  padding: 15px;
+  resize: vertical;
+}
+
+.submission-field input:focus,
+.submission-field textarea:focus,
+.submission-field select:focus {
+  border-color: var(--accent-cyan);
+  box-shadow: inset 3px 0 0 var(--accent-pink);
+}
+
+.submission-input-icon {
+  position: relative;
+}
+
+.submission-input-icon > svg {
+  position: absolute;
+  top: 50%;
+  left: 15px;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.submission-input-icon input {
+  padding-left: 44px;
+}
+
+.submission-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-top: 18px;
+  padding: 22px 24px;
+  border: 1px solid var(--border-default);
+  background: var(--bg-panel);
+}
+
+.submission-actions > div:first-child {
+  display: grid;
+  gap: 6px;
+}
+
+.submission-actions strong {
+  color: var(--text-primary);
+}
+
+.submission-actions span {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.submission-action-buttons {
+  display: flex;
+  gap: 12px;
+}
+
+.submission-save-button {
+  min-height: 48px;
+  justify-content: center;
+  border: 1px solid var(--accent-cyan);
+  background: transparent;
+  color: var(--accent-cyan);
+}
+
+.submission-save-button:hover {
+  background: var(--accent-cyan);
+  color: var(--bg-primary);
+}
+
+@media (max-width: 900px) {
+  .submission-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .submission-field-wide {
+    grid-column: auto;
+  }
+
+  .submission-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .submission-action-buttons {
+    flex-direction: column;
+  }
+}

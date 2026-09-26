@@ -11,6 +11,7 @@ import { RegisterPage } from './pages/auth/RegisterPage';
 import { ParticipantDashboard } from './pages/participant/ParticipantDashboard';
 import { ParticipantLayout } from './pages/participant/ParticipantLayout';
 import { TeamPage } from './pages/participant/TeamPage';
+import { SubmissionPage } from './pages/participant/SubmissionPage';
 import { ParticipantPlaceholderPage } from './pages/participant/ParticipantPlaceholderPage';
 
 import { OrganizerDashboard } from './pages/organizer/OrganizerDashboard';
@@ -89,16 +90,7 @@ export default function App() {
 
           <Route path="team" element={<TeamPage />} />
 
-          <Route
-            path="submission"
-            element={
-              <ParticipantPlaceholderPage
-                eyebrow="[ PARTICIPANT / SUBMISSION ]"
-                title="PROJECT SUBMISSION"
-                description="Build and manage your project submission."
-              />
-            }
-          />
+          <Route path="submission" element={<SubmissionPage />} />
         </Route>
 
 
