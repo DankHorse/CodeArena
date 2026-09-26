@@ -13,6 +13,12 @@ import { ParticipantDashboard } from './pages/participant/ParticipantDashboard';
 import { ParticipantLayout } from './pages/participant/ParticipantLayout';
 import { TeamPage } from './pages/participant/TeamPage';
 import { SubmissionPage } from './pages/participant/SubmissionPage';
+import { JudgeDashboard } from './pages/judge/JudgeDashboard';
+import { JudgeAssignmentsPage } from './pages/judge/JudgeAssignmentsPage';
+import { JudgeReviewPage } from './pages/judge/JudgeReviewPage';
+import { JudgeScoringGuidePage } from './pages/judge/JudgeScoringGuidePage';
+import { JudgeLayout } from './pages/judge/JudgeLayout';
+import { JudgePlaceholderPage } from './pages/judge/JudgePlaceholderPage';
 import { ParticipantPlaceholderPage } from './pages/participant/ParticipantPlaceholderPage';
 
 import { OrganizerDashboard } from './pages/organizer/OrganizerDashboard';
@@ -90,25 +96,25 @@ export default function App() {
 
         <Route
           path="/judge"
-          element={
-            <PlaceholderPage
-              eyebrow="[ JUDGE WORKSPACE ]"
-              title="ASSIGNMENT QUEUE"
-              description="Judge assignments will appear here."
-            />
-          }
-        />
+          element={<JudgeLayout />}
+        >
+          <Route
+            index
+            element={<JudgeDashboard />}
+          />
 
-        <Route
-          path="/judge/assignments/:assignmentId"
-          element={
-            <PlaceholderPage
-              eyebrow="[ JUDGE / EVALUATION ]"
-              title="EVALUATION TERMINAL"
-              description="Project scoring will appear here."
-            />
-          }
-        />
+          <Route path="assignments" element={<JudgeAssignmentsPage />} />
+
+          <Route
+            path="review/:projectId"
+            element={<JudgeReviewPage />}
+          />
+
+
+          <Route path="rubric" element={<JudgeScoringGuidePage />} />
+        </Route>
+
+
 
 
         {/* ORGANIZER */}
