@@ -1,14 +1,17 @@
-import { Outlet } from 'react-router-dom';
+import { DEMO } from '../../api';
+import { judgeEventId } from '../../judge/navigation';
+import { Outlet, useLocation } from 'react-router-dom';
 import { JudgeSidebar } from '../../components/judge/JudgeSidebar';
 import { JudgeTopbar } from '../../components/judge/JudgeTopbar';
 import { JudgeProvider, useJudge } from '../../judge/JudgeProvider';
 import { useSession } from '../../auth/SessionProvider';
 function JudgeWorkspace() {
+  const missingEvent = !DEMO && !judgeEventId(useLocation().search);
   const { snapshot, loading, busy, error, message, refresh } = useJudge();
   return <div className="app-shell"><JudgeSidebar /><div className="shell-workspace"><JudgeTopbar /><main className="workspace" id="main-content">
     {error && <div className="team-message" role="alert">{error} <button className="button submission-save-button" type="button" disabled={loading || busy} onClick={() => void refresh()}>Retry</button></div>}
     {message && <p className="team-message" role="status">{message}</p>}
-    {loading ? <p className="metadata" role="status">Loading your judging workspace…</p> : snapshot && <Outlet />}
+    {missingEvent ? <p className="team-message" role="status">Choose or open a judge event to continue.</p> : loading ? <p className="metadata" role="status">Loading your judging workspace…</p> : snapshot && <Outlet />}
   </main></div></div>;
 }
-export function JudgeLayout() { const { user } = useSession(); return <JudgeProvider key={user?.id}><JudgeWorkspace /></JudgeProvider>; }
+export function JudgeLayout() { const { user } = useSession(); const location = useLocation(); const eventId = DEMO ? undefined : judgeEventId(location.search); return <JudgeProvider key={DEMO ? user?.id : `${user?.id}:${eventId ?? location.search}`} eventId={eventId}><JudgeWorkspace /></JudgeProvider>; }
