@@ -366,3 +366,130 @@ Relevant structured errors include `401 UNAUTHORIZED`, `403 FORBIDDEN`,
 `ALREADY_REGISTERED`, `REGISTRATION_CLOSED`, `ALREADY_IN_TEAM`, `TEAM_FULL`,
 `INVITATION_EXPIRED`, `SUBMISSION_LOCKED`, `EVENT_CLOSED`, and
 `DEADLINE_PASSED`; invalid bodies use `422 VALIDATION_ERROR`.
+
+## DOGFOOD Human Judging (T2)
+
+These routes judge DOGFOOD `ProjectSubmission` records. They do not read or
+write CodeArena coding `Submission`, `SubmissionTestResult`, or problem
+evaluation records. Authentication uses the existing HttpOnly cookie. Every
+management route is scoped to `events.organizer_id`; being a global admin does
+not grant management access to another organizer's event.
+
+Judges are event-scoped. An event organizer assigns an active participant
+account as a judge; that account must not be registered for the same event.
+Registration and judge assignment serialize on the event row, preventing one
+account from acquiring both event roles. The account remains a normal global
+`participant` for other events.
+
+| Method | Path | Authorization | Purpose |
+| --- | --- | --- | --- |
+| `POST` | `/api/v1/events/{event_id}/rubrics` | Event organizer | Create a new immutable draft rubric version |
+| `GET` | `/api/v1/events/{event_id}/rubrics` | Event organizer | List rubric versions and criteria |
+| `GET` | `/api/v1/events/{event_id}/rubric` | Event organizer or active event judge | Read the active rubric |
+| `POST` | `/api/v1/events/{event_id}/rubrics/{rubric_id}/activate` | Event organizer | Activate a draft rubric; rejected after project assignments exist |
+| `POST` | `/api/v1/events/{event_id}/judges` | Event organizer | Enroll a participant account as an event judge |
+| `POST` | `/api/v1/events/{event_id}/judge-assignments` | Event organizer | Assign an enrolled judge to a submitted project |
+| `GET` | `/api/v1/events/{event_id}/judge-assignments` | Event organizer | List assignment IDs and status only; contains no score/feedback |
+| `GET` | `/api/v1/events/{event_id}/judge-assignments/me` | Active event judge | List only the caller's assignments |
+| `GET` | `/api/v1/judge-assignments/{assignment_id}` | Assigned judge | Read assigned project details and its pinned rubric |
+| `GET` | `/api/v1/judge-assignments/{assignment_id}/evaluation` | Assigned judge | Read only the caller's own evaluation, or `{"evaluation":null}` |
+| `GET` | `/api/v1/judging/scores` | Active event judge | List the caller's own assignment scores; a `judge` query is rejected |
+| `PUT` | `/api/v1/judge-assignments/{assignment_id}/evaluation` | Assigned judge | Replace/save the caller's draft scores and feedback |
+| `POST` | `/api/v1/judge-assignments/{assignment_id}/evaluation/submit` | Assigned judge | Finalize; all criteria must be scored; immutable afterward |
+| `GET` | `/api/v1/events/{event_id}/judging/progress` | Event organizer | Assignment counts and completion percentages by judge; no private scores |
+| `POST` | `/api/v1/events/{event_id}/judging/results/recalculate` | Event organizer | Persist a new versioned normalization snapshot |
+| `GET` | `/api/v1/events/{event_id}/judging/results` | Event organizer | Read latest aggregate result snapshot and freshness state |
+| `GET` | `/api/v1/events/{event_id}/judging/results.csv` | Event organizer | Download event-scoped aggregate results CSV |
+
+Create a rubric with a title and ordered criteria. `position` values must be
+unique and contiguous from zero. Each weight must be positive and all weights
+must total exactly 100. Each criterion has a positive `max_score`.
+
+```json
+{
+  "title": "DOGFOOD 2026 rubric",
+  "criteria": [
+    {"name": "Impact", "description": "Problem impact", "weight": 60, "max_score": 5, "position": 0},
+    {"name": "Execution", "description": "Quality", "weight": 40, "max_score": 5, "position": 1}
+  ]
+}
+```
+
+Rubric versions are created as drafts and activated separately. Activated
+criteria cannot be edited through the API. Create a new version to make
+changes. Activation is blocked after any project assignment exists, so an
+assignment and every evaluation pin one stable rubric version. Composite
+database foreign keys keep an assignment, event, rubric and score criterion
+within the same event/version.
+
+Enroll a judge with `{"judge_id":"<user UUID>"}`. Assign them to a submitted
+project with `{"project_id":"<project UUID>","judge_id":"<user UUID>"}`.
+Project assignment rows are unique per project/judge and already support
+multiple rows in one transaction for a future batch-assignment operation.
+Unregistered, inactive, event-registered, or non-participant accounts cannot
+be enrolled as event judges.
+
+Draft evaluation requests use a full replacement set of scores and feedback:
+
+```json
+{
+  "scores": [
+    {"criterion_id": "<impact criterion UUID>", "score": 4},
+    {"criterion_id": "<execution criterion UUID>", "score": 3.5}
+  ],
+  "feedback": "Clear user value; polish the onboarding flow."
+}
+```
+
+Scores are raw values from zero through the criterion's `max_score`. Partial
+drafts are allowed; the weighted result is absent until every criterion has a
+score. Finalization requires every criterion and freezes the judge's response.
+The server stores each raw criterion score separately and computes the raw
+weighted percentage as `sum(score / max_score * weight)`. The `weighted_score`
+is a derived 0-100 percentage; clients cannot provide it. Judges can only
+read/write their own assigned evaluation. Other judges' assignments, scores,
+and feedback return not-found/forbidden responses. Participants have no access
+to judging routes. Organizers see progress counts and aggregate results, not
+individual score sheets or feedback.
+
+Progress responses contain `total_assignments`, `completed_evaluations`,
+`pending_evaluations`, `in_progress_evaluations`, `completion_percentage`, and
+per-judge counts keyed by judge UUID. They intentionally omit raw or weighted
+scores and written feedback.
+
+Normalization is `judge_mean_center`, version `1.0`. For each judge, calculate
+their mean weighted percentage across submitted event evaluations. Calculate
+the grand mean across all those evaluations. For each project/judge evaluation:
+`adjusted = raw_weighted_percentage - judge_mean + grand_mean`; clamp each
+adjusted score to `[0, 100]`; then average the adjusted scores per project.
+The result snapshot also retains the project's unmodified raw-score average.
+Values use decimal arithmetic and round half-up to four decimal places. This
+method requires at least two judges and at least two submitted evaluations per
+judge. Otherwise recalculation persists an `insufficient_data` snapshot with a
+reason and no invented normalized values. Recalculation never updates raw
+evaluations. Result snapshots are event-scoped and identify the method and
+version. `GET results` reports `is_stale` if more evaluations were finalized
+since the last snapshot. For stale, insufficient, or not-yet-calculated
+snapshots, CSV exports available raw weighted averages and evaluation counts;
+rank and normalized-score cells are blank. A stale snapshot is labeled
+`stale_snapshot_ignored`. Missing scores are never filled in or treated as
+normalized results.
+
+Results and CSV have no participant or judge route in T2; they remain private
+to the event organizer (there is no publication endpoint yet). Result rows
+sort by normalized score descending, raw average descending, then project
+title and UUID. Equal normalized scores share a rank; the remaining keys only
+provide deterministic display order.
+
+CSV columns are stable and ordered as:
+`event_slug,event_title,rubric_version,normalization_method,rank,project_id,project_title,team_id,raw_average,normalized_score,completed_evaluations,submitted_at,repository_url,demo_url`.
+Formula-leading text beginning with `=`, `+`, `-`, or `@` (including after
+leading spaces/tabs/newlines) is prefixed with an apostrophe before CSV
+quoting.
+
+Judging errors include `ACTIVE_RUBRIC_REQUIRED`, `RUBRIC_LOCKED`,
+`RUBRIC_IMMUTABLE`, `JUDGE_CONFLICT`, `JUDGE_NOT_ASSIGNED`,
+`ASSIGNMENT_EXISTS`, `ASSIGNMENT_NOT_FOUND`, `INVALID_CRITERION`,
+`SCORE_OUT_OF_RANGE`, `EVALUATION_INCOMPLETE`, `EVALUATION_LOCKED`,
+`INSUFFICIENT_NORMALIZATION_DATA`, and `RESULTS_STALE`. Request validation
+errors use the existing structured `422 VALIDATION_ERROR` response.

@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 
 from app.core.errors import APIError
 from app.models.event import Event, EventRegistration
+from app.models.judging import JudgeEventAssignment
 from app.models.user import User
 from app.schemas.events import EventCreate, EventUpdate
 
@@ -185,6 +186,15 @@ def register_for_event(
         raise APIError(403, "FORBIDDEN", "Participant access is required to register")
     if event.status != "published":
         raise APIError(409, "EVENT_NOT_OPEN", "Event registration is not open")
+    judge_assignment = db.scalar(
+        select(JudgeEventAssignment.id).where(
+            JudgeEventAssignment.event_id == event_id,
+            JudgeEventAssignment.judge_id == user.id,
+            JudgeEventAssignment.status == "active",
+        )
+    )
+    if judge_assignment is not None:
+        raise APIError(409, "JUDGE_CONFLICT", "An event judge cannot register as a participant")
     if now < event.registration_opens_at or now > event.registration_deadline:
         raise APIError(
             409,

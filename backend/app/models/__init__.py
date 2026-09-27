@@ -6,10 +6,28 @@ from app.models.submission import Submission, SubmissionTestResult
 from app.models.event import Event, EventRegistration
 from app.models.team import Team, TeamInvitation, TeamMember
 from app.models.project import ProjectSubmission
+from app.models.judging import (
+    JudgeCriterionScore,
+    JudgeEvaluation,
+    JudgeEventAssignment,
+    JudgeProjectAssignment,
+    JudgingProjectResult,
+    JudgingResultSnapshot,
+    JudgingRubric,
+    JudgingRubricCriterion,
+)
 
 __all__ = [
     "Event",
     "EventRegistration",
+    "JudgeCriterionScore",
+    "JudgeEvaluation",
+    "JudgeEventAssignment",
+    "JudgeProjectAssignment",
+    "JudgingProjectResult",
+    "JudgingResultSnapshot",
+    "JudgingRubric",
+    "JudgingRubricCriterion",
     "Problem",
     "ProblemTestCase",
     "ProjectSubmission",

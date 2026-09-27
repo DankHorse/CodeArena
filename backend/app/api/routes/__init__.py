@@ -6,6 +6,7 @@ from app.api.routes.projects import gallery_router, router as projects_router
 from app.api.routes.statistics import leaderboard_router, router as statistics_router
 from app.api.routes.submissions import problem_submissions_router, router as submissions_router
 from app.api.routes.teams import invitation_router, router as teams_router
+from app.api.routes.judging import router as judging_router
 from fastapi import APIRouter
 
 router = APIRouter()
@@ -22,3 +23,4 @@ router.include_router(problem_submissions_router, prefix="/problems", tags=["sub
 router.include_router(submissions_router, prefix="/submissions", tags=["submissions"])
 router.include_router(statistics_router, prefix="/statistics", tags=["statistics"])
 router.include_router(leaderboard_router, tags=["leaderboard"])
+router.include_router(judging_router, tags=["DOGFOOD judging"])

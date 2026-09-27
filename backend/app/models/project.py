@@ -29,6 +29,9 @@ class ProjectSubmission(Base):
             name="fk_project_submissions_team_event",
         ),
         UniqueConstraint("team_id", name="uq_project_submissions_team"),
+        UniqueConstraint(
+            "id", "event_id", name="uq_project_submissions_id_event"
+        ),
         CheckConstraint(
             "status IN ('draft', 'submitted')", name="ck_project_submissions_status"
         ),
