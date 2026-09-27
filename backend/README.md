@@ -493,3 +493,36 @@ Judging errors include `ACTIVE_RUBRIC_REQUIRED`, `RUBRIC_LOCKED`,
 `SCORE_OUT_OF_RANGE`, `EVALUATION_INCOMPLETE`, `EVALUATION_LOCKED`,
 `INSUFFICIENT_NORMALIZATION_DATA`, and `RESULTS_STALE`. Request validation
 errors use the existing structured `422 VALIDATION_ERROR` response.
+
+## Local DOGFOOD Acceptance Demo
+
+From the repository root, ensure `backend/.env` has local PostgreSQL and JWT
+configuration (copy `backend/.env.example` if needed), then start the seeded
+stack:
+
+```sh
+docker compose --env-file backend/.env -f backend/docker-compose.yml up --build
+```
+
+The backend container applies Alembic migrations, imports the untouched root
+`fixtures.json`, and writes local-only role cookies into the ignored root
+`.dogfood.local.toml`. The fixture importer is repeatable and replaces only its
+deterministic DOGFOOD event data. It preserves the fixture's sparse scores and
+all 41 projects; the second project assigned to `tm_07` receives a
+display-equivalent seed team because normal project creation is limited to one
+project per team. Tracks are stored in `event_tracks` and referenced by seeded
+projects.
+
+Run the official checker from the repository root:
+
+```sh
+python3 run.py .dogfood.local.toml
+```
+
+The local auth headers contain short-lived JWT credentials generated using the
+secret in `backend/.env`; do not commit `.dogfood.local.toml`. Re-run the fixture
+seeder/container after the tokens expire. Stop the local services with:
+
+```sh
+docker compose --env-file backend/.env -f backend/docker-compose.yml down
+```

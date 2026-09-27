@@ -90,3 +90,18 @@ class EventRegistration(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )
+
+
+class EventTrack(Base):
+    __tablename__ = "event_tracks"
+    __table_args__ = (
+        UniqueConstraint("event_id", "source_id", name="uq_event_tracks_event_source"),
+        UniqueConstraint("id", "event_id", name="uq_event_tracks_id_event"),
+    )
+
+    id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
+    event_id: Mapped[UUID] = mapped_column(
+        ForeignKey("events.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    source_id: Mapped[str] = mapped_column(String(64), nullable=False)
+    name: Mapped[str] = mapped_column(String(120), nullable=False)

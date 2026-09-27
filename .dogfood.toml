@@ -1,0 +1,21 @@
+# DOGFOOD checker config template. Compose generates local auth headers in
+# the ignored .dogfood.local.toml file.
+[portal]
+base_url = "http://127.0.0.1:8002"
+
+[tiers]
+claimed = ["T1", "T2"]
+pitch = "A self-hostable hackathon portal with event-scoped human judging."
+
+[auth]
+organizer = "Cookie: codearena_access=generated-by-compose"
+judge_a = "Cookie: codearena_access=generated-by-compose"
+judge_b = "Cookie: codearena_access=generated-by-compose"
+participant = "Cookie: codearena_access=generated-by-compose"
+
+[routes]
+gallery = "/api/v1/gallery/projects"
+submit = "/api/v1/events/f6ed6dbe-23e8-5d7c-8b9c-7f82c993861d/projects"
+judge_scores = "/api/v1/judging/scores"
+peer_scores = "/api/v1/judging/scores?judge=judge_a"
+csv_export = "/api/v1/events/f6ed6dbe-23e8-5d7c-8b9c-7f82c993861d/judging/results.csv"

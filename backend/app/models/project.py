@@ -28,6 +28,12 @@ class ProjectSubmission(Base):
             ondelete="RESTRICT",
             name="fk_project_submissions_team_event",
         ),
+        ForeignKeyConstraint(
+            ["track_id", "event_id"],
+            ["event_tracks.id", "event_tracks.event_id"],
+            ondelete="RESTRICT",
+            name="fk_project_submissions_track_event",
+        ),
         UniqueConstraint("team_id", name="uq_project_submissions_team"),
         UniqueConstraint(
             "id", "event_id", name="uq_project_submissions_id_event"
@@ -51,6 +57,7 @@ class ProjectSubmission(Base):
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
     event_id: Mapped[UUID] = mapped_column(nullable=False)
     team_id: Mapped[UUID] = mapped_column(nullable=False)
+    track_id: Mapped[UUID | None] = mapped_column(nullable=True)
     title: Mapped[str] = mapped_column(String(160), nullable=False)
     description: Mapped[str] = mapped_column(
         Text, nullable=False, default="", server_default=text("''")

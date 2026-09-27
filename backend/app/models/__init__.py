@@ -3,7 +3,7 @@
 from app.models.user import User
 from app.models.problem import Problem, ProblemTestCase
 from app.models.submission import Submission, SubmissionTestResult
-from app.models.event import Event, EventRegistration
+from app.models.event import Event, EventRegistration, EventTrack
 from app.models.team import Team, TeamInvitation, TeamMember
 from app.models.project import ProjectSubmission
 from app.models.judging import (
@@ -20,6 +20,7 @@ from app.models.judging import (
 __all__ = [
     "Event",
     "EventRegistration",
+    "EventTrack",
     "JudgeCriterionScore",
     "JudgeEvaluation",
     "JudgeEventAssignment",
