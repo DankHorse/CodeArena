@@ -285,3 +285,84 @@ Hidden case inputs and expected outputs are never included in API responses;
 hidden case stdout and stderr are also omitted. List APIs omit source code and
 execution output. The per-case table stores only result metadata and safe
 outputs, and cascades when its submission is removed.
+
+## DOGFOOD Events and Projects (T1)
+
+DOGFOOD project entries are separate from coding `Submission` rows. They are
+team-owned project records and are not executed by the CodeArena coding
+worker. User roles are `participant`, `organizer`, and `admin`. Registration
+always creates a participant. An admin can grant only participant or organizer
+with the role endpoint; public self-promotion is not available. Event
+management is scoped to the event's `organizer_id`, even for an admin.
+
+Event creation requires an organizer/admin and creates a private `draft`.
+Organizers can edit only drafts, then transition through
+`draft -> published -> active -> completed`; cancellation is allowed from
+draft, published, or active. Activation is rejected before `starts_at`, and
+completion is rejected before `ends_at`. Public event reads omit drafts and
+cancelled events. The organizer is assigned from the authenticated identity,
+never from request data.
+
+Team size is configured per event (`team_min_size`, `team_max_size`) rather
+than relying on an undocumented global limit. Only registered participants
+can create teams. A participant can belong to at most one team per event; the
+captain is the initial member and only the captain may invite teammates or
+manage the team's project. Invitations target participants registered for
+the same event, expire at its registration deadline, and persist only a
+SHA-256 digest of the one-time bearer token. The raw token is returned only
+when created and must be delivered to the invitee through the app's
+authenticated channel.
+
+Drafts can be created/edited while the event is published or active and the
+submission deadline has not passed. Equality with the deadline is accepted;
+strictly later times are rejected. Finalization additionally requires the
+configured minimum team size and a nonblank description. Submitted projects
+are immutable. Event closure/cancellation rejects edits and finalization.
+Private project reads are limited to event team members and the event
+organizer. The public gallery contains only submitted projects from published,
+active, or completed events and uses a dedicated response schema without team
+or user identities or internal fields.
+
+| Method | Path | Auth | Purpose |
+| --- | --- | --- | --- |
+| `PATCH` | `/api/v1/admin/users/{user_id}/role` | Admin | Assign participant/organizer role |
+| `GET` | `/api/v1/events?offset=0&limit=20` | Public | Paginated public event list |
+| `GET` | `/api/v1/events/by-slug/{slug}` | Public | Public event details |
+| `POST` | `/api/v1/events` | Organizer/admin | Create draft event |
+| `GET` | `/api/v1/events/{event_id}` | Authenticated | Read event; private drafts only to owner |
+| `PATCH` | `/api/v1/events/{event_id}` | Event organizer | Edit a draft event |
+| `POST` | `/api/v1/events/{event_id}/transition` | Event organizer | Transition event lifecycle |
+| `POST` | `/api/v1/events/{event_id}/registrations` | Participant | Register current user |
+| `POST` | `/api/v1/events/{event_id}/teams` | Registered participant | Create team; caller is captain |
+| `GET` | `/api/v1/events/{event_id}/teams/me` | Authenticated | Current user's team and member IDs |
+| `POST` | `/api/v1/teams/{team_id}/invitations` | Team captain | Invite registered event participant |
+| `POST` | `/api/v1/team-invitations/accept` | Invitee | Accept using `{ "token": "..." }` |
+| `POST` | `/api/v1/events/{event_id}/projects` | Team captain | Create project draft |
+| `GET` | `/api/v1/projects/{project_id}` | Team member/organizer | Read private project state |
+| `PATCH` | `/api/v1/projects/{project_id}` | Team captain | Edit draft project |
+| `POST` | `/api/v1/projects/{project_id}/submit` | Team captain | Finalize project |
+| `GET` | `/api/v1/gallery/projects?offset=0&limit=20` | Public | Paginated submitted gallery |
+
+Event creation requires `title`, `description`, timezone-aware
+`registration_opens_at`, `registration_deadline`, `starts_at`,
+`submission_deadline`, `ends_at`, and event-specific `team_min_size` and
+`team_max_size`; `slug` is optional. Dates must be chronological. Transition
+request bodies are `{"status":"published"}`, `{"status":"active"}`,
+`{"status":"completed"}`, or `{"status":"cancelled"}`, subject to
+lifecycle/time rules. Event and gallery lists accept `offset` (default 0) and
+`limit` (default 20, maximum 100); gallery also supports `event_slug` and
+`search`.
+
+Project create bodies accept `title`, optional `description`,
+`repository_url`, and `demo_url`. Updates accept a subset. Event/team/owner/
+status fields are server-owned. The gallery response has `items`, `offset`,
+`limit`, and `total`; each item contains project ID, event slug/title, project
+title/description, public repository/demo URLs, and `submitted_at`. Drafts,
+team identities, member IDs, organizer IDs, and internal fields are never
+included.
+
+Relevant structured errors include `401 UNAUTHORIZED`, `403 FORBIDDEN`,
+`404 EVENT_NOT_FOUND`/`PROJECT_NOT_FOUND`, `409 INVALID_EVENT_TRANSITION`,
+`ALREADY_REGISTERED`, `REGISTRATION_CLOSED`, `ALREADY_IN_TEAM`, `TEAM_FULL`,
+`INVITATION_EXPIRED`, `SUBMISSION_LOCKED`, `EVENT_CLOSED`, and
+`DEADLINE_PASSED`; invalid bodies use `422 VALIDATION_ERROR`.
