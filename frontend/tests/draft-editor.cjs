@@ -8,6 +8,7 @@ const { runtime } = require('./contract-runtime.cjs');
   const edited = original + ' Updated draft.';
   const snapshot = { event: { id: 'event' }, team: { id: 'team' }, project: { id: 'project', title: 'habitIq', summary: original, state: 'draft' }, data: { tracks: [] } };
   let patch, passed, edits, previousDeps;
+  const mode = { DEMO: false };
   const load = runtime(false, async (url, options) => {
     assert.equal(url, '/api/v1/projects/project'); assert.equal(options.method, 'PATCH');
     patch = JSON.parse(options.body);
@@ -26,10 +27,10 @@ const { runtime } = require('./contract-runtime.cjs');
     exports, HTMLButtonElement: class {}, require: name => {
       if (name === 'react') return react;
       if (name === 'react/jsx-runtime') return { jsx: element, jsxs: element };
-      if (name === '../../api') return { DEMO: false };
+      if (name === '../../api') return mode;
       if (name === 'react-router-dom') return { Link: 'link' };
       if (name === 'lucide-react') return {};
-      if (name.includes('ParticipantProvider')) return { useParticipant: () => ({ snapshot, locked: false, busy: false, saveSubmission: fields => { passed = fields; pending = data.saveRealProject('user', 'event', 'team', fields, 'project'); } }) };
+      if (name.includes('ParticipantProvider')) return { useParticipant: () => ({ snapshot, locked: !mode.DEMO && snapshot.project.state === 'submitted', busy: false, saveSubmission: fields => { passed = fields; pending = data.saveRealProject('user', 'event', 'team', fields, 'project'); } }) };
       if (name.includes('participant/data')) return { deadlineLabel: () => '' };
       return { paths: { participant: {} } };
     },
@@ -51,5 +52,15 @@ const { runtime } = require('./contract-runtime.cjs');
   snapshot.project = { ...snapshot.project, summary: edited, title: patch.title };
   exports.SubmissionPage(); tree = flatten(exports.SubmissionPage());
   assert.equal(tree.find(n => n.props?.name === 'summary').props.value, edited);
+  const labels = () => flatten(exports.SubmissionPage()).filter(n => n.type === 'button').map(n => n.props.children.filter(child => typeof child === 'string').join(''));
+  assert.deepEqual(labels(), ['Save draft', 'Submit project']);
+  snapshot.project = { ...snapshot.project, state: 'submitted' };
+  assert.deepEqual(labels(), ['Read only', 'Submitted']);
+  assert.equal(flatten(exports.SubmissionPage()).find(n => n.type === 'fieldset').props.disabled, true);
+  mode.DEMO = true;
+  assert.deepEqual(labels(), ['Save changes', 'Update submission']);
+  snapshot.project = { ...snapshot.project, state: 'draft' };
+  assert.deepEqual(labels(), ['Save draft', 'Submit project']);
+  console.log('PASS real submitted labels/read-only fieldset; real draft and demo labels unchanged.');
   console.log('PASS edited title/summary survive rerender and reach PATCH; optional URLs null; no track; authoritative snapshot sync.');
 })().catch(error => { console.error(error); process.exitCode = 1; });
