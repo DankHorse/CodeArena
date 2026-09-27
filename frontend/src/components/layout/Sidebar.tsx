@@ -1,3 +1,4 @@
+import { useOrganizer } from '../../organizer/OrganizerProvider';
 import {
   Activity,
   BarChart3,
@@ -23,6 +24,7 @@ const navigation = [
 ];
 
 export function Sidebar() {
+  const { snapshot, loading, busy, selectEvent } = useOrganizer();
   return (
     <aside className="sidebar">
       <div className="brand" aria-label="CodeArena">
@@ -40,8 +42,9 @@ export function Sidebar() {
           CURRENT EVENT
         </label>
 
-        <select id="current-event" defaultValue="dogfood-2026">
-          <option value="dogfood-2026">DOGFOOD 2026</option>
+        <select id="current-event" value={snapshot?.event?.id ?? ''} disabled={loading || busy || !snapshot?.events.length} onChange={event => void selectEvent(event.target.value)}>
+          {!snapshot?.events.length && <option value="">No event available</option>}
+          {snapshot?.events.map(event => <option key={event.id} value={event.id}>{event.name}</option>)}
         </select>
       </div>
 

@@ -1,3 +1,4 @@
+import { useOrganizer } from '../../organizer/OrganizerProvider';
 import { LogoutButton } from '../common/LogoutButton';
 import { paths } from '../../routes';
 import { ArrowUpRight } from 'lucide-react';
@@ -15,6 +16,7 @@ const breadcrumbLabels: Record<string, string> = {
 };
 
 export function Topbar() {
+  const { snapshot } = useOrganizer();
   const location = useLocation();
 
   const currentLabel =
@@ -31,7 +33,7 @@ export function Topbar() {
       <div className="topbar-controls">
         <LogoutButton />
         <span className="badge badge-cyan">
-          FIXTURE EVENT
+          {snapshot?.event?.practice ? 'PRACTICE EVENT' : 'FIXTURE EVENT'}
         </span>
 
         <Link className="public-site" to={paths.home}>

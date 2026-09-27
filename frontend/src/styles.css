@@ -2972,3 +2972,33 @@ EOf npm --prefix frontend run build
 .judge-review-fields { border: 0; padding: 0; margin: 0; min-width: 0; }
 .judge-review-fields:disabled input, .judge-review-fields:disabled textarea { opacity: 0.8; }
 .judge-review-fields:disabled button { opacity: 0.55; }
+
+/* Connected organizer forms retain the existing panel and table styling. */
+.organizer-fields { border: 0; margin: 0; padding: 0; min-width: 0; display: grid; gap: 24px; }
+.organizer-refresh { display: flex; justify-content: flex-end; margin-bottom: 16px; }
+.organizer-fields:disabled button { opacity: 0.55; }
+.organizer-results-controls { flex-wrap: wrap; }
+
+/* Organizer track management */
+.event-track-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.event-track-remove {
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.event-track-remove:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+  text-decoration: none;
+}

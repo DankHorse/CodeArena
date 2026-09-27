@@ -55,7 +55,30 @@ async function mock(path:string,method:string,p:Row|Row[]={}):Promise<any>{
   if(action==='register'){if(isClosed(event.submissions_close)||isClosed(event.registration_close))throw Error('Event registration is closed.');if(!roleFor(e))state.memberships.push({event_id:e,user_id:state.user,role:'participant'});persist();return {};}
   if(action==='results'&&method==='GET'){if(!event.published)requireRole(e,['organizer']);return {items:leaderboard(e),published:event.published,method:'mean-centered-v1'};}
   requireRole(e,action==='rubric'||action==='assignments'?['judge','organizer']:['organizer']);
-  if(!action&&method==='PUT'){Object.assign(event,body);body.tracks.forEach((name:string)=>{if(!state.tracks.some((t:Row)=>t.event_id===e&&t.name===name))state.tracks.push({id:id('trk'),event_id:e,name});});log(e,'event.updated',e);}
+  if(!action&&method==='PUT'){
+   const trackNames=[...new Set((body.tracks as string[]).map(name=>name.trim()).filter(Boolean))];
+   const currentTracks=state.tracks.filter((t:Row)=>t.event_id===e);
+   const removed=currentTracks.filter((t:Row)=>!trackNames.includes(t.name));
+   const blocked=removed.filter((t:Row)=>state.projects.some((p:Row)=>p.event_id===e&&p.track_id===t.id));
+
+   if(blocked.length){
+    throw Error('Cannot remove tracks used by projects: '+blocked.map((t:Row)=>t.name).join(', ')+'.');
+   }
+
+   const eventUpdate={...body};
+   delete eventUpdate.tracks;
+   Object.assign(event,eventUpdate);
+
+   state.tracks=state.tracks.filter((t:Row)=>t.event_id!==e||trackNames.includes(t.name));
+
+   trackNames.forEach((name:string)=>{
+    if(!state.tracks.some((t:Row)=>t.event_id===e&&t.name===name)){
+     state.tracks.push({id:id('trk'),event_id:e,name});
+    }
+   });
+
+   log(e,'event.updated',e);
+  }
   if(action==='rubric'){
    if(method==='GET')return state.rubric.filter((c:Row)=>c.event_id===e);
    requireRole(e,['organizer']);if(state.evaluations.some((v:Row)=>state.assignments.some((a:Row)=>a.id===v.assignment_id&&state.projects.some((p:Row)=>p.id===a.project_id&&p.event_id===e))))throw Error('The rubric is locked because scoring has started.');
