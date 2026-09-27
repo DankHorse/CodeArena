@@ -12,6 +12,8 @@ type Selection = { eventId?: string; teamId?: string; projectId?: string };
 export type Snapshot = { data: Bootstrap; event: ParticipantEvent | null; team: ParticipantTeam | null; project: ParticipantProject | null };
 interface ParticipantContextValue {
   recovery?: string;
+  registrationConfirmed?: boolean;
+  registerCurrentEvent?: () => Promise<void>;
   snapshot: Snapshot | null; loading: boolean; busy: boolean; error: string; message: string; locked: boolean;
   refresh: () => Promise<void>;
   selectEvent: (id: string) => Promise<void>;
