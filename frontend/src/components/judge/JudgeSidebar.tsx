@@ -1,3 +1,4 @@
+import { useJudge } from '../../judge/JudgeProvider';
 import {
   ClipboardCheck,
   LayoutDashboard,
@@ -26,6 +27,7 @@ const navigation = [
 ];
 
 export function JudgeSidebar() {
+  const { snapshot, loading, busy, selectEvent } = useJudge();
   return (
     <aside className="sidebar">
       <div className="brand" aria-label="CodeArena">
@@ -39,11 +41,11 @@ export function JudgeSidebar() {
       </div>
 
       <div className="event-context">
-        <p className="metadata">CURRENT EVENT</p>
-
-        <div className="participant-event">
-          DOGFOOD 2026
-        </div>
+        <label className="metadata" htmlFor="judge-event">CURRENT EVENT</label>
+        <select id="judge-event" value={snapshot?.event?.id ?? ''} disabled={loading || busy || !snapshot?.events.length} onChange={event => void selectEvent(event.target.value)}>
+          {!snapshot?.events.length && <option value="">No event available</option>}
+          {snapshot?.events.map(event => <option key={event.id} value={event.id}>{event.name}</option>)}
+        </select>
       </div>
 
       <nav className="sidebar-nav" aria-label="Judge workspace">

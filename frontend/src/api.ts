@@ -42,7 +42,7 @@ function leaderboard(e:string){
 function judgeList(e:string){return state.memberships.filter((m:Row)=>m.event_id===e&&m.role==='judge').map((m:Row)=>{const u=state.users.find((u:Row)=>u.id===m.user_id);const as=state.assignments.filter((a:Row)=>a.judge_id===u.id&&state.projects.some((p:Row)=>p.id===a.project_id&&p.event_id===e)&&a.status!=='recused');return {...u,track_ids:e==='evt_practice'?state.tracks.filter((t:Row)=>t.event_id===e).map((t:Row)=>t.id):(m.track_ids||u.tracks||[]),assigned:as.length,completed:as.filter((a:Row)=>a.status==='submitted').length};});}
 function log(e:string,action:string,target:string){state.audit.unshift({id:id('audit'),event_id:e,actor_id:state.user,action,target,created_at:date()});}
 async function mock(path:string,method:string,p:Row|Row[]={}):Promise<any>{
- const body=p as Row,parts=path.split('/').filter(Boolean);const e=parts[2],action=parts[3];
+ const body=p as Row,parts=path.split('/').filter(Boolean).map(decodeURIComponent);const e=parts[2],action=parts[3];
  if(path==='/api/bootstrap')return {user:state.users.find((u:Row)=>u.id===state.user)||null,memberships:state.memberships.filter((m:Row)=>m.user_id===state.user),events:state.events.map((e:Row)=>({...e,closed:isClosed(e.submissions_close)})),tracks:state.tracks,teams:state.teams.map((t:Row)=>({id:t.id,name:t.name,event_id:t.event_id,mine:myTeam(t)})),projects:state.projects.filter((p:Row)=>p.state==='submitted'||roleFor(p.event_id)==='organizer'||myTeam(state.teams.find((t:Row)=>t.id===p.team_id))).map(project),demo_enabled:true};
  if(path==='/api/auth/demo'){state.user={organizer:'organizer',participant:'participant',judge:'jdg_01'}[body.role as string];persist();return {};}
  if(path==='/api/auth/logout'){state.user=null;persist();return {};}

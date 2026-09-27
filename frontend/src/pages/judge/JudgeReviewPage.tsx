@@ -1,254 +1,41 @@
-import { FormEvent, useState } from 'react';
-import {
-  ArrowLeft,
-  CheckCircle2,
-  ExternalLink,
-  Save,
-  ShieldCheck,
-} from 'lucide-react';
+import type { FormEvent } from 'react';
 import { Link, useParams } from 'react-router-dom';
-
-const projects = {
-  'glass-signal': {
-    title: 'Glass Signal',
-    team: 'Northstar',
-    track: 'Security',
-    summary:
-      'A shared fixture project assigned to this judge for independent review.',
-  },
-  'small-meadow': {
-    title: 'Small Meadow',
-    team: 'Greenframe',
-    track: 'Climate',
-    summary:
-      'A shared fixture project assigned to this judge for independent review.',
-  },
-  'deep-compass': {
-    title: 'Deep Compass',
-    team: 'Vector Labs',
-    track: 'Data and analytics',
-    summary:
-      'A shared fixture project assigned to this judge for independent review.',
-  },
-} as const;
-
-type ProjectId = keyof typeof projects;
-
-const criteria = [
-  {
-    key: 'functionality',
-    title: 'FUNCTIONALITY',
-    description: 'How effectively does the project work?',
-  },
-  {
-    key: 'quality',
-    title: 'QUALITY',
-    description: 'How complete and well-executed is the project?',
-  },
-  {
-    key: 'innovation',
-    title: 'INNOVATION',
-    description: 'How original or distinctive is the approach?',
-  },
-];
-
+import { Save, CheckCircle2, ShieldCheck } from 'lucide-react';
+import { useJudge } from '../../judge/JudgeProvider';
+import { paths } from '../../routes';
 export function JudgeReviewPage() {
   const { projectId } = useParams();
-  const [message, setMessage] = useState('');
-
-  const project =
-    projectId && projectId in projects
-      ? projects[projectId as ProjectId]
-      : null;
-
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  const { snapshot, busy, save } = useJudge();
+  const review = snapshot?.reviews.find(review => review.project.id === projectId);
+  if (!review || review.assignment.status === 'recused') return <section className="judge-review-missing"><p className="eyebrow">[ JUDGE / REVIEW ]</p><h1>REVIEW UNAVAILABLE.</h1><p>{review ? 'You have recused yourself from this assignment.' : 'This project is not assigned to you in the current event.'}</p><Link to={paths.judge.assignments}>← Return to assignments</Link></section>;
+  const { project, assignment, evaluation } = review;
+  const rubric = snapshot?.rubric ?? [];
+  const locked = assignment.status === 'submitted';
+  function handleSave(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-
-    setMessage(
-      'Review submission ready. Backend evaluation persistence will connect here.',
-    );
+    const form = new FormData(event.currentTarget);
+    const submitter = (event.nativeEvent as SubmitEvent).submitter;
+    const submit = submitter instanceof HTMLButtonElement && submitter.value === 'submit';
+    const scores: Record<string, number> = {};
+    for (const criterion of rubric) {
+      const value = form.get(criterion.id);
+      if (typeof value === 'string' && value.trim() !== '') scores[criterion.id] = Number(value);
+    }
+    void save(project.id, scores, String(form.get('comment') ?? ''), submit);
   }
-
-  function handleSaveDraft() {
-    setMessage(
-      'Review draft preview saved in the frontend only.',
-    );
-  }
-
-  if (!project) {
-    return (
-      <section className="judge-review-missing">
-        <p className="eyebrow">[ JUDGE / REVIEW ]</p>
-        <h1>
-          PROJECT NOT FOUND
-          <span className="heading-period">.</span>
-        </h1>
-
-        <Link to="/judge/assignments">
-          ← Return to assignments
-        </Link>
-      </section>
-    );
-  }
-
-  return (
-    <>
-      <div className="judge-review-back">
-        <Link to="/judge/assignments">
-          <ArrowLeft size={15} aria-hidden="true" />
-          Back to assignments
-        </Link>
-      </div>
-
-      <section className="workspace-intro">
-        <div>
-          <p className="eyebrow">[ JUDGE / PROJECT REVIEW ]</p>
-
-          <h1>
-            {project.title.toUpperCase()}
-            <span className="heading-period">.</span>
-          </h1>
-
-          <p className="workspace-description">
-            Score this project independently using the event rubric.
-          </p>
-        </div>
-
-        <span className="badge badge-cyan">
-          REVIEW OPEN
-        </span>
-      </section>
-
-      <section className="review-project-panel">
-        <div>
-          <p className="metadata">PROJECT</p>
-          <h2>{project.title}</h2>
-          <p>{project.summary}</p>
-        </div>
-
-        <div className="review-project-meta">
-          <div>
-            <p className="metadata">TEAM</p>
-            <strong>{project.team}</strong>
-          </div>
-
-          <div>
-            <p className="metadata">TRACK</p>
-            <strong>{project.track}</strong>
-          </div>
-
-          <button
-            className="review-demo-button"
-            type="button"
-            disabled
-            title="Project links will come from the backend"
-          >
-            Project links
-            <ExternalLink size={15} aria-hidden="true" />
-          </button>
-        </div>
-      </section>
-
-      <section className="review-isolation-note">
-        <ShieldCheck size={19} aria-hidden="true" />
-
-        <div>
-          <p className="metadata">INDEPENDENT REVIEW</p>
-          <span>
-            Other judges&apos; scores are not shown in this workspace.
-          </span>
-        </div>
-      </section>
-
-      <form className="review-form" onSubmit={handleSubmit}>
-        <div className="review-form-heading">
-          <div>
-            <p className="metadata">SCORING / RUBRIC</p>
-            <h2>EVALUATION</h2>
-          </div>
-
-          <span className="badge badge-cyan">DRAFT</span>
-        </div>
-
-        <div className="review-criteria-list">
-          {criteria.map((criterion, index) => (
-            <section
-              className="review-criterion"
-              key={criterion.key}
-            >
-              <div className="review-criterion-info">
-                <span className="review-criterion-number">
-                  {String(index + 1).padStart(2, '0')}
-                </span>
-
-                <div>
-                  <h3>{criterion.title}</h3>
-                  <p>{criterion.description}</p>
-                </div>
-              </div>
-
-              <label className="review-score-field">
-                <span>SCORE / 10</span>
-
-                <input
-                  type="number"
-                  name={criterion.key}
-                  min="0"
-                  max="10"
-                  step="1"
-                  placeholder="0"
-                  required
-                />
-              </label>
-            </section>
-          ))}
-        </div>
-
-        <label className="review-comment-field">
-          <span>OVERALL COMMENT</span>
-
-          <textarea
-            name="comment"
-            rows={5}
-            placeholder="Add concise judging feedback"
-          />
-        </label>
-
-        <div className="review-actions">
-          <div>
-            <p className="metadata">REVIEW STATE</p>
-            <strong>DRAFT / EDITABLE</strong>
-            <span>
-              Final authorization and persistence will be enforced by the backend.
-            </span>
-          </div>
-
-          <div className="review-action-buttons">
-            <button
-              className="button submission-save-button"
-              type="button"
-              onClick={handleSaveDraft}
-            >
-              <Save size={16} aria-hidden="true" />
-              Save draft
-            </button>
-
-            <button
-              className="button button-primary"
-              type="submit"
-            >
-              <CheckCircle2 size={16} aria-hidden="true" />
-              Submit review
-            </button>
-          </div>
-        </div>
-      </form>
-
-      {message && (
-        <p className="team-message" role="status">
-          {message}
-        </p>
-      )}
-    </>
-  );
+  return <>
+    <div className="judge-review-back"><Link to={paths.judge.assignments}>← Back to assignments</Link></div>
+    <section className="workspace-intro"><div><p className="eyebrow">[ JUDGE / PROJECT REVIEW ]</p><h1>{project.title.toUpperCase()}<span className="heading-period">.</span></h1><p className="workspace-description">Score this project independently using the event rubric.</p></div><span className="badge badge-cyan">{locked ? 'COMPLETED / LOCKED' : 'REVIEW OPEN'}</span></section>
+    <section className="review-project-panel"><div><p className="metadata">PROJECT</p><h2>{project.title}</h2><p>{project.summary}</p></div><div className="review-project-meta"><div><p className="metadata">TEAM</p><strong>{review.team}</strong></div><div><p className="metadata">TRACK</p><strong>{review.track}</strong></div>{project.repo_url && /^https?:\/\//i.test(project.repo_url) && <a className="review-demo-button" href={project.repo_url} target="_blank" rel="noopener noreferrer">Repository ↗</a>}</div></section>
+    <section className="review-isolation-note"><ShieldCheck size={19} aria-hidden="true" /><div><p className="metadata">INDEPENDENT REVIEW</p><span>Only your own evaluation is shown.</span></div><Link to={paths.judge.rubric}>Scoring guide ↗</Link></section>
+    <form className="review-form" key={assignment.id} onSubmit={handleSave} aria-busy={busy}>
+      <div className="review-form-heading"><h2>EVALUATION</h2><span className="badge badge-cyan">{locked ? 'COMPLETED' : assignment.status === 'in_progress' ? 'IN PROGRESS' : 'DRAFT'}</span></div>
+      <fieldset className="judge-review-fields" disabled={locked || busy || !rubric.length}>
+        <div className="review-criteria-list">{rubric.map((criterion,index) => <section className="review-criterion" key={criterion.id}><div className="review-criterion-info"><span className="review-criterion-number">{String(index+1).padStart(2,'0')}</span><div><h3>{criterion.name}</h3><p>{criterion.description}</p><p className="metadata">WEIGHT / {criterion.weight}%</p></div></div><label className="review-score-field"><span>{criterion.name} / 0–{criterion.max_score}</span><input type="number" name={criterion.id} min={0} max={criterion.max_score} step="any" defaultValue={evaluation?.scores[criterion.id] ?? ''} placeholder="—" /></label></section>)}</div>
+        <label className="review-comment-field"><span>OVERALL COMMENT</span><textarea name="comment" rows={5} defaultValue={evaluation?.comment ?? ''} placeholder="Add concise judging feedback" /></label>
+        <div className="review-actions"><div><p className="metadata">REVIEW STATE</p><strong>{locked ? 'COMPLETED / LOCKED' : 'DRAFT / EDITABLE'}</strong><span>{locked ? 'Submitted evaluations cannot be changed.' : 'Score every criterion to submit. Partial drafts can be saved.'}</span></div>{!locked && <div className="review-action-buttons"><button className="button submission-save-button" type="submit" value="draft"><Save size={16} aria-hidden="true" />Save draft</button><button className="button button-primary" type="submit" value="submit"><CheckCircle2 size={16} aria-hidden="true" />{busy ? 'Saving…' : 'Submit review'}</button></div>}</div>
+      </fieldset>
+      {!rubric.length && <p className="team-message">The scoring rubric is unavailable. Review actions are disabled.</p>}
+    </form>
+  </>;
 }

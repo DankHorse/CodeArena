@@ -1,117 +1,18 @@
-import { ArrowUpRight, CheckCircle2, Clock3 } from 'lucide-react';
 import { Link } from 'react-router-dom';
-
-const assignments = [
-  {
-    id: 'glass-signal',
-    title: 'Glass Signal',
-    team: 'Northstar',
-    track: 'Security',
-    status: 'Pending',
-  },
-  {
-    id: 'small-meadow',
-    title: 'Small Meadow',
-    team: 'Greenframe',
-    track: 'Climate',
-    status: 'In review',
-  },
-  {
-    id: 'deep-compass',
-    title: 'Deep Compass',
-    team: 'Vector Labs',
-    track: 'Data and analytics',
-    status: 'Pending',
-  },
-];
-
+import { useJudge } from '../../judge/JudgeProvider';
+import { reviewCounts, statusLabel } from '../../judge/data';
+import { paths } from '../../routes';
 export function JudgeAssignmentsPage() {
-  return (
-    <>
-      <section className="workspace-intro">
-        <div>
-          <p className="eyebrow">[ JUDGE / ASSIGNMENTS ]</p>
-
-          <h1>
-            ASSIGNMENTS
-            <span className="heading-period">.</span>
-          </h1>
-
-          <p className="workspace-description">
-            Review projects assigned to your judging queue.
-          </p>
-        </div>
-      </section>
-
-      <section className="assignment-summary">
-        <article>
-          <p className="metadata">ASSIGNED</p>
-          <strong>3</strong>
-        </article>
-
-        <article>
-          <p className="metadata">IN PROGRESS</p>
-          <strong>1</strong>
-        </article>
-
-        <article>
-          <p className="metadata">COMPLETED</p>
-          <strong>1</strong>
-        </article>
-
-        <article>
-          <p className="metadata">REMAINING</p>
-          <strong>2</strong>
-        </article>
-      </section>
-
-      <section className="assignment-table">
-        <div className="assignment-table-header">
-          <span>PROJECT</span>
-          <span>TEAM</span>
-          <span>TRACK</span>
-          <span>STATUS</span>
-          <span>ACTION</span>
-        </div>
-
-        {assignments.map((assignment) => (
-          <article className="assignment-table-row" key={assignment.id}>
-            <div>
-              <strong>{assignment.title}</strong>
-            </div>
-
-            <span>{assignment.team}</span>
-
-            <span>{assignment.track}</span>
-
-            <span className="assignment-status">
-              {assignment.status === 'In review' ? (
-                <>
-                  <Clock3 size={14} aria-hidden="true" />
-                  In review
-                </>
-              ) : (
-                <>
-                  <CheckCircle2 size={14} aria-hidden="true" />
-                  Pending
-                </>
-              )}
-            </span>
-
-            <Link
-              className="assignment-review-link"
-              to={`/judge/review/${assignment.id}`}
-            >
-              Review
-              <ArrowUpRight size={15} aria-hidden="true" />
-            </Link>
-          </article>
-        ))}
-      </section>
-
-      <p className="team-message">
-        Frontend preview only. Judge assignments will come from the backend API later.
-      </p>
-    </>
-  );
+  const { snapshot } = useJudge();
+  if (!snapshot) return null;
+  const counts = reviewCounts(snapshot.reviews);
+  return <>
+    <section className="workspace-intro"><div><p className="eyebrow">[ JUDGE / ASSIGNMENTS ]</p><h1>ASSIGNMENTS<span className="heading-period">.</span></h1><p className="workspace-description">Your judging queue for {snapshot.event?.name ?? 'this event'}.</p></div></section>
+    <section className="assignment-summary">{[{label:'ASSIGNED',value:counts.assigned},{label:'IN PROGRESS',value:counts.inProgress},{label:'COMPLETED',value:counts.completed},{label:'REMAINING',value:counts.remaining}].map(item => <article key={item.label}><p className="metadata">{item.label}</p><strong>{item.value}</strong></article>)}</section>
+    {counts.recused > 0 && <p className="team-message">{counts.recused} recused assignments excluded from active totals.</p>}
+    <section className="assignment-table"><div className="assignment-table-header"><span>PROJECT</span><span>TEAM</span><span>TRACK</span><span>STATUS</span><span>ACTION</span></div>
+      {snapshot.reviews.map(({assignment,project,team,track}) => <article className="assignment-table-row" key={assignment.id}><strong>{project.title}</strong><span>{team}</span><span>{track}</span><span className="assignment-status">{statusLabel(assignment.status)}</span>{assignment.status === 'recused' ? <span>Unavailable</span> : <Link className="assignment-review-link" to={paths.judge.review(project.id)}>{assignment.status === 'submitted' ? 'View completed review' : assignment.status === 'in_progress' ? 'Continue review' : 'Start review'} ↗</Link>}</article>)}
+      {!snapshot.reviews.length && <p className="team-message">No assignments for this event.</p>}
+    </section>
+  </>;
 }

@@ -2967,3 +2967,8 @@ EOf npm --prefix frontend run build
 .participant-choice { display: grid; gap: 10px; padding: 20px; font: 12px var(--font-mono); }
 .participant-choice select { color: var(--text-primary); background: var(--bg-panel); border: 1px solid var(--border-default); padding: 12px; }
 .participant-fieldset:disabled .button, .team-form button:disabled { opacity: 0.55; }
+
+/* Shared judge review state uses existing review layout styles. */
+.judge-review-fields { border: 0; padding: 0; margin: 0; min-width: 0; }
+.judge-review-fields:disabled input, .judge-review-fields:disabled textarea { opacity: 0.8; }
+.judge-review-fields:disabled button { opacity: 0.55; }

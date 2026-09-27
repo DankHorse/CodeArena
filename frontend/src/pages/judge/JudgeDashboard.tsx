@@ -1,142 +1,17 @@
-import {
-  ArrowUpRight,
-  CheckCircle2,
-  ClipboardCheck,
-  Clock3,
-} from 'lucide-react';
+import { ArrowUpRight, ClipboardCheck, CheckCircle2, Clock3 } from 'lucide-react';
 import { Link } from 'react-router-dom';
-
-const assignments = [
-  {
-    title: 'Glass Signal',
-    track: 'Security',
-    status: 'Pending',
-  },
-  {
-    title: 'Small Meadow',
-    track: 'Climate',
-    status: 'In review',
-  },
-  {
-    title: 'Deep Compass',
-    track: 'Data and analytics',
-    status: 'Pending',
-  },
-];
-
+import { useJudge } from '../../judge/JudgeProvider';
+import { reviewCounts, statusLabel } from '../../judge/data';
+import { paths } from '../../routes';
 export function JudgeDashboard() {
-  return (
-    <>
-      <section className="workspace-intro">
-        <div>
-          <p className="eyebrow">[ JUDGE WORKSPACE ]</p>
-
-          <h1>
-            REVIEW DESK
-            <span className="heading-period">.</span>
-          </h1>
-
-          <p className="workspace-description">
-            Review your assigned projects independently and track your progress.
-          </p>
-        </div>
-
-        <Link
-          className="button button-primary"
-          to="/judge/assignments"
-        >
-          View assignments
-          <ArrowUpRight size={17} aria-hidden="true" />
-        </Link>
-      </section>
-
-      <section className="judge-status-panel">
-        <div>
-          <span className="badge badge-cyan">
-            JUDGING IN PROGRESS
-          </span>
-
-          <p className="metadata judge-status-label">
-            CURRENT EVENT
-          </p>
-
-          <h2>DOGFOOD 2026</h2>
-
-          <p>
-            Only your own assigned reviews are visible in this workspace.
-          </p>
-        </div>
-
-        <div className="judge-progress">
-          <p className="metadata">YOUR REVIEW PROGRESS</p>
-
-          <strong>1 / 3</strong>
-
-          <div className="judge-progress-bar">
-            <span />
-          </div>
-
-          <p>2 reviews remaining</p>
-        </div>
-      </section>
-
-      <div className="judge-metrics">
-        <article>
-          <ClipboardCheck size={20} aria-hidden="true" />
-          <p className="metadata">ASSIGNED</p>
-          <strong>3</strong>
-          <span>Projects in your queue.</span>
-        </article>
-
-        <article>
-          <CheckCircle2 size={20} aria-hidden="true" />
-          <p className="metadata">COMPLETED</p>
-          <strong>1</strong>
-          <span>Reviews submitted.</span>
-        </article>
-
-        <article>
-          <Clock3 size={20} aria-hidden="true" />
-          <p className="metadata">REMAINING</p>
-          <strong>2</strong>
-          <span>Reviews still open.</span>
-        </article>
-      </div>
-
-      <section className="judge-assignment-preview">
-        <div className="judge-section-heading">
-          <div>
-            <p className="metadata">CURRENT QUEUE</p>
-            <h2>ASSIGNED PROJECTS</h2>
-          </div>
-
-          <Link to="/judge/assignments">
-            VIEW ALL ↗
-          </Link>
-        </div>
-
-        <div className="judge-assignment-list">
-          {assignments.map((assignment, index) => (
-            <article
-              className="judge-assignment-row"
-              key={assignment.title}
-            >
-              <span className="judge-assignment-number">
-                {String(index + 1).padStart(2, '0')}
-              </span>
-
-              <div>
-                <strong>{assignment.title}</strong>
-                <p>{assignment.track}</p>
-              </div>
-
-              <span className="judge-assignment-status">
-                {assignment.status}
-              </span>
-            </article>
-          ))}
-        </div>
-      </section>
-    </>
-  );
+  const { snapshot } = useJudge();
+  if (!snapshot) return null;
+  const counts = reviewCounts(snapshot.reviews);
+  const queue = [...snapshot.reviews].sort((a, b) => Number(['submitted','recused'].includes(a.assignment.status)) - Number(['submitted','recused'].includes(b.assignment.status))).slice(0, 3);
+  return <>
+    <section className="workspace-intro"><div><p className="eyebrow">[ JUDGE WORKSPACE ]</p><h1>REVIEW DESK<span className="heading-period">.</span></h1><p className="workspace-description">Review your assigned projects independently and track your progress.</p></div><Link className="button button-primary" to={paths.judge.assignments}>View assignments <ArrowUpRight size={17} aria-hidden="true" /></Link></section>
+    <section className="judge-status-panel"><div><span className="badge badge-cyan">{counts.remaining ? 'JUDGING IN PROGRESS' : counts.assigned ? 'REVIEWS COMPLETE' : 'NO ASSIGNMENTS'}</span><p className="metadata judge-status-label">CURRENT EVENT</p><h2>{snapshot.event?.name ?? 'No judge event available'}</h2><p>Only your own assigned reviews are visible in this workspace.</p></div><div className="judge-progress"><p className="metadata">YOUR REVIEW PROGRESS</p><strong>{counts.completed} / {counts.assigned}</strong><progress value={counts.completed} max={counts.assigned || 1} aria-label="Your review completion" /><p>{counts.remaining} reviews remaining</p></div></section>
+    <div className="judge-metrics">{[{label:'ASSIGNED',value:counts.assigned,icon:ClipboardCheck},{label:'COMPLETED',value:counts.completed,icon:CheckCircle2},{label:'REMAINING',value:counts.remaining,icon:Clock3}].map(({label,value,icon:Icon}) => <article key={label}><Icon size={20} aria-hidden="true" /><p className="metadata">{label}</p><strong>{value}</strong></article>)}</div>
+    <section className="judge-assignment-preview"><div className="judge-section-heading"><div><p className="metadata">CURRENT QUEUE</p><h2>ASSIGNED PROJECTS</h2></div><Link to={paths.judge.assignments}>VIEW ALL ↗</Link></div><div className="judge-assignment-list">{queue.map(review => <article className="judge-assignment-row" key={review.assignment.id}><div>{review.assignment.status === 'recused' ? <strong>{review.project.title}</strong> : <Link to={paths.judge.review(review.project.id)}>{review.project.title} ↗</Link>}<p>{review.track}</p></div><span className="judge-assignment-status">{statusLabel(review.assignment.status)}</span></article>)}{!queue.length && <p className="team-message">No projects are assigned to you for this event.</p>}</div></section>
+  </>;
 }
