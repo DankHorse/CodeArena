@@ -24,6 +24,7 @@ export function RealParticipantProvider({ children }: { children: ReactNode }) {
     const generation = ++version.current;
     const next = await loadParticipant(user.id);
     if (generation === version.current) { setSnapshot(next); setRecovery(next.recovery); }
+    return next;
   }, [user?.id]);
   const refresh = useCallback(async () => {
     setLoading(true); setError('');
@@ -79,7 +80,10 @@ export function RealParticipantProvider({ children }: { children: ReactNode }) {
         const submitted = await submitRealProject(draft.id);
         setSnapshot(current => current && ({ ...current, project: submitted }));
       }
-      await load();
+      const reloaded = await load();
+      if (!reloaded?.project || reloaded.project.id !== draft.id || reloaded.project.title !== fields.title.trim() || reloaded.project.summary !== fields.summary.trim()) {
+        throw Error('The server did not return the saved title and summary. Refresh and verify your project before continuing.');
+      }
     }, 'Project saved.'),
   }}>
     {children}
