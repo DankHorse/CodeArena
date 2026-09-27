@@ -1,5 +1,7 @@
+import { LogoutButton } from '../common/LogoutButton';
+import { paths } from '../../routes';
 import { ArrowUpRight } from 'lucide-react';
-import { useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 
 const breadcrumbLabels: Record<string, string> = {
   '/organizer': 'Arena control',
@@ -27,19 +29,15 @@ export function Topbar() {
       </p>
 
       <div className="topbar-controls">
+        <LogoutButton />
         <span className="badge badge-cyan">
           FIXTURE EVENT
         </span>
 
-        <button
-          className="public-site"
-          type="button"
-          disabled
-          title="Public site coming soon"
-        >
+        <Link className="public-site" to={paths.home}>
           PUBLIC SITE
           <ArrowUpRight size={15} aria-hidden="true" />
-        </button>
+        </Link>
       </div>
     </header>
   );

@@ -101,14 +101,30 @@ async function mock(path:string,method:string,p:Row|Row[]={}):Promise<any>{
  }
  throw Error('This action is unavailable in the preview.');
 }
-export async function api(path:string,method='GET',data?:any):Promise<any>{
- if(DEMO)return mock(path,method,data);
- const res=await fetch(path,{method,credentials:'same-origin',headers:{'Content-Type':'application/json','X-CodeArena-Request':'1'},...(data!==undefined?{body:JSON.stringify(data)}:{})});
- const body=await res.json().catch(()=>({}));if(!res.ok)throw Error(body.error?.message||'The request failed. Please try again.');return body;
+export class ApiError extends Error {
+ constructor(message: string, public readonly status: number) { super(message); this.name = 'ApiError'; }
+}
+export const apiPath = (path: string) =>
+ path.startsWith('/api/') && !/^\/api\/v1(?:\/|$|\?)/.test(path) ? path.replace('/api/', '/api/v1/') : path;
+export async function api<T = unknown>(path: string, method = 'GET', data?: unknown): Promise<T> {
+ if (DEMO) return mock(path, method, data as Row) as Promise<T>;
+ const res = await fetch(apiPath(path), {
+  method, credentials: 'include',
+  headers: {'Content-Type': 'application/json', 'X-CodeArena-Request': '1'},
+  ...(data !== undefined ? {body: JSON.stringify(data)} : {}),
+ });
+ if (res.status === 204) return undefined as T;
+ const body = await res.json().catch(() => ({}));
+ if (!res.ok) {
+  const detail = typeof body.detail === 'string' ? body.detail
+   : Array.isArray(body.detail) ? body.detail.map((item: {msg?: string}) => item.msg).filter(Boolean).join('; ') : '';
+  throw new ApiError(body.error?.message || detail || 'The request failed. Please try again.', res.status);
+ }
+ return body as T;
 }
 export async function exportCSV(event:string){
  let blob:Blob;
  if(DEMO){const items=leaderboard(event),escape=(v:any)=>'"'+String(v??'').replaceAll('"','""')+'"';blob=new Blob([['Rank','Project','Reviews','Raw score','Normalized score','Complete'].map(escape).join(',')+'\n'+items.map((r:Row)=>[r.rank,r.title,r.reviews,r.raw_score,r.score,r.complete].map(escape).join(',')).join('\n')],{type:'text/csv'});}
- else{const r=await fetch(`/api/events/${event}/results/export.csv`,{credentials:'same-origin'});if(!r.ok)throw Error('CSV export failed.');blob=await r.blob();}
+ else{const r=await fetch(apiPath(`/api/events/${event}/results/export.csv`),{credentials:'include'});if(!r.ok)throw Error('CSV export failed.');blob=await r.blob();}
  const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='codearena-results.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
 }

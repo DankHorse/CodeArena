@@ -1,3 +1,5 @@
+import { SessionProvider } from './auth/SessionProvider';
+import { ProtectedRoute } from './auth/ProtectedRoute';
 import {
   BrowserRouter,
   Navigate,
@@ -5,7 +7,11 @@ import {
   Routes,
 } from 'react-router-dom';
 
-import { PlaceholderPage } from './components/common/PlaceholderPage';
+import { paths } from './routes';
+import { LandingPage } from './pages/public/LandingPage';
+import { EventsPage } from './pages/public/EventsPage';
+import { EventDetailsPage } from './pages/public/EventDetailsPage';
+import { ProjectDetailsPage } from './pages/public/ProjectDetailsPage';
 import { LoginPage } from './pages/auth/LoginPage';
 import { RegisterPage } from './pages/auth/RegisterPage';
 import { GalleryPage } from './pages/public/GalleryPage';
@@ -18,12 +24,9 @@ import { JudgeAssignmentsPage } from './pages/judge/JudgeAssignmentsPage';
 import { JudgeReviewPage } from './pages/judge/JudgeReviewPage';
 import { JudgeScoringGuidePage } from './pages/judge/JudgeScoringGuidePage';
 import { JudgeLayout } from './pages/judge/JudgeLayout';
-import { JudgePlaceholderPage } from './pages/judge/JudgePlaceholderPage';
-import { ParticipantPlaceholderPage } from './pages/participant/ParticipantPlaceholderPage';
 
 import { OrganizerDashboard } from './pages/organizer/OrganizerDashboard';
 import { OrganizerLayout } from './pages/organizer/OrganizerLayout';
-import { OrganizerPlaceholderPage } from './pages/organizer/OrganizerPlaceholderPage';
 import { EventSettingsPage } from './pages/organizer/EventSettingsPage';
 import { OrganizerTeamsPage } from './pages/organizer/OrganizerTeamsPage';
 import { OrganizerProjectsPage } from './pages/organizer/OrganizerProjectsPage';
@@ -35,90 +38,60 @@ import { OrganizerActivityPage } from './pages/organizer/OrganizerActivityPage';
 export default function App() {
   return (
     <BrowserRouter>
+      <SessionProvider>
       <Routes>
 
         {/* PUBLIC */}
-
-        <Route
-          path="/"
-          element={
-            <PlaceholderPage
-              eyebrow="[ CODEARENA / PUBLIC ]"
-              title="ENTER THE ARENA."
-              description="CodeArena public landing page."
-            />
-          }
-        />
-
-        <Route
-          path="/events"
-          element={
-            <PlaceholderPage
-              eyebrow="[ PUBLIC / EVENTS ]"
-              title="EVENTS"
-              description="Browse hackathons and event information."
-            />
-          }
-        />
-
-        <Route path="/gallery" element={<GalleryPage />} />
-
-        <Route
-          path="/projects/:projectId"
-          element={
-            <PlaceholderPage
-              eyebrow="[ PUBLIC / PROJECT ]"
-              title="PROJECT DETAILS"
-              description="Project information will appear here."
-            />
-          }
-        />
-
+        <Route path={paths.home} element={<LandingPage />} />
+        <Route path={paths.events} element={<EventsPage />} />
+        <Route path={paths.eventPattern} element={<EventDetailsPage />} />
+        <Route path={paths.gallery()} element={<GalleryPage />} />
+        <Route path={paths.projectPattern} element={<ProjectDetailsPage />} />
 
         {/* AUTH */}
 
-        <Route path="/login" element={<LoginPage />} />
+        <Route path={paths.login} element={<LoginPage />} />
 
-        <Route path="/register" element={<RegisterPage />} />
+        <Route path={paths.register} element={<RegisterPage />} />
 
 
         {/* PARTICIPANT */}
 
         <Route
-          path="/participant"
-          element={<ParticipantLayout />}
+          path={paths.participant.home}
+          element={<ProtectedRoute role="participant"><ParticipantLayout /></ProtectedRoute>}
         >
           <Route
             index
             element={<ParticipantDashboard />}
           />
 
-          <Route path="team" element={<TeamPage />} />
+          <Route path={paths.participant.team} element={<TeamPage />} />
 
-          <Route path="submission" element={<SubmissionPage />} />
+          <Route path={paths.participant.submission} element={<SubmissionPage />} />
         </Route>
 
 
         {/* JUDGE */}
 
         <Route
-          path="/judge"
-          element={<JudgeLayout />}
+          path={paths.judge.home}
+          element={<ProtectedRoute role="judge"><JudgeLayout /></ProtectedRoute>}
         >
           <Route
             index
             element={<JudgeDashboard />}
           />
 
-          <Route path="assignments" element={<JudgeAssignmentsPage />} />
+          <Route path={paths.judge.assignments} element={<JudgeAssignmentsPage />} />
 
           <Route
-            path="review/:projectId"
+            path={paths.judge.reviewPattern}
             element={<JudgeReviewPage />}
           />
 
 
-          <Route path="rubric" element={<JudgeScoringGuidePage />} />
+          <Route path={paths.judge.rubric} element={<JudgeScoringGuidePage />} />
         </Route>
 
 
@@ -127,30 +100,30 @@ export default function App() {
         {/* ORGANIZER */}
 
         <Route
-          path="/organizer"
-          element={<OrganizerLayout />}
+          path={paths.organizer.home}
+          element={<ProtectedRoute role="organizer"><OrganizerLayout /></ProtectedRoute>}
         >
           <Route
             index
             element={<OrganizerDashboard />}
           />
 
-          <Route path="events" element={<EventSettingsPage />} />
+          <Route path={paths.organizer.events} element={<EventSettingsPage />} />
 
-          <Route path="teams" element={<OrganizerTeamsPage />} />
+          <Route path={paths.organizer.teams} element={<OrganizerTeamsPage />} />
 
-          <Route path="projects" element={<OrganizerProjectsPage />} />
+          <Route path={paths.organizer.projects} element={<OrganizerProjectsPage />} />
 
-          <Route path="rubric" element={<OrganizerRubricPage />} />
+          <Route path={paths.organizer.rubric} element={<OrganizerRubricPage />} />
 
           <Route
-            path="judges"
+            path={paths.organizer.judges}
             element={<OrganizerJudgeAssignmentsPage />}
           />
 
-          <Route path="results" element={<OrganizerResultsPage />} />
+          <Route path={paths.organizer.results} element={<OrganizerResultsPage />} />
 
-          <Route path="activity" element={<OrganizerActivityPage />} />
+          <Route path={paths.organizer.activity} element={<OrganizerActivityPage />} />
         </Route>
 
 
@@ -158,10 +131,11 @@ export default function App() {
 
         <Route
           path="*"
-          element={<Navigate to="/" replace />}
+          element={<Navigate to={paths.home} replace />}
         />
 
       </Routes>
+      </SessionProvider>
     </BrowserRouter>
   );
 }

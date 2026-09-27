@@ -1,76 +1,38 @@
-import { FormEvent, useState } from 'react';
+import { useState } from 'react';
+import type { FormEvent } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { AuthShell } from './AuthShell';
+import { useSession } from '../../auth/SessionProvider';
+import { errorMessage } from '../../auth/types';
+import { paths } from '../../routes';
+import { DEMO } from '../../api';
 
 export function RegisterPage() {
-  const [message, setMessage] = useState('');
-
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  const { register } = useSession();
+  const navigate = useNavigate();
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-
-    setMessage(
-      'Registration UI ready. Backend account creation will connect here.',
-    );
+    const data = new FormData(event.currentTarget);
+    const display_name = String(data.get('name') ?? '').trim();
+    const email = String(data.get('email') ?? '').trim();
+    const password = String(data.get('password') ?? '');
+    if (!display_name || !email || password.length < 12) { setError('Enter a name, email, and password of at least 12 characters.'); return; }
+    setBusy(true); setError('');
+    try { await register({ display_name, email, password }); navigate(paths.login, { replace: true, state: { registered: true } }); }
+    catch (error) { setError(errorMessage(error)); }
+    finally { setBusy(false); }
   }
-
   return (
-    <AuthShell
-      eyebrow="[ ACCESS / REGISTER ]"
-      title="JOIN THE ARENA."
-      description="Create your account and enter the event workspace."
-      footerText="Already registered?"
-      footerLinkLabel="Login ↗"
-      footerLinkTo="/login"
-    >
-      <form className="auth-form" onSubmit={handleSubmit}>
-        <label>
-          <span>NAME</span>
-
-          <input
-            type="text"
-            name="name"
-            placeholder="Your name"
-            autoComplete="name"
-            required
-          />
-        </label>
-
-        <label>
-          <span>EMAIL</span>
-
-          <input
-            type="email"
-            name="email"
-            placeholder="you@example.com"
-            autoComplete="email"
-            required
-          />
-        </label>
-
-        <label>
-          <span>PASSWORD</span>
-
-          <input
-            type="password"
-            name="password"
-            placeholder="Create a password"
-            autoComplete="new-password"
-            minLength={8}
-            required
-          />
-        </label>
-
-        <button
-          className="button button-primary auth-submit"
-          type="submit"
-        >
-          Create account ↗
-        </button>
-
-        {message && (
-          <p className="auth-message" role="status">
-            {message}
-          </p>
-        )}
+    <AuthShell eyebrow="[ ACCESS / REGISTER ]" title="JOIN THE ARENA." description="Create your account and enter the event workspace." footerText="Already registered?" footerLinkLabel="Login ↗" footerLinkTo={paths.login}>
+      {DEMO && <p className="auth-message">Demo registration creates a local preview profile. Use sample details, not real credentials.</p>}
+      <form className="auth-form" onSubmit={handleSubmit} aria-busy={busy}>
+        <label><span>NAME</span><input type="text" name="name" autoComplete="name" placeholder="Your name" required disabled={busy} /></label>
+        <label><span>EMAIL</span><input type="email" name="email" autoComplete="email" placeholder="you@example.com" required disabled={busy} /></label>
+        <label><span>PASSWORD / 12 CHARACTERS MINIMUM</span><input type="password" name="password" autoComplete="new-password" minLength={12} placeholder="Create a password" required disabled={busy} /></label>
+        <button className="button button-primary auth-submit" type="submit" disabled={busy}>{busy ? 'Creating account…' : 'Create account ↗'}</button>
+        {error && <p className="auth-message" role="alert">{error}</p>}
       </form>
     </AuthShell>
   );
