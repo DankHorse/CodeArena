@@ -1,3 +1,5 @@
+import { DEMO } from '../../api';
+import { RealGalleryPage } from './RealGallery';
 import { useState } from 'react';
 import { Search } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router-dom';
@@ -6,7 +8,8 @@ import { findEvent } from '../../data/publicData';
 import { usePublicCatalog } from '../../data/usePublicCatalog';
 import { paths } from '../../routes';
 
-export function GalleryPage() {
+export function GalleryPage() { return DEMO ? <DemoGalleryPage /> : <RealGalleryPage />; }
+function DemoGalleryPage() {
   const [query, setQuery] = useState('');
   const [params] = useSearchParams();
   const { catalog, loading, error, refresh } = usePublicCatalog();

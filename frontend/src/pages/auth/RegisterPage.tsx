@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { AuthShell } from './AuthShell';
 import { useSession } from '../../auth/SessionProvider';
 import { errorMessage } from '../../auth/types';
@@ -10,6 +10,7 @@ import { DEMO } from '../../api';
 export function RegisterPage() {
   const { register } = useSession();
   const navigate = useNavigate();
+  const location = useLocation();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -20,7 +21,7 @@ export function RegisterPage() {
     const password = String(data.get('password') ?? '');
     if (!display_name || !email || password.length < 12) { setError('Enter a name, email, and password of at least 12 characters.'); return; }
     setBusy(true); setError('');
-    try { await register({ display_name, email, password }); navigate(paths.login, { replace: true, state: { registered: true } }); }
+    try { await register({ display_name, email, password }); navigate(paths.login, { replace: true, state: { registered: true, ...(!DEMO && location.state && typeof location.state.from === 'string' ? { from: location.state.from } : {}) } }); }
     catch (error) { setError(errorMessage(error)); }
     finally { setBusy(false); }
   }

@@ -1,3 +1,5 @@
+import { DEMO } from '../../api';
+import { RealProjectDetails } from './RealGallery';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { PublicShell } from '../../components/public/PublicShell';
 import {
@@ -12,7 +14,8 @@ const safeUrl = (value?: string) =>
     ? value
     : undefined;
 
-export function ProjectDetailsPage() {
+export function ProjectDetailsPage() { return DEMO ? <DemoProjectDetailsPage /> : <RealProjectDetails />; }
+function DemoProjectDetailsPage() {
   const { projectId } = useParams();
   const [params] = useSearchParams();
   const { catalog, loading, error, refresh } = usePublicCatalog();

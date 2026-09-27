@@ -1,10 +1,10 @@
 import { api, DEMO } from '../api';
 
-export interface ParticipantEvent { id: string; name: string; submissions_close: string; closed: boolean }
+export interface ParticipantEvent { real?: import('../data/events').BackendEvent; id: string; name: string; submissions_close: string; closed: boolean }
 export interface TeamSummary { id: string; name: string; event_id: string; mine: boolean }
-export interface ParticipantTeam extends TeamSummary { invite_code: string; members: { id: string; name: string; email: string }[] }
+export interface ParticipantTeam extends TeamSummary { captain_id?: string; invite_code?: string; members: { id: string; name?: string; email?: string }[] }
 export interface ParticipantProject {
-  id: string; event_id: string; team_id: string; track_id: string; title: string;
+  id: string; event_id: string; team_id: string; track_id?: string; submitted_at?: string | null; title: string;
   summary: string; repo_url?: string; demo_url?: string; state: 'draft' | 'submitted'; status: string;
 }
 export interface Bootstrap {
@@ -33,6 +33,6 @@ export const participantData = {
   },
 };
 export const deadlinePassed = (event: ParticipantEvent | null) =>
-  !!event && (event.closed || Date.now() >= Date.parse(event.submissions_close));
+  !!event && (event.closed || (event.real ? Date.now() > Date.parse(event.submissions_close) : Date.now() >= Date.parse(event.submissions_close)));
 export const deadlineLabel = (event: ParticipantEvent) =>
   new Intl.DateTimeFormat('en-GB', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'UTC' }).format(new Date(event.submissions_close)) + ' UTC';

@@ -1,3 +1,4 @@
+import { EventRegistration } from './EventRegistration';
 import { DEMO } from '../../api';
 import { Link, useParams } from 'react-router-dom';
 import { PublicShell } from '../../components/public/PublicShell';
@@ -92,13 +93,13 @@ export function EventDetailsPage() {
           ))}
         </ul>
 
-        {DEMO && <Link
+        <Link
           className="button button-primary"
-          to={paths.gallery(event.id)}
+          to={paths.gallery(event.id) + (!DEMO && event.slug ? `&event_slug=${encodeURIComponent(event.slug)}` : '')}
         >
           View Project Gallery ↗
-        </Link>}
-        {!DEMO && <p className="metadata">Project gallery integration is not available yet.</p>}
+        </Link>
+        {!DEMO && <EventRegistration key={event.id} event={event} />}
       </section>
     </PublicShell>
   );

@@ -1,3 +1,5 @@
+import { DEMO } from '../../api';
+import { RealTeamPage } from './RealTeamPage';
 import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { Copy, UserRound, Users } from 'lucide-react';
@@ -6,7 +8,8 @@ import { useParticipant } from '../../participant/ParticipantProvider';
 import { deadlinePassed } from '../../participant/data';
 import { paths } from '../../routes';
 
-export function TeamPage() {
+export function TeamPage() { return DEMO ? <DemoTeamPage /> : <RealTeamPage />; }
+function DemoTeamPage() {
   const { snapshot, busy, createTeam, joinTeam, selectTeam } = useParticipant();
   const [copyMessage, setCopyMessage] = useState('');
   const team = snapshot?.team;
@@ -15,7 +18,7 @@ export function TeamPage() {
   const disabled = busy || !event || deadlinePassed(event);
   function create(event: FormEvent<HTMLFormElement>) { event.preventDefault(); void createTeam(String(new FormData(event.currentTarget).get('teamName') ?? '')); }
   function join(event: FormEvent<HTMLFormElement>) { event.preventDefault(); void joinTeam(String(new FormData(event.currentTarget).get('inviteCode') ?? '')); }
-  async function copy() { if (!team) return; try { await navigator.clipboard.writeText(team.invite_code); setCopyMessage('Invite code copied.'); } catch { setCopyMessage(`Invite code: ${team.invite_code}`); } }
+  async function copy() { if (!team) return; try { await navigator.clipboard.writeText(team.invite_code ?? ''); setCopyMessage('Invite code copied.'); } catch { setCopyMessage(`Invite code: ${team.invite_code}`); } }
   return <>
     <section className="workspace-intro"><div><p className="eyebrow">[ PARTICIPANT / TEAM ]</p><h1>TEAM CONTROL<span className="heading-period">.</span></h1><p className="workspace-description">Create, join and manage your hackathon team.</p></div><Link to={paths.participant.home}>← Dashboard</Link></section>
     {team ? <section className="team-workspace-panel"><div className="team-workspace-header"><div><p className="metadata">ACTIVE TEAM</p><h2>{team.name}</h2></div><span className="badge badge-cyan">TEAM ACTIVE</span></div>

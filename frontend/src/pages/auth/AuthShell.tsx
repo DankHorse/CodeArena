@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
-import { Link } from 'react-router-dom';
+import { DEMO } from '../../api';
+import { Link, useLocation } from 'react-router-dom';
 import { CodeArenaMark } from '../../components/brand/CodeArenaMark';
 
 type AuthShellProps = {
@@ -21,6 +22,7 @@ export function AuthShell({
   footerLinkLabel,
   footerLinkTo,
 }: AuthShellProps) {
+  const location = useLocation();
   return (
     <main className="auth-page">
       <section className="auth-brand-panel">
@@ -63,7 +65,7 @@ export function AuthShell({
 
           <p className="auth-switch">
             {footerText}{' '}
-            <Link to={footerLinkTo}>{footerLinkLabel}</Link>
+            <Link to={footerLinkTo} state={DEMO ? undefined : location.state}>{footerLinkLabel}</Link>
           </p>
         </div>
       </section>

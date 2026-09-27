@@ -1,3 +1,5 @@
+import { DEMO } from '../api';
+import { RealParticipantProvider } from './RealParticipantProvider';
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
@@ -7,8 +9,9 @@ import { deadlinePassed, participantData } from './data';
 import type { Bootstrap, ParticipantEvent, ParticipantTeam, ParticipantProject, SubmissionFields } from './data';
 
 type Selection = { eventId?: string; teamId?: string; projectId?: string };
-type Snapshot = { data: Bootstrap; event: ParticipantEvent | null; team: ParticipantTeam | null; project: ParticipantProject | null };
+export type Snapshot = { data: Bootstrap; event: ParticipantEvent | null; team: ParticipantTeam | null; project: ParticipantProject | null };
 interface ParticipantContextValue {
+  recovery?: string;
   snapshot: Snapshot | null; loading: boolean; busy: boolean; error: string; message: string; locked: boolean;
   refresh: () => Promise<void>;
   selectEvent: (id: string) => Promise<void>;
@@ -17,9 +20,12 @@ interface ParticipantContextValue {
   joinTeam: (code: string) => Promise<void>;
   saveSubmission: (fields: SubmissionFields, submit: boolean) => Promise<void>;
 }
-const Context = createContext<ParticipantContextValue | null>(null);
+export const Context = createContext<ParticipantContextValue | null>(null);
 
 export function ParticipantProvider({ children }: { children: ReactNode }) {
+  return DEMO ? <DemoParticipantProvider>{children}</DemoParticipantProvider> : <RealParticipantProvider>{children}</RealParticipantProvider>;
+}
+function DemoParticipantProvider({ children }: { children: ReactNode }) {
   const { user } = useSession();
   const location = useLocation();
   const messageRoute = useRef(location.key);

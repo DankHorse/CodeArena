@@ -1,7 +1,7 @@
 import fixture from '../fixtures.json';
 
 export type PublicEvent = {
-  slug?: string; registrationClose?: string; lifecycle?: import('./events').EventStatus;
+  slug?: string; registrationClose?: string; registrationOpens?: string; lifecycle?: import('./events').EventStatus;
   id: string;
   name: string;
   description: string;

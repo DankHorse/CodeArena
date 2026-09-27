@@ -14,7 +14,7 @@ export interface BackendEvent extends EventFields {
 export const publicEvent = (event: BackendEvent): PublicEvent => ({
   id: event.id, slug: event.slug, name: event.title, description: event.description,
   submissionsClose: event.submission_deadline, registrationClose: event.registration_deadline,
-  lifecycle: event.status, tracks: [],
+  registrationOpens: event.registration_opens_at, lifecycle: event.status, tracks: [],
 });
 export async function listPublicEvents(): Promise<PublicEvent[]> {
   const events: PublicEvent[] = [];
