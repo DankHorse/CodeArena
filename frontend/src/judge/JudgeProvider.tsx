@@ -1,3 +1,4 @@
+import { DEMO } from '../api';
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
@@ -11,7 +12,7 @@ interface JudgeContextValue {
   save: (projectId: string, scores: Record<string, number>, comment: string, submit: boolean) => Promise<void>;
 }
 const Context = createContext<JudgeContextValue | null>(null);
-export function JudgeProvider({ children }: { children: ReactNode }) {
+export function JudgeProvider({ children, eventId }: { children: ReactNode; eventId?: string }) {
   const { user } = useSession();
   const location = useLocation();
   const messageRoute = useRef(location.key);
@@ -24,17 +25,20 @@ export function JudgeProvider({ children }: { children: ReactNode }) {
     messageRoute.current = location.key;
     setMessage(''); setError('');
   }, [location.key]);
-  const selectedEvent = useRef<string | undefined>(undefined);
+  const selectedEvent = useRef<string | undefined>(eventId);
   const generation = useRef(0);
   const pending = useRef(false);
   const load = useCallback(async (id = selectedEvent.current) => {
     const version = ++generation.current;
     if (!user) throw new Error('Sign in as a judge to continue.');
-    const next = await loadJudge(user.id, id);
+    if (!DEMO && !eventId) throw new Error('Judge access requires a valid event UUID in the URL. Open an event-specific judge link.');
+    const next = await loadJudge(user.id, DEMO ? id : eventId);
+    if (!DEMO && !next.reviews.some(review => review.assignment.status !== 'recused')) throw new Error('No active judge assignments are available to you for this event.');
     if (version === generation.current) { selectedEvent.current = next.event?.id; setSnapshot(next); }
-  }, [user?.id]);
+  }, [user?.id, eventId]);
   const refresh = useCallback(async () => {
     setLoading(true); setError('');
+    if (!DEMO) setSnapshot(null);
     try { await load(); } catch (error) { setSnapshot(null); setError(errorMessage(error)); }
     finally { setLoading(false); }
   }, [load]);

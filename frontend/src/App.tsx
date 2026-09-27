@@ -1,3 +1,4 @@
+import { DEMO } from './api';
 import { SessionProvider } from './auth/SessionProvider';
 import { ProtectedRoute } from './auth/ProtectedRoute';
 import {
@@ -76,7 +77,7 @@ export default function App() {
 
         <Route
           path={paths.judge.home}
-          element={<ProtectedRoute role="judge"><JudgeLayout /></ProtectedRoute>}
+          element={<ProtectedRoute role={DEMO ? "judge" : "participant"}><JudgeLayout /></ProtectedRoute>}
         >
           <Route
             index

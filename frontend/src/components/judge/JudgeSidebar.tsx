@@ -1,3 +1,5 @@
+import { useLocation } from 'react-router-dom';
+import { judgePath, judgeEventId } from '../../judge/navigation';
 import { useJudge } from '../../judge/JudgeProvider';
 import {
   ClipboardCheck,
@@ -27,6 +29,7 @@ const navigation = [
 ];
 
 export function JudgeSidebar() {
+  const eventId = judgeEventId(useLocation().search);
   const { snapshot, loading, busy, selectEvent } = useJudge();
   return (
     <aside className="sidebar">
@@ -55,7 +58,7 @@ export function JudgeSidebar() {
           {navigation.map(({ label, icon: Icon, to, end }) => (
             <li key={label}>
               <NavLink
-                to={to}
+                to={judgePath(to, eventId)}
                 end={end}
                 className={({ isActive }) =>
                   `nav-item${isActive ? ' is-active' : ''}`
