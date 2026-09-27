@@ -1,0 +1,8 @@
+import { useState } from 'react';
+import { useOrganizer } from '../../organizer/OrganizerProvider';
+export function OrganizerTeamsPage() {
+  const { snapshot } = useOrganizer(); const [query,setQuery] = useState(''); if (!snapshot) return null;
+  const rows = snapshot.teams.map(team => ({ ...team, titles: snapshot.projects.filter(project => project.team_id === team.id).map(project => project.title).join(', ') }));
+  const filtered = rows.filter(team => `${team.name} ${team.titles}`.toLowerCase().includes(query.trim().toLowerCase()));
+  return <><section className="workspace-intro"><div><p className="eyebrow">[ ORGANIZER / TEAMS ]</p><h1>TEAMS<span className="heading-period">.</span></h1><p className="workspace-description">Review participating teams and memberships.</p></div><span className="badge badge-cyan">{rows.length} REGISTERED</span></section><section className="organizer-teams-toolbar"><strong>PARTICIPATING TEAMS</strong><label className="organizer-search"><input type="search" value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search teams" aria-label="Search teams" /></label></section><section className="organizer-team-table"><div className="organizer-team-header"><span>TEAM</span><span>MEMBERS</span><span>PROJECT</span><span>STATUS</span></div>{filtered.map(team => <article className="organizer-team-row" key={team.id}><strong>{team.name}</strong><span>{team.members.length}</span><span>{team.titles || 'No project yet'}</span><span className="badge badge-cyan">ACTIVE</span></article>)}{!filtered.length && <p className="team-message">No teams match.</p>}</section></>;
+}

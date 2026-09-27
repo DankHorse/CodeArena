@@ -1,30 +1,33 @@
-import { useOrganizer } from '../../organizer/OrganizerProvider';
+import { useJudge } from '../../judge/JudgeProvider';
 import {
-  Activity,
-  BarChart3,
   ClipboardCheck,
-  Files,
   LayoutDashboard,
   Scale,
-  Settings,
-  Users,
 } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { CodeArenaMark } from '../brand/CodeArenaMark';
 
 const navigation = [
-  { label: 'Arena control', icon: LayoutDashboard, to: '/organizer', end: true },
-  { label: 'Event settings', icon: Settings, to: '/organizer/events' },
-  { label: 'Teams', icon: Users, to: '/organizer/teams' },
-  { label: 'Projects', icon: Files, to: '/organizer/projects' },
-  { label: 'Scoring rubric', icon: Scale, to: '/organizer/rubric' },
-  { label: 'Judge assignments', icon: ClipboardCheck, to: '/organizer/judges' },
-  { label: 'Results & exports', icon: BarChart3, to: '/organizer/results' },
-  { label: 'Activity log', icon: Activity, to: '/organizer/activity' },
+  {
+    label: 'Dashboard',
+    icon: LayoutDashboard,
+    to: '/judge',
+    end: true,
+  },
+  {
+    label: 'Assignments',
+    icon: ClipboardCheck,
+    to: '/judge/assignments',
+  },
+  {
+    label: 'Scoring guide',
+    icon: Scale,
+    to: '/judge/rubric',
+  },
 ];
 
-export function Sidebar() {
-  const { snapshot, loading, busy, selectEvent } = useOrganizer();
+export function JudgeSidebar() {
+  const { snapshot, loading, busy, selectEvent } = useJudge();
   return (
     <aside className="sidebar">
       <div className="brand" aria-label="CodeArena">
@@ -38,18 +41,15 @@ export function Sidebar() {
       </div>
 
       <div className="event-context">
-        <label className="metadata" htmlFor="current-event">
-          CURRENT EVENT
-        </label>
-
-        <select id="current-event" value={snapshot?.event?.id ?? ''} disabled={loading || busy || !snapshot?.events.length} onChange={event => void selectEvent(event.target.value)}>
+        <label className="metadata" htmlFor="judge-event">CURRENT EVENT</label>
+        <select id="judge-event" value={snapshot?.event?.id ?? ''} disabled={loading || busy || !snapshot?.events.length} onChange={event => void selectEvent(event.target.value)}>
           {!snapshot?.events.length && <option value="">No event available</option>}
           {snapshot?.events.map(event => <option key={event.id} value={event.id}>{event.name}</option>)}
         </select>
       </div>
 
-      <nav className="sidebar-nav" aria-label="Organizer workspace">
-        <p className="nav-label">// ORGANIZER WORKSPACE</p>
+      <nav className="sidebar-nav" aria-label="Judge workspace">
+        <p className="nav-label">// JUDGE WORKSPACE</p>
 
         <ul>
           {navigation.map(({ label, icon: Icon, to, end }) => (
@@ -67,7 +67,10 @@ export function Sidebar() {
                     <span>{label}</span>
 
                     {isActive && (
-                      <span className="nav-active-mark" aria-hidden="true">
+                      <span
+                        className="nav-active-mark"
+                        aria-hidden="true"
+                      >
                         /
                       </span>
                     )}
@@ -80,8 +83,8 @@ export function Sidebar() {
       </nav>
 
       <div className="sidebar-footer">
-        <span className="status-dot" /> ORGANIZER CONSOLE
-        <p>Build with intent. Judge with integrity.</p>
+        <span className="status-dot" /> JUDGE CONSOLE
+        <p>Review independently. Score fairly.</p>
       </div>
     </aside>
   );

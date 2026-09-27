@@ -42,7 +42,7 @@ function leaderboard(e:string){
 function judgeList(e:string){return state.memberships.filter((m:Row)=>m.event_id===e&&m.role==='judge').map((m:Row)=>{const u=state.users.find((u:Row)=>u.id===m.user_id);const as=state.assignments.filter((a:Row)=>a.judge_id===u.id&&state.projects.some((p:Row)=>p.id===a.project_id&&p.event_id===e)&&a.status!=='recused');return {...u,track_ids:e==='evt_practice'?state.tracks.filter((t:Row)=>t.event_id===e).map((t:Row)=>t.id):(m.track_ids||u.tracks||[]),assigned:as.length,completed:as.filter((a:Row)=>a.status==='submitted').length};});}
 function log(e:string,action:string,target:string){state.audit.unshift({id:id('audit'),event_id:e,actor_id:state.user,action,target,created_at:date()});}
 async function mock(path:string,method:string,p:Row|Row[]={}):Promise<any>{
- const body=p as Row,parts=path.split('/').filter(Boolean);const e=parts[2],action=parts[3];
+ const body=p as Row,parts=path.split('/').filter(Boolean).map(decodeURIComponent);const e=parts[2],action=parts[3];
  if(path==='/api/bootstrap')return {user:state.users.find((u:Row)=>u.id===state.user)||null,memberships:state.memberships.filter((m:Row)=>m.user_id===state.user),events:state.events.map((e:Row)=>({...e,closed:isClosed(e.submissions_close)})),tracks:state.tracks,teams:state.teams.map((t:Row)=>({id:t.id,name:t.name,event_id:t.event_id,mine:myTeam(t)})),projects:state.projects.filter((p:Row)=>p.state==='submitted'||roleFor(p.event_id)==='organizer'||myTeam(state.teams.find((t:Row)=>t.id===p.team_id))).map(project),demo_enabled:true};
  if(path==='/api/auth/demo'){state.user={organizer:'organizer',participant:'participant',judge:'jdg_01'}[body.role as string];persist();return {};}
  if(path==='/api/auth/logout'){state.user=null;persist();return {};}
@@ -55,7 +55,30 @@ async function mock(path:string,method:string,p:Row|Row[]={}):Promise<any>{
   if(action==='register'){if(isClosed(event.submissions_close)||isClosed(event.registration_close))throw Error('Event registration is closed.');if(!roleFor(e))state.memberships.push({event_id:e,user_id:state.user,role:'participant'});persist();return {};}
   if(action==='results'&&method==='GET'){if(!event.published)requireRole(e,['organizer']);return {items:leaderboard(e),published:event.published,method:'mean-centered-v1'};}
   requireRole(e,action==='rubric'||action==='assignments'?['judge','organizer']:['organizer']);
-  if(!action&&method==='PUT'){Object.assign(event,body);body.tracks.forEach((name:string)=>{if(!state.tracks.some((t:Row)=>t.event_id===e&&t.name===name))state.tracks.push({id:id('trk'),event_id:e,name});});log(e,'event.updated',e);}
+  if(!action&&method==='PUT'){
+   const trackNames=[...new Set((body.tracks as string[]).map(name=>name.trim()).filter(Boolean))];
+   const currentTracks=state.tracks.filter((t:Row)=>t.event_id===e);
+   const removed=currentTracks.filter((t:Row)=>!trackNames.includes(t.name));
+   const blocked=removed.filter((t:Row)=>state.projects.some((p:Row)=>p.event_id===e&&p.track_id===t.id));
+
+   if(blocked.length){
+    throw Error('Cannot remove tracks used by projects: '+blocked.map((t:Row)=>t.name).join(', ')+'.');
+   }
+
+   const eventUpdate={...body};
+   delete eventUpdate.tracks;
+   Object.assign(event,eventUpdate);
+
+   state.tracks=state.tracks.filter((t:Row)=>t.event_id!==e||trackNames.includes(t.name));
+
+   trackNames.forEach((name:string)=>{
+    if(!state.tracks.some((t:Row)=>t.event_id===e&&t.name===name)){
+     state.tracks.push({id:id('trk'),event_id:e,name});
+    }
+   });
+
+   log(e,'event.updated',e);
+  }
   if(action==='rubric'){
    if(method==='GET')return state.rubric.filter((c:Row)=>c.event_id===e);
    requireRole(e,['organizer']);if(state.evaluations.some((v:Row)=>state.assignments.some((a:Row)=>a.id===v.assignment_id&&state.projects.some((p:Row)=>p.id===a.project_id&&p.event_id===e))))throw Error('The rubric is locked because scoring has started.');
@@ -85,9 +108,31 @@ async function mock(path:string,method:string,p:Row|Row[]={}):Promise<any>{
   requireRole(body.event_id,['participant']);const t={...body,id:id('team'),owner_id:state.user,invite_code:id('JOIN').toUpperCase(),member_ids:[state.user],members:[state.users.find((u:Row)=>u.id===state.user).email]};state.teams.push(t);persist();return t;
  }
  if(parts[1]==='submissions'){
-  requireRole(body.event_id,['participant']);const ev=state.events.find((e:Row)=>e.id===body.event_id);if(isClosed(ev.submissions_close))throw Error('Submissions are closed. This project is locked.');if(!myTeam(state.teams.find((t:Row)=>t.id===body.team_id)))throw Error('Not your team.');
-  if(body.submit&&(!body.repo_url||!body.summary))throw Error('Add a summary and repository before submitting.');
-  const pr=e?state.projects.find((x:Row)=>x.id===e):{id:id('prj'),state:'draft'};Object.assign(pr,body);if(body.submit){pr.state='submitted';pr.submitted_at=pr.submitted_at||date();}if(!e)state.projects.push(pr);log(body.event_id,'project.saved',pr.id);persist();return project(pr);
+  requireRole(body.event_id,['participant']);
+  const ev=state.events.find((event:Row)=>event.id===body.event_id);
+  if(isClosed(ev.submissions_close))throw Error('Submissions are closed. This project is locked.');
+  const team=state.teams.find((team:Row)=>team.id===body.team_id&&team.event_id===ev.id);
+  if(!team||!myTeam(team))throw Error('Not your team.');
+  const existing=e?state.projects.find((pr:Row)=>pr.id===e):undefined;
+  if(e&&(!existing||existing.event_id!==ev.id||existing.team_id!==team.id))throw Error('Project access denied.');
+  // Validate the merged record before mutating shared or persisted state.
+  const submitted=existing?.state==='submitted'||body.submit===true;
+  const candidate={...existing,...body,state:submitted?'submitted':'draft'};
+  const nonempty=(value:unknown)=>typeof value==='string'&&value.trim().length>0;
+  if(!nonempty(candidate.title))throw Error('Enter a project title.');
+  if(submitted&&(!nonempty(candidate.summary)||!nonempty(candidate.repo_url)||!nonempty(candidate.track_id)))throw Error('Submitted projects require a summary, track and repository URL.');
+  if(candidate.track_id&&!state.tracks.some((track:Row)=>track.id===candidate.track_id&&track.event_id===ev.id))throw Error('Select a track for this event.');
+  for(const value of [candidate.repo_url,candidate.demo_url]){
+   if(!value)continue;
+   let url:URL;
+   try{url=new URL(value);}catch{throw Error('Project links must be valid HTTP or HTTPS URLs.');}
+   if(!['http:','https:'].includes(url.protocol))throw Error('Project links must use HTTP or HTTPS.');
+  }
+  const pr=existing||{id:id('prj')};
+  Object.assign(pr,candidate,{id:pr.id});
+  if(submitted)pr.submitted_at=existing?.submitted_at||date();
+  if(!existing)state.projects.push(pr);
+  log(ev.id,'project.saved',pr.id);persist();return project(pr);
  }
  if(parts[1]==='evaluations'){
   const a=state.assignments.find((a:Row)=>a.id===e);if(!a||a.judge_id!==state.user)throw Error('Another judge’s evaluation is private.');const pr=state.projects.find((p:Row)=>p.id===a.project_id);let v=state.evaluations.find((v:Row)=>v.assignment_id===e);
@@ -101,14 +146,30 @@ async function mock(path:string,method:string,p:Row|Row[]={}):Promise<any>{
  }
  throw Error('This action is unavailable in the preview.');
 }
-export async function api(path:string,method='GET',data?:any):Promise<any>{
- if(DEMO)return mock(path,method,data);
- const res=await fetch(path,{method,credentials:'same-origin',headers:{'Content-Type':'application/json','X-CodeArena-Request':'1'},...(data!==undefined?{body:JSON.stringify(data)}:{})});
- const body=await res.json().catch(()=>({}));if(!res.ok)throw Error(body.error?.message||'The request failed. Please try again.');return body;
+export class ApiError extends Error {
+ constructor(message: string, public readonly status: number, public readonly code?: string, public readonly details?: unknown) { super(message); this.name = 'ApiError'; }
+}
+export const apiPath = (path: string) =>
+ path.startsWith('/api/') && !/^\/api\/v1(?:\/|$|\?)/.test(path) ? path.replace('/api/', '/api/v1/') : path;
+export async function api<T = unknown>(path: string, method = 'GET', data?: unknown): Promise<T> {
+ if (DEMO) return mock(path, method, data as Row) as Promise<T>;
+ const res = await fetch(apiPath(path), {
+  method, credentials: 'include',
+  headers: {'Content-Type': 'application/json', 'X-CodeArena-Request': '1'},
+  ...(data !== undefined ? {body: JSON.stringify(data)} : {}),
+ });
+ if (res.status === 204) return undefined as T;
+ const body = await res.json().catch(() => ({}));
+ if (!res.ok) {
+  const detail = typeof body.detail === 'string' ? body.detail
+   : Array.isArray(body.detail) ? body.detail.map((item: {msg?: string}) => item.msg).filter(Boolean).join('; ') : '';
+  throw new ApiError(body.error?.message || detail || 'The request failed. Please try again.', res.status, body.error?.code, body.error?.details ?? body.detail);
+ }
+ return body as T;
 }
 export async function exportCSV(event:string){
  let blob:Blob;
  if(DEMO){const items=leaderboard(event),escape=(v:any)=>'"'+String(v??'').replaceAll('"','""')+'"';blob=new Blob([['Rank','Project','Reviews','Raw score','Normalized score','Complete'].map(escape).join(',')+'\n'+items.map((r:Row)=>[r.rank,r.title,r.reviews,r.raw_score,r.score,r.complete].map(escape).join(',')).join('\n')],{type:'text/csv'});}
- else{const r=await fetch(`/api/events/${event}/results/export.csv`,{credentials:'same-origin'});if(!r.ok)throw Error('CSV export failed.');blob=await r.blob();}
+ else{const r=await fetch(apiPath(`/api/events/${event}/results/export.csv`),{credentials:'include'});if(!r.ok)throw Error('CSV export failed.');blob=await r.blob();}
  const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='codearena-results.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
 }

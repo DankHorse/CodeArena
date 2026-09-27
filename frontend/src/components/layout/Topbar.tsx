@@ -1,5 +1,9 @@
+import { DEMO } from '../../api';
+import { useOrganizer } from '../../organizer/OrganizerProvider';
+import { LogoutButton } from '../common/LogoutButton';
+import { paths } from '../../routes';
 import { ArrowUpRight } from 'lucide-react';
-import { useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 
 const breadcrumbLabels: Record<string, string> = {
   '/organizer': 'Arena control',
@@ -13,6 +17,7 @@ const breadcrumbLabels: Record<string, string> = {
 };
 
 export function Topbar() {
+  const { snapshot } = useOrganizer();
   const location = useLocation();
 
   const currentLabel =
@@ -27,19 +32,15 @@ export function Topbar() {
       </p>
 
       <div className="topbar-controls">
+        <LogoutButton />
         <span className="badge badge-cyan">
-          FIXTURE EVENT
+          {!DEMO ? snapshot?.event?.real?.status.toUpperCase() ?? 'REAL MODE' : snapshot?.event?.practice ? 'PRACTICE EVENT' : 'FIXTURE EVENT'}
         </span>
 
-        <button
-          className="public-site"
-          type="button"
-          disabled
-          title="Public site coming soon"
-        >
+        <Link className="public-site" to={paths.home}>
           PUBLIC SITE
           <ArrowUpRight size={15} aria-hidden="true" />
-        </button>
+        </Link>
       </div>
     </header>
   );
