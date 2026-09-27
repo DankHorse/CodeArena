@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { api, ApiError, DEMO } from '../api';
-import { errorMessage, isRole } from './types';
+import { errorMessage, isRole, isBackendRole } from './types';
 import type { AuthUser, Credentials, Registration, Role, SessionStatus } from './types';
 
 type Session = { user: AuthUser | null; status: SessionStatus; error: string };
@@ -27,7 +27,7 @@ async function readUser(): Promise<AuthUser | null> {
   }
   try {
     const user = await api<AuthUser>('/api/auth/me');
-    if (!user || !isRole(user.role)) throw new Error('This account has no supported workspace role.');
+    if (!user || !isBackendRole(user.role)) throw new Error('This account has no supported workspace role.');
     if (!user.is_active) throw new Error('This account is inactive.');
     return user;
   } catch (error) {

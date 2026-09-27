@@ -1,6 +1,7 @@
 import fixture from '../fixtures.json';
 
 export type PublicEvent = {
+  slug?: string; registrationClose?: string; lifecycle?: import('./events').EventStatus;
   id: string;
   name: string;
   description: string;
@@ -184,7 +185,7 @@ export const findProject = (
 ) => projects.find(project => project.id === id);
 
 export const eventStatus = (event: PublicEvent) =>
-  Date.now() >= Date.parse(event.submissionsClose)
+  event.lifecycle === 'completed' || event.lifecycle === 'cancelled' || Date.now() >= Date.parse(event.submissionsClose)
     ? 'Submissions closed'
     : 'Submissions open';
 

@@ -1,10 +1,12 @@
+import { DEMO } from '../api';
+import { listPublicEvents } from './events';
 import { useCallback, useEffect, useState } from 'react';
 import {
   loadPublicCatalog,
   type PublicCatalog,
 } from './publicData';
 
-export function usePublicCatalog() {
+export function usePublicCatalog(eventsOnly = false) {
   const [catalog, setCatalog] = useState<PublicCatalog | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -14,7 +16,7 @@ export function usePublicCatalog() {
     setError('');
 
     try {
-      setCatalog(await loadPublicCatalog());
+      setCatalog(!DEMO && eventsOnly ? { events: await listPublicEvents(), projects: [] } : await loadPublicCatalog());
     } catch (error) {
       setCatalog(null);
       setError(
@@ -25,7 +27,7 @@ export function usePublicCatalog() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [eventsOnly]);
 
   useEffect(() => {
     void refresh();

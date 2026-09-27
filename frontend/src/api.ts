@@ -147,7 +147,7 @@ async function mock(path:string,method:string,p:Row|Row[]={}):Promise<any>{
  throw Error('This action is unavailable in the preview.');
 }
 export class ApiError extends Error {
- constructor(message: string, public readonly status: number) { super(message); this.name = 'ApiError'; }
+ constructor(message: string, public readonly status: number, public readonly code?: string, public readonly details?: unknown) { super(message); this.name = 'ApiError'; }
 }
 export const apiPath = (path: string) =>
  path.startsWith('/api/') && !/^\/api\/v1(?:\/|$|\?)/.test(path) ? path.replace('/api/', '/api/v1/') : path;
@@ -163,7 +163,7 @@ export async function api<T = unknown>(path: string, method = 'GET', data?: unkn
  if (!res.ok) {
   const detail = typeof body.detail === 'string' ? body.detail
    : Array.isArray(body.detail) ? body.detail.map((item: {msg?: string}) => item.msg).filter(Boolean).join('; ') : '';
-  throw new ApiError(body.error?.message || detail || 'The request failed. Please try again.', res.status);
+  throw new ApiError(body.error?.message || detail || 'The request failed. Please try again.', res.status, body.error?.code, body.error?.details ?? body.detail);
  }
  return body as T;
 }

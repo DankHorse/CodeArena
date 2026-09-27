@@ -1,4 +1,8 @@
-export type Role = 'participant' | 'judge' | 'organizer';
+export type BackendRole = 'participant' | 'organizer' | 'admin';
+// Judge is a demo workspace role; real event capabilities will be added separately.
+export type Role = BackendRole | 'judge';
+export const isBackendRole = (value: unknown): value is BackendRole =>
+  value === 'participant' || value === 'organizer' || value === 'admin';
 export type SessionStatus = 'loading' | 'anonymous' | 'authenticated';
 export interface AuthUser {
   id: string;
@@ -12,5 +16,12 @@ export interface AuthUser {
 export interface Credentials { email: string; password: string }
 export interface Registration extends Credentials { display_name: string }
 export const isRole = (value: unknown): value is Role =>
-  value === 'participant' || value === 'judge' || value === 'organizer';
-export const errorMessage = (error: unknown) => error instanceof Error ? error.message : 'Something went wrong. Please try again.';
+  isBackendRole(value) || value === 'judge';
+export const errorMessage = (error: unknown) => {
+  if (!(error instanceof Error)) return 'Something went wrong. Please try again.';
+  const details = 'details' in error ? error.details : undefined;
+  const messages = Array.isArray(details) ? details.flatMap(item =>
+    item && typeof item === 'object' && typeof item.message === 'string'
+      ? [Array.isArray(item.location) ? `${item.location.join('.')}: ${item.message}` : item.message] : []) : [];
+  return [error.message, ...messages].join(' ');
+};

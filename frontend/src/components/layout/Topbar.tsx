@@ -1,3 +1,4 @@
+import { DEMO } from '../../api';
 import { useOrganizer } from '../../organizer/OrganizerProvider';
 import { LogoutButton } from '../common/LogoutButton';
 import { paths } from '../../routes';
@@ -33,7 +34,7 @@ export function Topbar() {
       <div className="topbar-controls">
         <LogoutButton />
         <span className="badge badge-cyan">
-          {snapshot?.event?.practice ? 'PRACTICE EVENT' : 'FIXTURE EVENT'}
+          {!DEMO ? snapshot?.event?.real?.status.toUpperCase() ?? 'REAL MODE' : snapshot?.event?.practice ? 'PRACTICE EVENT' : 'FIXTURE EVENT'}
         </span>
 
         <Link className="public-site" to={paths.home}>

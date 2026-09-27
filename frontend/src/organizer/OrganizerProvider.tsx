@@ -1,3 +1,4 @@
+import { DEMO } from '../api';
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
@@ -33,6 +34,14 @@ export function OrganizerProvider({ children }: { children: ReactNode }) {
   useEffect(() => { void refresh(); return () => { generation.current++; }; }, [refresh]);
   async function selectEvent(id: string) {
     if (pending.current) return;
+    if (!DEMO) {
+      const origin = location.key;
+      selected.current = id;
+      try { localStorage.setItem(`codearena-event:${user?.id}`, id); } catch { /* optional context */ }
+      setError('');
+      try { await load(id); } catch (error) { if (route.current === origin) setError(errorMessage(error)); }
+      return;
+    }
     setLoading(true); setMessage(''); setError('');
     try { await load(id); } catch (error) { setSnapshot(null); setError(errorMessage(error)); } finally { setLoading(false); }
   }

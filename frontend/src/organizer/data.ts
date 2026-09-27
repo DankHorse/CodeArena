@@ -1,6 +1,8 @@
 import { api, DEMO, exportCSV } from '../api';
+import { getEvent } from '../data/events';
+import type { BackendEvent } from '../data/events';
 import type { Assignment, RubricCriterion } from '../judge/data';
-export interface OrganizerEvent { id: string; name: string; description: string; submissions_close: string; registration_close: string; closed: boolean; practice: boolean; published: boolean; required_judges: number }
+export interface OrganizerEvent { real?: BackendEvent; id: string; name: string; description: string; submissions_close: string; registration_close: string; closed: boolean; practice: boolean; published: boolean; required_judges: number }
 export interface Track { id: string; event_id: string; name: string }
 export interface Team { id: string; event_id: string; name: string; members: { id: string; name: string; email: string }[] }
 export interface Project { id: string; event_id: string; title: string; summary: string; team_id: string; track_id: string; state: string; status: string; repo_url?: string; demo_url?: string }
@@ -11,6 +13,20 @@ export interface OrganizerSnapshot { events: OrganizerEvent[]; event: OrganizerE
 interface Bootstrap { user: { id: string } | null; memberships: { event_id: string; role: string }[]; events: OrganizerEvent[]; tracks: Track[]; teams: Omit<Team, 'members'>[]; projects: Project[] }
 function supported() { if (!DEMO) throw new Error('Organizer event, judging and results APIs are not connected in real mode yet.'); }
 export async function loadOrganizer(userId: string, eventId?: string): Promise<OrganizerSnapshot> {
+  if (!DEMO) {
+    let knownId = eventId;
+    if (!knownId) { try { knownId = localStorage.getItem(`codearena-event:${userId}`) ?? undefined; } catch { /* optional navigation context */ } }
+    const real = knownId ? await getEvent(knownId) : null;
+    if (real && real.organizer_id !== userId) throw new Error('Only the event owner can manage this event.');
+    const event: OrganizerEvent | null = real ? {
+      id: real.id, name: real.title, description: real.description,
+      submissions_close: real.submission_deadline, registration_close: real.registration_deadline,
+      closed: !['published', 'active'].includes(real.status) || Date.now() > Date.parse(real.submission_deadline),
+      practice: false, published: false, required_judges: 0, real,
+    } : null;
+    if (real) { try { localStorage.setItem(`codearena-event:${userId}`, real.id); } catch { /* optional navigation context */ } }
+    return { events: event ? [event] : [], event, tracks: [], teams: [], projects: [], rubric: [], judges: [], assignments: [], results: { items: [], published: false, method: '' }, audit: [] };
+  }
   supported();
   const bootstrap = await api<Bootstrap>('/api/bootstrap');
   if (bootstrap.user?.id !== userId) throw new Error('Organizer session changed. Please sign in again.');

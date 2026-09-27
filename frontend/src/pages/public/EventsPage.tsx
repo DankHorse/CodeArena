@@ -1,3 +1,4 @@
+import { DEMO } from '../../api';
 import { Link } from 'react-router-dom';
 import { PublicShell } from '../../components/public/PublicShell';
 import {
@@ -8,7 +9,7 @@ import { usePublicCatalog } from '../../data/usePublicCatalog';
 import { paths } from '../../routes';
 
 export function EventsPage() {
-  const { catalog, loading, error, refresh } = usePublicCatalog();
+  const { catalog, loading, error, refresh } = usePublicCatalog(true);
 
   return (
     <PublicShell>
@@ -17,7 +18,7 @@ export function EventsPage() {
         <h1>
           FIND YOUR ARENA<span className="heading-period">.</span>
         </h1>
-        <p>Explore the fixture hackathon or start with a practice event.</p>
+        <p>{DEMO ? 'Explore the fixture hackathon or start with a practice event.' : 'Explore upcoming and active hackathons.'}</p>
       </section>
 
       {loading && (
@@ -39,6 +40,8 @@ export function EventsPage() {
           </button>
         </section>
       )}
+
+      {!DEMO && !loading && catalog?.events.length === 0 && <section className="public-empty"><p>No public events are available yet.</p></section>}
 
       {!loading && catalog && (
         <div className="public-event-grid">

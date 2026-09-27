@@ -1,7 +1,7 @@
 import { paths } from '../routes';
 import type { Role } from './types';
 
-export const workspaceFor = (role: Role) => paths[role].home;
+export const workspaceFor = (role: Role) => paths[role === 'admin' ? 'organizer' : role].home;
 export function loginDestination(role: Role, state: unknown): string {
   const home = workspaceFor(role);
   if (!state || typeof state !== 'object' || !('from' in state) || typeof state.from !== 'string') return home;

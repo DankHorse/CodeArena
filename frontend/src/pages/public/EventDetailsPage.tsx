@@ -1,3 +1,4 @@
+import { DEMO } from '../../api';
 import { Link, useParams } from 'react-router-dom';
 import { PublicShell } from '../../components/public/PublicShell';
 import {
@@ -10,7 +11,7 @@ import { paths } from '../../routes';
 
 export function EventDetailsPage() {
   const { eventId } = useParams();
-  const { catalog, loading, error, refresh } = usePublicCatalog();
+  const { catalog, loading, error, refresh } = usePublicCatalog(true);
 
   if (loading) {
     return (
@@ -83,7 +84,7 @@ export function EventDetailsPage() {
           </div>
         </dl>
 
-        <h2>Tracks</h2>
+        {DEMO && <h2>Tracks</h2>}
 
         <ul className="public-tracks">
           {event.tracks.map(track => (
@@ -91,12 +92,13 @@ export function EventDetailsPage() {
           ))}
         </ul>
 
-        <Link
+        {DEMO && <Link
           className="button button-primary"
           to={paths.gallery(event.id)}
         >
           View Project Gallery ↗
-        </Link>
+        </Link>}
+        {!DEMO && <p className="metadata">Project gallery integration is not available yet.</p>}
       </section>
     </PublicShell>
   );
