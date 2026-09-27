@@ -5,17 +5,16 @@ import { useOrganizer } from '../../organizer/OrganizerProvider';
 export function EventSettingsPage() {
   const { snapshot, busy, saveSettings } = useOrganizer();
 
-  if (!snapshot?.event) return null;
-
-  const { event, tracks, projects } = snapshot;
-
   const [keptTrackIds, setKeptTrackIds] = useState<string[]>(
-    () => tracks.map(track => track.id)
+    () => snapshot?.tracks.map(track => track.id) ?? []
   );
 
   useEffect(() => {
-    setKeptTrackIds(tracks.map(track => track.id));
-  }, [event.id, tracks]);
+    setKeptTrackIds(snapshot?.tracks.map(track => track.id) ?? []);
+  }, [snapshot?.event?.id, snapshot?.tracks]);
+
+  if (!snapshot?.event) return null;
+  const { event, tracks, projects } = snapshot;
 
   const usedTrackIds = new Set(
     projects.map(project => project.track_id).filter(Boolean)

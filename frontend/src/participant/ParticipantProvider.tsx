@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useSession } from '../auth/SessionProvider';
 import { errorMessage } from '../auth/types';
 import { deadlinePassed, participantData } from './data';
@@ -20,6 +21,8 @@ const Context = createContext<ParticipantContextValue | null>(null);
 
 export function ParticipantProvider({ children }: { children: ReactNode }) {
   const { user } = useSession();
+  const location = useLocation();
+  const messageRoute = useRef(location.key);
   const [snapshot, setSnapshot] = useState<Snapshot | null>(null);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
@@ -29,6 +32,10 @@ export function ParticipantProvider({ children }: { children: ReactNode }) {
   const selection = useRef<Selection>({});
   const generation = useRef(0);
   const actionPending = useRef(false);
+  useEffect(() => {
+    messageRoute.current = location.key;
+    setMessage(''); setError('');
+  }, [location.key]);
 
   const load = useCallback(async (preferred: Selection = selection.current) => {
     const version = ++generation.current;
@@ -60,9 +67,10 @@ export function ParticipantProvider({ children }: { children: ReactNode }) {
 
   async function run(action: () => Promise<void>, success = '') {
     if (actionPending.current) return;
+    const origin = location.key;
     actionPending.current = true; setBusy(true); setError(''); setMessage('');
-    try { await action(); setMessage(success); }
-    catch (error) { setError(errorMessage(error)); }
+    try { await action(); if (messageRoute.current === origin) setMessage(success); }
+    catch (error) { if (messageRoute.current === origin) setError(errorMessage(error)); }
     finally { actionPending.current = false; setBusy(false); }
   }
   function editableEvent() {
@@ -92,10 +100,14 @@ export function ParticipantProvider({ children }: { children: ReactNode }) {
       if (snapshot?.project?.status === 'locked') throw new Error('This project is locked.');
       if (!snapshot?.team) throw new Error('Create or join a team before submitting.');
       if (!fields.title.trim()) throw new Error('Enter a project title.');
-      if (submit && (!fields.summary.trim() || !fields.repo_url.trim() || !fields.track_id)) throw new Error('Add a summary, track and repository URL before submitting.');
+      if ((submit || snapshot.project?.state === 'submitted') && (!fields.summary.trim() || !fields.repo_url.trim() || !fields.track_id.trim())) throw new Error('Submitted projects require a summary, track and repository URL.');
       if (fields.track_id && !snapshot.data.tracks.some(track => track.id === fields.track_id && track.event_id === event.id)) throw new Error('Select a track for this event.');
       for (const url of [fields.repo_url, fields.demo_url]) {
-        if (url && !/^https?:\/\//i.test(url)) throw new Error('Project links must use HTTP or HTTPS.');
+        if (url) {
+          let parsed: URL;
+          try { parsed = new URL(url); } catch { throw new Error('Project links must be valid HTTP or HTTPS URLs.'); }
+          if (!['http:', 'https:'].includes(parsed.protocol)) throw new Error('Project links must use HTTP or HTTPS.');
+        }
       }
       const project = await participantData.saveProject(event.id, snapshot.team.id, fields, submit, snapshot.project?.id);
       await load({ eventId: event.id, teamId: snapshot.team.id, projectId: project.id });

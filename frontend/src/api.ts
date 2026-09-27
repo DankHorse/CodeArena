@@ -108,9 +108,31 @@ async function mock(path:string,method:string,p:Row|Row[]={}):Promise<any>{
   requireRole(body.event_id,['participant']);const t={...body,id:id('team'),owner_id:state.user,invite_code:id('JOIN').toUpperCase(),member_ids:[state.user],members:[state.users.find((u:Row)=>u.id===state.user).email]};state.teams.push(t);persist();return t;
  }
  if(parts[1]==='submissions'){
-  requireRole(body.event_id,['participant']);const ev=state.events.find((e:Row)=>e.id===body.event_id);if(isClosed(ev.submissions_close))throw Error('Submissions are closed. This project is locked.');if(!myTeam(state.teams.find((t:Row)=>t.id===body.team_id)))throw Error('Not your team.');
-  if(body.submit&&(!body.repo_url||!body.summary))throw Error('Add a summary and repository before submitting.');
-  const pr=e?state.projects.find((x:Row)=>x.id===e):{id:id('prj'),state:'draft'};Object.assign(pr,body);if(body.submit){pr.state='submitted';pr.submitted_at=pr.submitted_at||date();}if(!e)state.projects.push(pr);log(body.event_id,'project.saved',pr.id);persist();return project(pr);
+  requireRole(body.event_id,['participant']);
+  const ev=state.events.find((event:Row)=>event.id===body.event_id);
+  if(isClosed(ev.submissions_close))throw Error('Submissions are closed. This project is locked.');
+  const team=state.teams.find((team:Row)=>team.id===body.team_id&&team.event_id===ev.id);
+  if(!team||!myTeam(team))throw Error('Not your team.');
+  const existing=e?state.projects.find((pr:Row)=>pr.id===e):undefined;
+  if(e&&(!existing||existing.event_id!==ev.id||existing.team_id!==team.id))throw Error('Project access denied.');
+  // Validate the merged record before mutating shared or persisted state.
+  const submitted=existing?.state==='submitted'||body.submit===true;
+  const candidate={...existing,...body,state:submitted?'submitted':'draft'};
+  const nonempty=(value:unknown)=>typeof value==='string'&&value.trim().length>0;
+  if(!nonempty(candidate.title))throw Error('Enter a project title.');
+  if(submitted&&(!nonempty(candidate.summary)||!nonempty(candidate.repo_url)||!nonempty(candidate.track_id)))throw Error('Submitted projects require a summary, track and repository URL.');
+  if(candidate.track_id&&!state.tracks.some((track:Row)=>track.id===candidate.track_id&&track.event_id===ev.id))throw Error('Select a track for this event.');
+  for(const value of [candidate.repo_url,candidate.demo_url]){
+   if(!value)continue;
+   let url:URL;
+   try{url=new URL(value);}catch{throw Error('Project links must be valid HTTP or HTTPS URLs.');}
+   if(!['http:','https:'].includes(url.protocol))throw Error('Project links must use HTTP or HTTPS.');
+  }
+  const pr=existing||{id:id('prj')};
+  Object.assign(pr,candidate,{id:pr.id});
+  if(submitted)pr.submitted_at=existing?.submitted_at||date();
+  if(!existing)state.projects.push(pr);
+  log(ev.id,'project.saved',pr.id);persist();return project(pr);
  }
  if(parts[1]==='evaluations'){
   const a=state.assignments.find((a:Row)=>a.id===e);if(!a||a.judge_id!==state.user)throw Error('Another judge’s evaluation is private.');const pr=state.projects.find((p:Row)=>p.id===a.project_id);let v=state.evaluations.find((v:Row)=>v.assignment_id===e);

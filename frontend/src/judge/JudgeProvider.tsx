@@ -22,7 +22,7 @@ export function JudgeProvider({ children }: { children: ReactNode }) {
   const [message, setMessage] = useState('');
   useEffect(() => {
     messageRoute.current = location.key;
-    setMessage('');
+    setMessage(''); setError('');
   }, [location.key]);
   const selectedEvent = useRef<string | undefined>(undefined);
   const generation = useRef(0);
@@ -68,7 +68,7 @@ export function JudgeProvider({ children }: { children: ReactNode }) {
       if (messageRoute.current === originRoute) {
         setMessage(submit ? 'Review submitted and locked. Your progress is updated.' : 'Draft saved. You can continue this review later.');
       }
-    } catch (error) { setError(errorMessage(error)); }
+    } catch (error) { if (messageRoute.current === originRoute) setError(errorMessage(error)); }
     finally { pending.current = false; setBusy(false); }
   }
   return <Context.Provider value={{ snapshot, loading, busy, error, message, refresh, selectEvent, save }}>{children}</Context.Provider>;

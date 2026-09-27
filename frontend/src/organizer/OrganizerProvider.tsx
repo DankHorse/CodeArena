@@ -44,7 +44,7 @@ export function OrganizerProvider({ children }: { children: ReactNode }) {
       const result = await action(snapshot.event.id);
       if (reload) await load();
       if (route.current === origin) setMessage(result);
-    } catch (error) { setError(errorMessage(error)); } finally { pending.current = false; setBusy(false); }
+    } catch (error) { if (route.current === origin) setError(errorMessage(error)); } finally { pending.current = false; setBusy(false); }
   }
   const value: OrganizerContextValue = {
     snapshot, loading, busy, error, message, refresh, selectEvent,
