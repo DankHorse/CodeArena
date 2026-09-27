@@ -1,12 +1,13 @@
 import { api, DEMO } from '../api';
+import { loadRealJudge } from './realData';
 export type AssignmentStatus = 'pending' | 'in_progress' | 'submitted' | 'recused';
 export interface JudgeEvent { id: string; name: string; closed: boolean }
 export interface Assignment { id: string; judge_id: string; project_id: string; status: AssignmentStatus }
 export interface RubricCriterion { id: string; name: string; description: string; weight: number; max_score: number; position: number }
 export interface JudgeProject { id: string; event_id: string; title: string; summary: string; team_id: string; track_id: string; repo_url?: string; demo_url?: string }
-export interface Evaluation { scores: Record<string, number>; comment: string }
+export interface Evaluation { scores: Record<string, number>; comment: string; status?: 'draft' | 'submitted' }
 export interface ReviewRecord { assignment: Assignment; project: JudgeProject; team: string; track: string; evaluation: Evaluation | null }
-export interface JudgeSnapshot { events: JudgeEvent[]; event: JudgeEvent | null; rubric: RubricCriterion[]; reviews: ReviewRecord[] }
+export interface JudgeSnapshot { events: JudgeEvent[]; event: JudgeEvent | null; rubric: RubricCriterion[]; reviews: ReviewRecord[]; revokedAssignmentIds?: string[] }
 interface Bootstrap {
   user: { id: string } | null;
   memberships: { event_id: string; role: string }[];
@@ -15,7 +16,10 @@ interface Bootstrap {
 }
 function requireApi() { if (!DEMO) throw new Error('Judge event, assignment and evaluation APIs are not connected in real mode yet.'); }
 export async function loadJudge(userId: string, eventId?: string): Promise<JudgeSnapshot> {
-  requireApi();
+  if (!DEMO) {
+    if (!eventId) throw new Error('Select a known event before loading judge assignments.');
+    return loadRealJudge(userId, eventId);
+  }
   const bootstrap = await api<Bootstrap>('/api/bootstrap');
   if (bootstrap.user?.id !== userId) throw new Error('Judge session changed. Please sign in again.');
   const events = bootstrap.events.filter(event => bootstrap.memberships.some(membership => membership.event_id === event.id && membership.role === 'judge'));
