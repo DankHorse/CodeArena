@@ -382,8 +382,14 @@ def test_gallery_pagination_and_only_publicly_submitted_projects(
                 ).status_code
                 == 200
             )
-    first = client.get("/api/v1/gallery/projects", params={"offset": 0, "limit": 1})
-    second = client.get("/api/v1/gallery/projects", params={"offset": 1, "limit": 1})
+    first = client.get(
+        "/api/v1/gallery/projects",
+        params={"event_slug": event["slug"], "offset": 0, "limit": 1},
+    )
+    second = client.get(
+        "/api/v1/gallery/projects",
+        params={"event_slug": event["slug"], "offset": 1, "limit": 1},
+    )
     assert first.status_code == second.status_code == 200
     assert first.json()["total"] == 2
     assert len(second.json()["items"]) == 1
