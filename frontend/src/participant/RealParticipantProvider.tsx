@@ -1,3 +1,4 @@
+import { ApiError } from '../api';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
@@ -5,7 +6,7 @@ import { useSession } from '../auth/SessionProvider';
 import { errorMessage } from '../auth/types';
 import { Context } from './ParticipantProvider';
 import type { Snapshot } from './ParticipantProvider';
-import { acceptInvitation, createRealTeam, eventKey, loadParticipant, projectKey, projectReadOnly, readContext, saveRealProject, submitRealProject, writeContext } from './realData';
+import { acceptInvitation, registerParticipant, createRealTeam, eventKey, loadParticipant, projectKey, projectReadOnly, readContext, saveRealProject, submitRealProject, writeContext } from './realData';
 
 export function RealParticipantProvider({ children }: { children: ReactNode }) {
   const { user } = useSession();
@@ -13,6 +14,7 @@ export function RealParticipantProvider({ children }: { children: ReactNode }) {
   const [snapshot, setSnapshot] = useState<Snapshot | null>(null);
   const [loading, setLoading] = useState(true), [busy, setBusy] = useState(false);
   const [error, setError] = useState(''), [message, setMessage] = useState(''), [recovery, setRecovery] = useState('');
+  const [registeredEvent, setRegisteredEvent] = useState<string | null>(null);
   const [, tick] = useState(0);
   const route = useRef(location.key), pending = useRef(false), version = useRef(0);
   useEffect(() => { route.current = location.key; setError(''); setMessage(''); }, [location.key]);
@@ -39,12 +41,27 @@ export function RealParticipantProvider({ children }: { children: ReactNode }) {
   }
   const locked = projectReadOnly(snapshot?.event ?? null, snapshot?.team ?? null, snapshot?.project ?? null, user?.id ?? '');
   return <Context.Provider value={{ snapshot, loading, busy, error, message, locked, refresh, recovery,
+    registrationConfirmed: !!snapshot?.team || (!!snapshot?.event && registeredEvent === snapshot.event.id),
+    registerCurrentEvent: () => run(async () => {
+      if (!user || !snapshot?.event) throw Error('Select an event from Browse Events first.');
+      await registerParticipant(user.id, snapshot.event.id);
+      setRegisteredEvent(snapshot.event.id);
+      await load();
+    }, 'Event registration confirmed. You can create your team.'),
     selectEvent: id => run(async () => { if (!user) return; writeContext(eventKey(user.id), id); await load(); }, ''),
     selectTeam: async () => {},
     createTeam: name => run(async () => {
       if (!snapshot?.event) throw Error('Select an event from Browse Events first.');
       if (!name.trim()) throw Error('Enter a team name.');
-      await createRealTeam(snapshot.event.id, name.trim()); await load();
+      try { await createRealTeam(snapshot.event.id, name.trim()); }
+      catch (error) {
+        if (error instanceof ApiError && error.status === 403) {
+          setRegisteredEvent(null);
+          throw Error(`${errorMessage(error)} If you have not registered, use Register for this event below, then retry creating your team.`);
+        }
+        throw error;
+      }
+      await load();
     }, 'Team created.'),
     joinTeam: token => run(async () => {
       if (!user) return;

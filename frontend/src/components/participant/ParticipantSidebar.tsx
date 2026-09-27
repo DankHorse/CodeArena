@@ -1,3 +1,4 @@
+import { DEMO } from '../../api';
 import { useParticipant } from '../../participant/ParticipantProvider';
 import {
   FileText,
@@ -17,7 +18,7 @@ const navigation = [
 
 export function ParticipantSidebar() {
   const { snapshot, loading, busy, selectEvent } = useParticipant();
-  const events = snapshot?.data.events.filter(event => snapshot.data.memberships.some(member => member.event_id === event.id && member.role === 'participant')) ?? [];
+  const events = !DEMO ? (snapshot?.event ? [snapshot.event] : []) : snapshot?.data.events.filter(event => snapshot.data.memberships.some(member => member.event_id === event.id && member.role === 'participant')) ?? [];
   return (
     <aside className="sidebar">
       <div className="brand" aria-label="CodeArena">
