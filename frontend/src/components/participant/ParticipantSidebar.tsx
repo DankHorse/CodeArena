@@ -1,3 +1,4 @@
+import { useParticipant } from '../../participant/ParticipantProvider';
 import {
   FileText,
   Images,
@@ -15,6 +16,8 @@ const navigation = [
 ];
 
 export function ParticipantSidebar() {
+  const { snapshot, loading, busy, selectEvent } = useParticipant();
+  const events = snapshot?.data.events.filter(event => snapshot.data.memberships.some(member => member.event_id === event.id && member.role === 'participant')) ?? [];
   return (
     <aside className="sidebar">
       <div className="brand" aria-label="CodeArena">
@@ -28,8 +31,11 @@ export function ParticipantSidebar() {
       </div>
 
       <div className="event-context">
-        <p className="metadata">CURRENT EVENT</p>
-        <div className="participant-event">DOGFOOD 2026</div>
+        <label className="metadata" htmlFor="participant-event">CURRENT EVENT</label>
+        <select id="participant-event" value={snapshot?.event?.id ?? ''} disabled={loading || busy || !events.length} onChange={event => void selectEvent(event.target.value)}>
+          {!events.length && <option value="">No event available</option>}
+          {events.map(event => <option key={event.id} value={event.id}>{event.name}</option>)}
+        </select>
       </div>
 
       <nav className="sidebar-nav" aria-label="Participant workspace">

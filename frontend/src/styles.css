@@ -2961,3 +2961,9 @@ EOf npm --prefix frontend run build
 .logout-control { max-width: 280px; }
 .auth-form select { padding: 14px; border: 1px solid var(--border-default); background: var(--bg-panel); color: var(--text-primary); font: inherit; width: 100%; }
 .auth-form button:disabled { opacity: 0.65; }
+
+/* Participant workflow controls preserve the existing form styling. */
+.participant-fieldset { border: 0; padding: 0; margin: 0; min-width: 0; display: grid; gap: 24px; }
+.participant-choice { display: grid; gap: 10px; padding: 20px; font: 12px var(--font-mono); }
+.participant-choice select { color: var(--text-primary); background: var(--bg-panel); border: 1px solid var(--border-default); padding: 12px; }
+.participant-fieldset:disabled .button, .team-form button:disabled { opacity: 0.55; }
