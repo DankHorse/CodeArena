@@ -731,3 +731,83 @@ def test_judging_results_visible_before_community_voting(client: TestClient):
     )
     assert results.status_code == 404
     assert results.json()["error"]["code"] == "RESULTS_NOT_CALCULATED"
+
+
+def test_community_ballot_returns_submitted_projects_in_randomized_order(
+    client: TestClient,
+):
+    organizer = make_user("organizer")
+    participant = make_user("participant")
+
+    event = create_event(
+        client,
+        organizer,
+        voting_opens_at=(datetime.now(timezone.utc) - timedelta(minutes=5)).isoformat(),
+        voting_ends_at=(datetime.now(timezone.utc) + timedelta(hours=2)).isoformat(),
+    )
+
+    projects = []
+    for index in range(5):
+        builder = make_user("participant")
+        projects.append(
+            create_project(
+                client,
+                event["id"],
+                builder,
+                title=f"Ballot Project {index}",
+            )
+        )
+
+    # Leave one project as a draft; it must not appear on the ballot.
+    draft_builder = make_user("participant")
+    create_project(
+        client,
+        event["id"],
+        draft_builder,
+        title="Draft Project",
+        submit=False,
+    )
+
+    auth(client, participant)
+
+    response = client.get(f"/api/v1/events/{event['id']}/ballot")
+    assert response.status_code == 200, response.text
+
+    items = response.json()
+    assert len(items) == 5
+    assert {item["id"] for item in items} == {project["id"] for project in projects}
+    assert all(item["title"].startswith("Ballot Project ") for item in items)
+    assert all("Draft Project" != item["title"] for item in items)
+
+
+def test_community_ballot_requires_open_voting_window(client: TestClient):
+    organizer = make_user("organizer")
+    participant = make_user("participant")
+
+    event = create_event(
+        client,
+        organizer,
+        voting_opens_at=(datetime.now(timezone.utc) + timedelta(hours=1)).isoformat(),
+        voting_ends_at=(datetime.now(timezone.utc) + timedelta(hours=2)).isoformat(),
+    )
+
+    auth(client, participant)
+
+    response = client.get(f"/api/v1/events/{event['id']}/ballot")
+    assert response.status_code == 409
+    assert response.json()["error"]["code"] == "VOTING_NOT_OPEN"
+
+
+def test_community_ballot_rejects_non_participant(client: TestClient):
+    organizer = make_user("organizer")
+    event = create_event(
+        client,
+        organizer,
+        voting_opens_at=(datetime.now(timezone.utc) - timedelta(minutes=5)).isoformat(),
+        voting_ends_at=(datetime.now(timezone.utc) + timedelta(hours=2)).isoformat(),
+    )
+
+    auth(client, organizer)
+
+    response = client.get(f"/api/v1/events/{event['id']}/ballot")
+    assert response.status_code == 403

@@ -13,6 +13,7 @@ from app.schemas.voting import (
     VoteCreate,
     VoteListResponse,
     VoteResponse,
+    BallotProjectResponse,
 )
 from app.services.voting import (
     cast_vote,
@@ -21,6 +22,7 @@ from app.services.voting import (
     get_project_vote_summary,
     list_user_votes,
     retract_vote,
+    get_ballot_projects,
 )
 
 router = APIRouter()
@@ -196,3 +198,16 @@ def retract_event_project_vote(
 ):
     retract_vote(db, project_id=project_id, actor=actor, event_id=event_id)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.get(
+    "/events/{event_id}/ballot",
+    response_model=list[BallotProjectResponse],
+    summary="Get a randomized community voting ballot",
+)
+def event_ballot(
+    event_id: UUID,
+    actor: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    return get_ballot_projects(db, event_id=event_id, actor=actor)

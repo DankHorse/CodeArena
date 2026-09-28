@@ -43,3 +43,14 @@ class EventVotesSummaryResponse(BaseModel):
     event_id: UUID
     total_votes: int
     items: list[ProjectVoteItem]
+
+
+class BallotProjectResponse(BaseModel):
+    id: UUID
+    event_slug: str
+    event_title: str
+    title: str
+    description: str
+    repository_url: str | None
+    demo_url: str | None
+    submitted_at: datetime

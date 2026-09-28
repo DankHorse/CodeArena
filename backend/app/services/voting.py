@@ -1,3 +1,4 @@
+import random
 from datetime import datetime
 from uuid import UUID
 
@@ -212,3 +213,49 @@ def retract_vote(
         raise APIError(404, "VOTE_NOT_FOUND", "Vote was not found")
     db.delete(vote)
     db.commit()
+
+
+def get_ballot_projects(
+    db: Session,
+    *,
+    event_id: UUID,
+    actor: User,
+) -> list[dict]:
+    if actor.role != "participant":
+        raise APIError(403, "FORBIDDEN", "Participant access is required to vote")
+    if not actor.is_active:
+        raise APIError(403, "ACCOUNT_DISABLED", "This account is disabled")
+
+    event = db.get(Event, event_id)
+    if event is None:
+        raise APIError(404, "EVENT_NOT_FOUND", "Event was not found")
+
+    _check_voting_window(event, utc_now())
+
+    rows = list(
+        db.execute(
+            select(ProjectSubmission, Event)
+            .join(Event, Event.id == ProjectSubmission.event_id)
+            .where(
+                ProjectSubmission.event_id == event_id,
+                ProjectSubmission.status == "submitted",
+            )
+        )
+    )
+
+    # Randomize the ballot ordering for each ballot request.
+    random.shuffle(rows)
+
+    return [
+        {
+            "id": project.id,
+            "event_slug": event.slug,
+            "event_title": event.title,
+            "title": project.title,
+            "description": project.description,
+            "repository_url": project.repository_url,
+            "demo_url": project.demo_url,
+            "submitted_at": project.submitted_at,
+        }
+        for project, event in rows
+    ]
