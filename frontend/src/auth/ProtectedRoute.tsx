@@ -10,7 +10,25 @@ export function ProtectedRoute({ role, children }: { role: Role; children: React
   const location = useLocation();
   if (session.status === 'loading') return <div className="session-state" role="status">CODEARENA / Loading your session…</div>;
   if (session.error) return <div className="session-state"><p role="alert">{session.error}</p><button className="button button-primary" onClick={() => void session.refreshSession()}>Retry session</button></div>;
-  if (!session.user) return <Navigate to={paths.login} replace state={{ from: location.pathname + location.search + location.hash }} />;
-  if (session.user.role !== role && !(role === 'organizer' && session.user.role === 'admin')) return <Navigate to={workspaceFor(session.user.role)} replace />;
+  if (!session.user) {
+    const loginPath =
+      role === 'judge'
+        ? paths.judgeLogin
+        : role === 'organizer'
+          ? paths.organizerLogin
+          : paths.login;
+
+    return (
+      <Navigate
+        to={loginPath}
+        replace
+        state={{ from: location.pathname + location.search + location.hash }}
+      />
+    );
+  }
+  const allowed = role === 'judge'
+    ? session.isJudge
+    : session.user.role === role || (role === 'organizer' && session.user.role === 'admin');
+  if (!allowed) return <Navigate to={workspaceFor(session.isJudge ? 'judge' : session.user.role)} replace />;
   return <>{children}</>;
 }

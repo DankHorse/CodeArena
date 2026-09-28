@@ -12,6 +12,7 @@ export const paths = {
   login: '/login',
   participantLogin: '/participant/login',
   judgeLogin: '/judge/login',
+  organizerLogin: '/organizer/login',
   register: '/register',
   participant: {
     home: '/participant', team: '/participant/team', submission: '/participant/submission',

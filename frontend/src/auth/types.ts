@@ -1,6 +1,6 @@
 export type BackendRole = 'participant' | 'organizer' | 'admin';
 // Judge is a demo workspace role; real event capabilities will be added separately.
-export type Role = BackendRole | 'judge';
+export type Role = BackendRole | 'judge'; // UI/demo login selector only; never an AuthUser backend role.
 export const isBackendRole = (value: unknown): value is BackendRole =>
   value === 'participant' || value === 'organizer' || value === 'admin';
 export type SessionStatus = 'loading' | 'anonymous' | 'authenticated';
@@ -8,7 +8,7 @@ export interface AuthUser {
   id: string;
   email: string;
   display_name: string;
-  role: Role;
+  role: BackendRole;
   is_active: boolean;
   created_at?: string;
   updated_at?: string;

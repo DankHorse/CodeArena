@@ -53,6 +53,7 @@ export default function App() {
           <Route path={paths.login} element={<LoginPage mode="participant" />} />
           <Route path={paths.participantLogin} element={<LoginPage mode="participant" />} />
           <Route path={paths.judgeLogin} element={<LoginPage mode="judge" />} />
+          <Route path={paths.organizerLogin} element={<LoginPage mode="organizer" />} />
 
           <Route path={paths.register} element={<RegisterPage />} />
 
