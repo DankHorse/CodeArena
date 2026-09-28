@@ -3920,3 +3920,40 @@ EOf npm --prefix frontend run build
   outline: 1px solid var(--accent-cyan);
   outline-offset: -3px;
 }
+
+/* Closed event registration notice */
+.public-registration-status {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  width: fit-content;
+  margin-top: 22px;
+  padding: 13px 16px;
+
+  border-left: 2px solid var(--accent-cyan);
+  background: rgba(50, 230, 220, 0.035);
+}
+
+.public-registration-status .metadata {
+  margin: 0;
+  color: var(--accent-cyan);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  white-space: nowrap;
+}
+
+.public-registration-status > p:last-child {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+@media (max-width: 700px) {
+  .public-registration-status {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 6px;
+    width: 100%;
+  }
+}
