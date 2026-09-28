@@ -16,6 +16,7 @@ from app.models.judging import (
     JudgingRubric,
     JudgingRubricCriterion,
 )
+from app.models.voting import Vote
 
 __all__ = [
     "Event",
@@ -38,4 +39,5 @@ __all__ = [
     "TeamInvitation",
     "TeamMember",
     "User",
+    "Vote",
 ]

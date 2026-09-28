@@ -32,6 +32,7 @@ from app.models import (
     TeamInvitation,
     TeamMember,
     User,
+    Vote,
 )
 
 _NAMESPACE = NAMESPACE_URL
@@ -81,6 +82,7 @@ def _clear_event(db: Session, event_id: UUID) -> None:
     db.execute(delete(JudgingRubricCriterion).where(JudgingRubricCriterion.event_id == event_id))
     db.execute(delete(JudgingRubric).where(JudgingRubric.event_id == event_id))
     db.execute(delete(JudgeEventAssignment).where(JudgeEventAssignment.event_id == event_id))
+    db.execute(delete(Vote).where(Vote.event_id == event_id))
     db.execute(delete(ProjectSubmission).where(ProjectSubmission.event_id == event_id))
     db.execute(delete(TeamInvitation).where(TeamInvitation.event_id == event_id))
     db.execute(delete(TeamMember).where(TeamMember.event_id == event_id))

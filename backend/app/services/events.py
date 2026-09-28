@@ -47,6 +47,14 @@ def _validate_schedule(values: dict) -> None:
         raise APIError(
             422, "INVALID_TEAM_SIZE", "Maximum team size must be at least the minimum"
         )
+    v_open = values.get("voting_opens_at")
+    v_close = values.get("voting_ends_at")
+    if v_open is not None and (v_open.tzinfo is None or v_open.utcoffset() is None):
+        raise APIError(422, "INVALID_EVENT_SCHEDULE", "Event times must include a timezone")
+    if v_close is not None and (v_close.tzinfo is None or v_close.utcoffset() is None):
+        raise APIError(422, "INVALID_EVENT_SCHEDULE", "Event times must include a timezone")
+    if v_open is not None and v_close is not None and v_open > v_close:
+        raise APIError(422, "INVALID_EVENT_SCHEDULE", "Voting opens time must be before voting ends time")
 
 
 def create_event(db: Session, request: EventCreate, organizer: User) -> Event:

@@ -59,6 +59,12 @@ class Event(Base):
         DateTime(timezone=True), nullable=False
     )
     ends_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    voting_opens_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    voting_ends_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
     team_min_size: Mapped[int] = mapped_column(Integer, nullable=False)
     team_max_size: Mapped[int] = mapped_column(Integer, nullable=False)
     created_at: Mapped[datetime] = mapped_column(

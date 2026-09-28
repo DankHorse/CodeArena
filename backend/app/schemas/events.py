@@ -3,7 +3,6 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
-
 class EventCreate(BaseModel):
     title: str = Field(min_length=1, max_length=160)
     slug: str | None = Field(default=None, min_length=1, max_length=180)
@@ -13,6 +12,8 @@ class EventCreate(BaseModel):
     starts_at: datetime
     submission_deadline: datetime
     ends_at: datetime
+    voting_opens_at: datetime | None = None
+    voting_ends_at: datetime | None = None
     team_min_size: int = Field(ge=1)
     team_max_size: int = Field(ge=1)
 
@@ -43,6 +44,8 @@ class EventUpdate(BaseModel):
     starts_at: datetime | None = None
     submission_deadline: datetime | None = None
     ends_at: datetime | None = None
+    voting_opens_at: datetime | None = None
+    voting_ends_at: datetime | None = None
     team_min_size: int | None = Field(default=None, ge=1)
     team_max_size: int | None = Field(default=None, ge=1)
 
@@ -71,6 +74,8 @@ class EventResponse(BaseModel):
     starts_at: datetime
     submission_deadline: datetime
     ends_at: datetime
+    voting_opens_at: datetime | None = None
+    voting_ends_at: datetime | None = None
     team_min_size: int
     team_max_size: int
     created_at: datetime
@@ -78,6 +83,8 @@ class EventResponse(BaseModel):
 
 
 class EventPublic(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: UUID
     title: str
     slug: str
@@ -88,6 +95,8 @@ class EventPublic(BaseModel):
     starts_at: datetime
     submission_deadline: datetime
     ends_at: datetime
+    voting_opens_at: datetime | None = None
+    voting_ends_at: datetime | None = None
     team_min_size: int
     team_max_size: int
 
