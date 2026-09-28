@@ -2,9 +2,11 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, Response, status
 from sqlalchemy.orm import Session
+from sqlalchemy import select
 
 from app.db.session import get_db
 from app.dependencies.auth import get_current_user
+from app.models.judging import JudgeEventAssignment
 from app.models.user import User
 from app.schemas.judging import (
     EvaluationDraftRequest,
@@ -46,6 +48,25 @@ from app.services.judging import (
 
 router = APIRouter()
 
+@router.get(
+    "/judging/me",
+    summary="Check whether the current account has active judge assignments",
+)
+def judging_me(
+    actor: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    assignments = db.scalars(
+        select(JudgeEventAssignment).where(
+            JudgeEventAssignment.judge_id == actor.id,
+            JudgeEventAssignment.status == "active",
+        )
+    ).all()
+
+    return {
+        "is_judge": bool(assignments),
+        "event_ids": [str(assignment.event_id) for assignment in assignments],
+    }
 
 @router.get(
     "/judging/scores",
