@@ -16,12 +16,11 @@ export function PublicShell({ children }: { children: ReactNode }) {
         <nav className="gallery-header-actions public-navigation" aria-label="Public navigation">
           <Link to={paths.events}>EVENTS</Link>
           <Link to={paths.gallery()}>GALLERY</Link>
-          <Link to={paths.login}>LOGIN</Link>
           <Link className="button button-primary" to={paths.register}>ENTER ARENA <ArrowUpRight size={15} aria-hidden="true" /></Link>
         </nav>
       </header>
       <main id="public-content" tabIndex={-1}>{children}</main>
-      <footer className="gallery-footer"><span>CODEARENA / BUILD WITH INTENT</span><span>PUBLIC FIXTURE PREVIEW</span></footer>
+      <footer className="gallery-footer"><span>CODEARENA / BUILD WITH INTENT</span></footer>
     </div>
   );
 }

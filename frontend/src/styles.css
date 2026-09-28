@@ -3280,3 +3280,333 @@ EOf npm --prefix frontend run build
     padding: 14px 20px;
   }
 }
+
+/* =========================================================
+   PUBLIC GALLERY — FINAL POLISH
+   ========================================================= */
+
+/* Public navigation: no accidental underlines */
+.public-navigation a,
+.public-back,
+.public-actions a,
+.public-actions button,
+.public-browse-events,
+.public-project-link {
+  text-decoration: none;
+}
+
+.public-navigation a:hover,
+.public-back:hover,
+.public-browse-events:hover,
+.public-project-link:hover {
+  text-decoration: none;
+}
+
+/* Back / Browse Events control */
+.public-back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: max-content;
+  min-height: 44px;
+  margin-top: 28px;
+  padding: 11px 16px;
+
+  border: 1px solid var(--accent-cyan);
+  background: transparent;
+  color: var(--accent-cyan);
+
+  font: 600 12px/1.4 var(--font-mono);
+  letter-spacing: 0.04em;
+
+  transition:
+    background 160ms ease,
+    color 160ms ease,
+    border-color 160ms ease;
+}
+
+.public-back:hover {
+  background: rgba(50, 230, 220, 0.07);
+  color: var(--text-primary);
+}
+
+/* Search control */
+.gallery-toolbar {
+  align-items: end;
+}
+
+.gallery-search {
+  display: grid;
+  grid-template-columns: auto minmax(160px, 1fr) auto;
+  align-items: center;
+
+  width: min(100%, 500px);
+  min-height: 54px;
+  padding-left: 18px;
+
+  border: 1px solid var(--border-bright);
+  background: var(--bg-panel);
+}
+
+.gallery-search > svg {
+  color: var(--accent-cyan);
+}
+
+.gallery-search input {
+  min-width: 0;
+  height: 52px;
+  padding: 0 15px;
+
+  border: 0;
+  outline: 0;
+  background: transparent;
+
+  color: var(--text-primary);
+  font-size: 14px;
+}
+
+.gallery-search input:focus {
+  border: 0;
+  outline: 0;
+  box-shadow: none;
+}
+
+.public-search-button {
+  align-self: stretch;
+  min-width: 112px;
+  padding: 0 18px;
+
+  border: 0;
+  border-left: 1px solid var(--border-bright);
+
+  background: transparent;
+  color: var(--accent-pink);
+
+  font: 700 12px/1 var(--font-mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+
+  cursor: pointer;
+
+  transition:
+    background 160ms ease,
+    color 160ms ease;
+}
+
+.public-search-button:hover {
+  background: var(--accent-pink);
+  color: var(--bg-primary);
+}
+
+/* Project cards */
+.public-project-grid {
+  align-items: stretch;
+}
+
+.public-project-link {
+  position: relative;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 28px;
+
+  min-height: 310px;
+  padding: 26px;
+
+  border: 1px solid var(--border-default);
+  background: rgba(13, 22, 37, 0.74);
+
+  transition:
+    transform 160ms ease,
+    background 160ms ease,
+    border-color 160ms ease;
+}
+
+.public-project-link:hover {
+  transform: translateY(-3px);
+  border-color: var(--accent-cyan);
+  background: var(--bg-panel-hover);
+}
+
+.public-project-card-top,
+.public-project-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.public-project-index {
+  color: var(--accent-pink);
+  font: 700 20px/1 var(--font-mono);
+}
+
+.public-project-event {
+  margin-bottom: 14px;
+}
+
+.public-project-link h2 {
+  margin-bottom: 14px;
+  font-size: clamp(1.8rem, 3vw, 2.6rem);
+}
+
+.public-project-summary {
+  display: -webkit-box;
+  max-width: 46ch;
+  overflow: hidden;
+
+  color: var(--text-secondary);
+  font-size: 14px;
+  line-height: 1.7;
+
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+.public-project-card-footer {
+  margin-top: auto;
+  padding-top: 18px;
+
+  border-top: 1px solid var(--border-default);
+}
+
+.public-project-card-footer strong {
+  color: var(--accent-cyan);
+
+  font: 700 11px/1.4 var(--font-mono);
+  letter-spacing: 0.06em;
+}
+
+/* Empty-state Browse Events */
+.public-browse-events {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  width: max-content;
+  min-height: 46px;
+  padding: 12px 18px;
+
+  border: 1px solid var(--accent-cyan);
+  background: transparent;
+  color: var(--accent-cyan);
+
+  font: 700 12px/1.4 var(--font-mono);
+  text-transform: uppercase;
+}
+
+.public-browse-events:hover {
+  background: rgba(50, 230, 220, 0.07);
+  color: var(--text-primary);
+}
+
+/* Dynamic pagination */
+.public-gallery-pagination {
+  display: grid;
+  grid-template-columns: 150px minmax(180px, 1fr) 150px;
+  align-items: center;
+  gap: 26px;
+
+  padding: 36px 0 18px;
+
+  border-top: 1px solid var(--border-default);
+}
+
+.public-page-button {
+  min-height: 50px;
+  padding: 12px 18px;
+
+  border: 1px solid var(--accent-pink);
+  background: var(--accent-pink);
+  color: var(--bg-primary);
+
+  font: 800 14px/1 var(--font-mono);
+  letter-spacing: 0.055em;
+  text-transform: uppercase;
+
+  cursor: pointer;
+}
+
+.public-page-button:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+
+.public-page-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.22;
+  filter: saturate(0.4);
+}
+
+.public-page-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 11px;
+}
+
+.public-page-status strong {
+  color: var(--text-primary);
+
+  font: 800 26px/1 var(--font-mono);
+}
+
+.public-page-status > span {
+  color: var(--text-muted);
+
+  font: 700 12px/1 var(--font-mono);
+  letter-spacing: 0.1em;
+}
+
+.public-page-status small {
+  margin-left: 8px;
+
+  color: var(--text-muted);
+
+  font: 600 11px/1 var(--font-mono);
+  letter-spacing: 0.08em;
+}
+
+/* Public footer now contains one item */
+.gallery-footer {
+  justify-content: flex-start;
+}
+
+@media (max-width: 700px) {
+  .gallery-search {
+    width: 100%;
+  }
+
+  .public-project-link {
+    min-height: 280px;
+    padding: 22px;
+  }
+
+  .public-gallery-pagination {
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+
+  .public-page-status {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    margin-bottom: 8px;
+  }
+
+  .public-page-status strong {
+    font-size: 22px;
+  }
+
+  .public-page-status > span {
+    font-size: 11px;
+  }
+
+  .public-page-status small {
+    font-size: 10px;
+  }
+
+  .public-page-button {
+    width: 100%;
+    font-size: 13px;
+  }
+}
