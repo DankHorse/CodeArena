@@ -5,6 +5,7 @@ import {
   Images,
   LayoutDashboard,
   Users,
+  Vote,
 } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { CodeArenaMark } from '../brand/CodeArenaMark';
@@ -13,6 +14,7 @@ const navigation = [
   { label: 'Dashboard', icon: LayoutDashboard, to: '/participant', end: true },
   { label: 'Team', icon: Users, to: '/participant/team' },
   { label: 'Submission', icon: FileText, to: '/participant/submission' },
+  { label: 'Community voting', icon: Vote, to: '/participant/voting' },
   { label: 'Project gallery', icon: Images, to: '/gallery' },
 ];
 

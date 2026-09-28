@@ -15,7 +15,10 @@ export const paths = {
   organizerLogin: '/organizer/login',
   register: '/register',
   participant: {
-    home: '/participant', team: '/participant/team', submission: '/participant/submission',
+    home: '/participant',
+    team: '/participant/team',
+    submission: '/participant/submission',
+    voting: '/participant/voting',
   },
   judge: {
     home: '/judge', assignments: '/judge/assignments', rubric: '/judge/rubric',
