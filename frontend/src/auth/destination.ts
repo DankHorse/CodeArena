@@ -12,6 +12,7 @@ export function loginDestination(role: Role, state: unknown): string {
   const pathname = from.split(/[?#]/)[0];
   if (from.includes('\\') || pathname.split('/').some(part => part === '.' || part === '..')) return home;
   if (!DEMO && role === 'participant' && /^\/events\/[0-9a-f-]+$/i.test(pathname)) return from;
+  if (!DEMO && role === 'participant' && pathname === paths.judge.home) return from;
   if (!DEMO && role === 'participant' && /^\/judge(?:\/(?:assignments|rubric|review\/[^/]+))?$/.test(pathname) && judgeEventId(from.includes('?') ? from.slice(from.indexOf('?')).split('#')[0] : '')) return from;
   return pathname === home || pathname.startsWith(`${home}/`) ? from : home;
 }

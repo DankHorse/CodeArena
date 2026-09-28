@@ -5,6 +5,7 @@ import { JudgeSidebar } from '../../components/judge/JudgeSidebar';
 import { JudgeTopbar } from '../../components/judge/JudgeTopbar';
 import { JudgeProvider, useJudge } from '../../judge/JudgeProvider';
 import { useSession } from '../../auth/SessionProvider';
+import { JudgeEntryPage } from './JudgeEntryPage';
 function JudgeWorkspace() {
   const missingEvent = !DEMO && !judgeEventId(useLocation().search);
   const { snapshot, loading, busy, error, message, refresh } = useJudge();
@@ -14,4 +15,22 @@ function JudgeWorkspace() {
     {missingEvent ? <p className="team-message" role="status">Choose or open a judge event to continue.</p> : loading ? <p className="metadata" role="status">Loading your judging workspace…</p> : snapshot && <Outlet />}
   </main></div></div>;
 }
-export function JudgeLayout() { const { user } = useSession(); const location = useLocation(); const eventId = DEMO ? undefined : judgeEventId(location.search); return <JudgeProvider key={DEMO ? user?.id : `${user?.id}:${eventId ?? location.search}`} eventId={eventId}><JudgeWorkspace /></JudgeProvider>; }
+
+export function JudgeLayout() {
+  const { user } = useSession();
+  const location = useLocation();
+  const eventId = DEMO ? undefined : judgeEventId(location.search);
+
+  if (!DEMO && !new URLSearchParams(location.search).has('event')) {
+    return <JudgeEntryPage key={user?.id} />;
+  }
+
+  return (
+    <JudgeProvider
+      key={DEMO ? user?.id : `${user?.id}:${eventId ?? location.search}`}
+      eventId={eventId}
+    >
+      <JudgeWorkspace />
+    </JudgeProvider>
+  );
+}

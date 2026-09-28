@@ -48,6 +48,7 @@ function providerHarness(demo, eventId, result, failure) {
     'react-router-dom': { useLocation: () => ({ search }) },
     '../../auth/SessionProvider': { useSession: () => ({ user: { id: 'user' } }) },
     '../../judge/JudgeProvider': { JudgeProvider: 'Provider' },
+    './JudgeEntryPage': { JudgeEntryPage: 'JudgeEntry' },
     '../../components/judge/JudgeSidebar': {}, '../../components/judge/JudgeTopbar': {},
   });
   const layout = layoutRuntime('pages/judge/JudgeLayout.tsx').JudgeLayout;
@@ -87,7 +88,8 @@ function providerHarness(demo, eventId, result, failure) {
       'react-router-dom': { useLocation: () => ({ search: currentSearch }), useParams: () => ({ projectId }), Link: 'Link', NavLink: 'NavLink' },
       'lucide-react': {}, '../brand/CodeArenaMark': {},
       '../../auth/SessionProvider': { useSession: () => ({ user: { id: 'user' } }) },
-      '../../components/judge/JudgeSidebar': {}, '../../components/judge/JudgeTopbar': {},
+      './JudgeEntryPage': { JudgeEntryPage: 'JudgeEntry' },
+    '../../components/judge/JudgeSidebar': {}, '../../components/judge/JudgeTopbar': {},
       '../../judge/JudgeProvider': { JudgeProvider: 'Provider', useJudge: () => ({ snapshot: currentSnapshot, loading: false }) },
     });
     const components = [
@@ -110,8 +112,7 @@ function providerHarness(demo, eventId, result, failure) {
     currentSearch = ''; currentSnapshot = null; check(...components[0]);
     if (!demoMode) {
       const layoutNode = renderRuntime('pages/judge/JudgeLayout.tsx').JudgeLayout();
-      const workspace = layoutNode.props.children.type();
-      assert(flatten(workspace).some(node => node.props?.children === 'Choose or open a judge event to continue.'));
+      assert.equal(layoutNode.type, 'JudgeEntry');
     }
   }
   console.log('PASS judge capability, missing/denied/revoked access, event remount/loading, event links, unassigned review, login destinations, and demo behavior.');
