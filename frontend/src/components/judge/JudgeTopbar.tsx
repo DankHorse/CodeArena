@@ -1,3 +1,4 @@
+import { paths } from '../../routes';
 import { LogoutButton } from '../common/LogoutButton';
 import { useLocation } from 'react-router-dom';
 
@@ -25,7 +26,7 @@ export function JudgeTopbar() {
       </p>
 
       <div className="topbar-controls">
-        <LogoutButton />
+        <LogoutButton redirectTo={paths.judgeLogin} />
         <span className="badge badge-cyan">JUDGE</span>
       </div>
     </header>
