@@ -527,3 +527,141 @@ def test_all_route_variations(client: TestClient):
 
     # Total votes = 3
     assert client.get(f"/api/v1/projects/{project['id']}/votes").json()["vote_count"] == 3
+
+
+def test_project_comments_create_and_list(client: TestClient):
+    organizer = make_user("organizer")
+    builder = make_user("participant")
+    commenter = make_user("participant")
+
+    event = create_event(client, organizer)
+    project = create_project(client, event["id"], builder, title="Commentable Project")
+
+    auth(client, commenter)
+
+    created = client.post(
+        f"/api/v1/events/{event['id']}/projects/{project['id']}/comments",
+        json={"body": "This project looks interesting."},
+    )
+    assert created.status_code == 201, created.text
+
+    comment = created.json()
+    assert comment["event_id"] == event["id"]
+    assert comment["project_id"] == project["id"]
+    assert comment["author_id"] == str(commenter.id)
+    assert comment["body"] == "This project looks interesting."
+    assert "id" in comment
+    assert "created_at" in comment
+
+    listed = client.get(
+        f"/api/v1/events/{event['id']}/projects/{project['id']}/comments"
+    )
+    assert listed.status_code == 200, listed.text
+    comments = listed.json()
+
+    assert len(comments) == 1
+    assert comments[0]["id"] == comment["id"]
+
+
+def test_project_comments_reject_non_participants(client: TestClient):
+    organizer = make_user("organizer")
+    builder = make_user("participant")
+    admin = make_user("admin")
+
+    event = create_event(client, organizer)
+    project = create_project(client, event["id"], builder)
+
+    for user in (organizer, admin):
+        auth(client, user)
+        response = client.post(
+            f"/api/v1/events/{event['id']}/projects/{project['id']}/comments",
+            json={"body": "Not allowed."},
+        )
+        assert response.status_code == 403, response.text
+
+
+def test_project_comments_reject_inactive_participant(client: TestClient):
+    organizer = make_user("organizer")
+    builder = make_user("participant")
+    inactive = make_user("participant", is_active=False)
+
+    event = create_event(client, organizer)
+    project = create_project(client, event["id"], builder)
+
+    auth(client, inactive)
+    response = client.post(
+        f"/api/v1/events/{event['id']}/projects/{project['id']}/comments",
+        json={"body": "Inactive user."},
+    )
+    assert response.status_code == 403
+
+
+def test_project_comments_reject_draft_project(client: TestClient):
+    organizer = make_user("organizer")
+    builder = make_user("participant")
+    commenter = make_user("participant")
+
+    event = create_event(client, organizer)
+    project = create_project(
+        client,
+        event["id"],
+        builder,
+        submit=False,
+    )
+
+    auth(client, commenter)
+    response = client.post(
+        f"/api/v1/events/{event['id']}/projects/{project['id']}/comments",
+        json={"body": "Draft comment."},
+    )
+    assert response.status_code == 400
+
+
+def test_project_comments_require_authentication(client: TestClient):
+    organizer = make_user("organizer")
+    builder = make_user("participant")
+
+    event = create_event(client, organizer)
+    project = create_project(client, event["id"], builder)
+
+    client.cookies.clear()
+
+    response = client.get(
+        f"/api/v1/events/{event['id']}/projects/{project['id']}/comments"
+    )
+    assert response.status_code == 401
+    assert response.json()["error"]["code"] == "UNAUTHORIZED"
+
+
+def test_project_comments_reject_mismatched_event_project(client: TestClient):
+    organizer = make_user("organizer")
+    builder = make_user("participant")
+
+    event_a = create_event(client, organizer)
+    event_b = create_event(client, organizer)
+    project_a = create_project(client, event_a["id"], builder)
+
+    auth(client, builder)
+
+    response = client.get(
+        f"/api/v1/events/{event_b['id']}/projects/{project_a['id']}/comments"
+    )
+    assert response.status_code == 404
+
+
+def test_project_comments_reject_blank_body(client: TestClient):
+    organizer = make_user("organizer")
+    builder = make_user("participant")
+    commenter = make_user("participant")
+
+    event = create_event(client, organizer)
+    project = create_project(client, event["id"], builder)
+
+    auth(client, commenter)
+
+    for body in ("", "   ", "\n\t"):
+        response = client.post(
+            f"/api/v1/events/{event['id']}/projects/{project['id']}/comments",
+            json={"body": body},
+        )
+        assert response.status_code in (400, 422), response.text

@@ -17,6 +17,7 @@ from app.models.judging import (
     JudgingRubricCriterion,
 )
 from app.models.voting import Vote
+from app.models.comment import ProjectComment
 
 __all__ = [
     "Event",
@@ -32,6 +33,7 @@ __all__ = [
     "JudgingRubricCriterion",
     "Problem",
     "ProblemTestCase",
+    "ProjectComment",
     "ProjectSubmission",
     "Submission",
     "SubmissionTestResult",

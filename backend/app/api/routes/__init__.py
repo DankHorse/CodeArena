@@ -8,6 +8,7 @@ from app.api.routes.submissions import problem_submissions_router, router as sub
 from app.api.routes.teams import invitation_router, router as teams_router
 from app.api.routes.judging import router as judging_router
 from app.api.routes.voting import router as voting_router
+from app.api.routes.comments import router as comments_router
 from fastapi import APIRouter
 
 router = APIRouter()
@@ -26,3 +27,4 @@ router.include_router(statistics_router, prefix="/statistics", tags=["statistics
 router.include_router(leaderboard_router, tags=["leaderboard"])
 router.include_router(judging_router, tags=["DOGFOOD judging"])
 router.include_router(voting_router, tags=["DOGFOOD voting"])
+router.include_router(comments_router, tags=["DOGFOOD comments"])
