@@ -14,7 +14,6 @@ interface Bootstrap {
   events: JudgeEvent[]; projects: JudgeProject[];
   teams: { id: string; name: string }[]; tracks: { id: string; name: string }[];
 }
-function requireApi() { if (!DEMO) throw new Error('Judge event, assignment and evaluation APIs are not connected in real mode yet.'); }
 export async function loadJudge(userId: string, eventId?: string): Promise<JudgeSnapshot> {
   if (!DEMO) {
     if (!eventId) throw new Error('Select a known event before loading judge assignments.');
@@ -44,8 +43,13 @@ export async function loadJudge(userId: string, eventId?: string): Promise<Judge
   }));
   return { events, event, reviews, rubric: [...rubric].sort((a, b) => a.position - b.position) };
 }
-export function saveEvaluation(assignmentId: string, scores: Record<string, number>, comment: string, submit: boolean) {
-  requireApi();
+export async function saveEvaluation(assignmentId: string, scores: Record<string, number>, comment: string, submit: boolean) {
+  if (!DEMO) {
+    const path = `/api/v1/judge-assignments/${encodeURIComponent(assignmentId)}/evaluation`;
+    await api(path, 'PUT', { scores: Object.entries(scores).map(([criterion_id, score]) => ({ criterion_id, score })), feedback: comment });
+    if (submit) await api(`${path}/submit`, 'POST');
+    return;
+  }
   return api(`/api/evaluations/${encodeURIComponent(assignmentId)}`, 'PUT', { scores, comment, submit });
 }
 export const statusLabel = (status: AssignmentStatus) => ({ pending: 'Pending', in_progress: 'In progress', submitted: 'Completed', recused: 'Recused' })[status];

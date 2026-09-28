@@ -48,6 +48,7 @@ export function JudgeProvider({ children }: { children: ReactNode }) {
   async function save(projectId: string, scores: Record<string, number>, comment: string, submit: boolean) {
     if (pending.current) return;
     const originRoute = location.key;
+    let writeStarted = false;
     pending.current = true; setBusy(true); setError(''); setMessage('');
     try {
       const review = snapshot?.reviews.find(review => review.project.id === projectId && review.assignment.judge_id === user?.id);
@@ -61,14 +62,20 @@ export function JudgeProvider({ children }: { children: ReactNode }) {
         if (submit && score === undefined) throw new Error('Score every criterion before submitting.');
         if (score !== undefined && (!Number.isFinite(score) || score < 0 || score > criterion.max_score)) throw new Error(`${criterion.name} must be between 0 and ${criterion.max_score}.`);
       }
+      writeStarted = true;
       await saveEvaluation(review.assignment.id, scores, comment, submit);
       // Lock immediately after successful submission, even if the subsequent refresh fails.
-      setSnapshot(current => current && ({ ...current, reviews: current.reviews.map(item => item.assignment.id === review.assignment.id ? { ...item, assignment: { ...item.assignment, status: submit ? 'submitted' : 'in_progress' }, evaluation: { scores, comment } } : item) }));
+      if (DEMO) setSnapshot(current => current && ({ ...current, reviews: current.reviews.map(item => item.assignment.id === review.assignment.id ? { ...item, assignment: { ...item.assignment, status: submit ? 'submitted' : 'in_progress' }, evaluation: { scores, comment } } : item) }));
       await load();
       if (messageRoute.current === originRoute) {
         setMessage(submit ? 'Review submitted and locked. Your progress is updated.' : 'Draft saved. You can continue this review later.');
       }
-    } catch (error) { if (messageRoute.current === originRoute) setError(errorMessage(error)); }
+    } catch (error) {
+      // A failed write/reload may mean revocation or an already-finalized evaluation.
+      // Require a fresh authorized load before allowing another edit.
+      if (!DEMO && writeStarted) setSnapshot(null);
+      if (messageRoute.current === originRoute) setError(errorMessage(error));
+    }
     finally { pending.current = false; setBusy(false); }
   }
   return <Context.Provider value={{ snapshot, loading, busy, error, message, refresh, selectEvent, save }}>{children}</Context.Provider>;
