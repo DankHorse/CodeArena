@@ -46,6 +46,20 @@ def _event(db: Session, event_id: UUID) -> Event:
     return event
 
 
+def _ensure_results_visible(event: Event) -> None:
+    now = _now()
+    if (
+        event.voting_opens_at is not None
+        and event.voting_ends_at is not None
+        and event.voting_opens_at <= now < event.voting_ends_at
+    ):
+        raise APIError(
+            409,
+            "RESULTS_HIDDEN_DURING_VOTING",
+            "Judging results are hidden while community voting is open",
+        )
+
+
 def _organizer_event(
     db: Session, event_id: UUID, actor: User, *, lock: bool = False
 ) -> Event:
@@ -695,7 +709,8 @@ def recalculate_results(db: Session, event_id: UUID, actor: User) -> JudgingResu
 
 
 def latest_results(db: Session, event_id: UUID, actor: User) -> dict:
-    _organizer_event(db, event_id, actor)
+    event = _organizer_event(db, event_id, actor)
+    _ensure_results_visible(event)
     snapshot = db.scalar(
         select(JudgingResultSnapshot)
         .where(JudgingResultSnapshot.event_id == event_id)
@@ -785,8 +800,8 @@ CSV_COLUMNS = (
 
 
 def export_results_csv(db: Session, event_id: UUID, actor: User) -> str:
-    _organizer_event(db, event_id, actor)
-    event = _event(db, event_id)
+    event = _organizer_event(db, event_id, actor)
+    _ensure_results_visible(event)
     try:
         results = latest_results(db, event_id, actor)
     except APIError as exc:

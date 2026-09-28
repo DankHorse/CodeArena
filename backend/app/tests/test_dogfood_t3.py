@@ -665,3 +665,69 @@ def test_project_comments_reject_blank_body(client: TestClient):
             json={"body": body},
         )
         assert response.status_code in (400, 422), response.text
+
+
+def test_judging_results_hidden_during_community_voting(client: TestClient):
+    organizer = make_user("organizer")
+    event = create_event(
+        client,
+        organizer,
+        voting_opens_at=(datetime.now(timezone.utc) - timedelta(minutes=5)).isoformat(),
+        voting_ends_at=(datetime.now(timezone.utc) + timedelta(hours=2)).isoformat(),
+    )
+
+    auth(client, organizer)
+
+    results = client.get(
+        f"/api/v1/events/{event['id']}/judging/results"
+    )
+    assert results.status_code == 409
+    assert results.json()["error"]["code"] == "RESULTS_HIDDEN_DURING_VOTING"
+
+    csv_results = client.get(
+        f"/api/v1/events/{event['id']}/judging/results.csv"
+    )
+    assert csv_results.status_code == 409
+    assert csv_results.json()["error"]["code"] == "RESULTS_HIDDEN_DURING_VOTING"
+
+
+def test_judging_results_visible_after_community_voting(client: TestClient):
+    organizer = make_user("organizer")
+    event = create_event(
+        client,
+        organizer,
+        voting_opens_at=(datetime.now(timezone.utc) - timedelta(hours=2)).isoformat(),
+        voting_ends_at=(datetime.now(timezone.utc) - timedelta(minutes=5)).isoformat(),
+    )
+
+    auth(client, organizer)
+
+    results = client.get(
+        f"/api/v1/events/{event['id']}/judging/results"
+    )
+    assert results.status_code == 404
+    assert results.json()["error"]["code"] == "RESULTS_NOT_CALCULATED"
+
+    csv_results = client.get(
+        f"/api/v1/events/{event['id']}/judging/results.csv"
+    )
+    assert csv_results.status_code == 200
+    assert csv_results.headers["content-type"].startswith("text/csv")
+
+
+def test_judging_results_visible_before_community_voting(client: TestClient):
+    organizer = make_user("organizer")
+    event = create_event(
+        client,
+        organizer,
+        voting_opens_at=(datetime.now(timezone.utc) + timedelta(hours=2)).isoformat(),
+        voting_ends_at=(datetime.now(timezone.utc) + timedelta(hours=4)).isoformat(),
+    )
+
+    auth(client, organizer)
+
+    results = client.get(
+        f"/api/v1/events/{event['id']}/judging/results"
+    )
+    assert results.status_code == 404
+    assert results.json()["error"]["code"] == "RESULTS_NOT_CALCULATED"
