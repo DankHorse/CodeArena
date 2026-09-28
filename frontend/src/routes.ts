@@ -10,6 +10,8 @@ export const paths = {
   projectPattern: '/projects/:projectId',
   project: (id: string, eventId?: string) => withEvent(`/projects/${encodeURIComponent(id)}`, eventId),
   login: '/login',
+  participantLogin: '/participant/login',
+  judgeLogin: '/judge/login',
   register: '/register',
   participant: {
     home: '/participant', team: '/participant/team', submission: '/participant/submission',

@@ -39,102 +39,104 @@ export default function App() {
   return (
     <BrowserRouter>
       <SessionProvider>
-      <Routes>
+        <Routes>
 
-        {/* PUBLIC */}
-        <Route path={paths.home} element={<LandingPage />} />
-        <Route path={paths.events} element={<EventsPage />} />
-        <Route path={paths.eventPattern} element={<EventDetailsPage />} />
-        <Route path={paths.gallery()} element={<GalleryPage />} />
-        <Route path={paths.projectPattern} element={<ProjectDetailsPage />} />
+          {/* PUBLIC */}
+          <Route path={paths.home} element={<LandingPage />} />
+          <Route path={paths.events} element={<EventsPage />} />
+          <Route path={paths.eventPattern} element={<EventDetailsPage />} />
+          <Route path={paths.gallery()} element={<GalleryPage />} />
+          <Route path={paths.projectPattern} element={<ProjectDetailsPage />} />
 
-        {/* AUTH */}
+          {/* AUTH */}
 
-        <Route path={paths.login} element={<LoginPage />} />
+          <Route path={paths.login} element={<LoginPage mode="participant" />} />
+          <Route path={paths.participantLogin} element={<LoginPage mode="participant" />} />
+          <Route path={paths.judgeLogin} element={<LoginPage mode="judge" />} />
 
-        <Route path={paths.register} element={<RegisterPage />} />
-
-
-        {/* PARTICIPANT */}
-
-        <Route
-          path={paths.participant.home}
-          element={<ProtectedRoute role="participant"><ParticipantLayout /></ProtectedRoute>}
-        >
-          <Route
-            index
-            element={<ParticipantDashboard />}
-          />
-
-          <Route path={paths.participant.team} element={<TeamPage />} />
-
-          <Route path={paths.participant.submission} element={<SubmissionPage />} />
-        </Route>
+          <Route path={paths.register} element={<RegisterPage />} />
 
 
-        {/* JUDGE */}
-
-        <Route
-          path={paths.judge.home}
-          element={<ProtectedRoute role="judge"><JudgeLayout /></ProtectedRoute>}
-        >
-          <Route
-            index
-            element={<JudgeDashboard />}
-          />
-
-          <Route path={paths.judge.assignments} element={<JudgeAssignmentsPage />} />
+          {/* PARTICIPANT */}
 
           <Route
-            path={paths.judge.reviewPattern}
-            element={<JudgeReviewPage />}
-          />
+            path={paths.participant.home}
+            element={<ProtectedRoute role="participant"><ParticipantLayout /></ProtectedRoute>}
+          >
+            <Route
+              index
+              element={<ParticipantDashboard />}
+            />
+
+            <Route path={paths.participant.team} element={<TeamPage />} />
+
+            <Route path={paths.participant.submission} element={<SubmissionPage />} />
+          </Route>
 
 
-          <Route path={paths.judge.rubric} element={<JudgeScoringGuidePage />} />
-        </Route>
-
-
-
-
-        {/* ORGANIZER */}
-
-        <Route
-          path={paths.organizer.home}
-          element={<ProtectedRoute role="organizer"><OrganizerLayout /></ProtectedRoute>}
-        >
-          <Route
-            index
-            element={<OrganizerDashboard />}
-          />
-
-          <Route path={paths.organizer.events} element={<EventSettingsPage />} />
-
-          <Route path={paths.organizer.teams} element={<OrganizerTeamsPage />} />
-
-          <Route path={paths.organizer.projects} element={<OrganizerProjectsPage />} />
-
-          <Route path={paths.organizer.rubric} element={<OrganizerRubricPage />} />
+          {/* JUDGE */}
 
           <Route
-            path={paths.organizer.judges}
-            element={<OrganizerJudgeAssignmentsPage />}
+            path={paths.judge.home}
+            element={<ProtectedRoute role="judge"><JudgeLayout /></ProtectedRoute>}
+          >
+            <Route
+              index
+              element={<JudgeDashboard />}
+            />
+
+            <Route path={paths.judge.assignments} element={<JudgeAssignmentsPage />} />
+
+            <Route
+              path={paths.judge.reviewPattern}
+              element={<JudgeReviewPage />}
+            />
+
+
+            <Route path={paths.judge.rubric} element={<JudgeScoringGuidePage />} />
+          </Route>
+
+
+
+
+          {/* ORGANIZER */}
+
+          <Route
+            path={paths.organizer.home}
+            element={<ProtectedRoute role="organizer"><OrganizerLayout /></ProtectedRoute>}
+          >
+            <Route
+              index
+              element={<OrganizerDashboard />}
+            />
+
+            <Route path={paths.organizer.events} element={<EventSettingsPage />} />
+
+            <Route path={paths.organizer.teams} element={<OrganizerTeamsPage />} />
+
+            <Route path={paths.organizer.projects} element={<OrganizerProjectsPage />} />
+
+            <Route path={paths.organizer.rubric} element={<OrganizerRubricPage />} />
+
+            <Route
+              path={paths.organizer.judges}
+              element={<OrganizerJudgeAssignmentsPage />}
+            />
+
+            <Route path={paths.organizer.results} element={<OrganizerResultsPage />} />
+
+            <Route path={paths.organizer.activity} element={<OrganizerActivityPage />} />
+          </Route>
+
+
+          {/* FALLBACK */}
+
+          <Route
+            path="*"
+            element={<Navigate to={paths.home} replace />}
           />
 
-          <Route path={paths.organizer.results} element={<OrganizerResultsPage />} />
-
-          <Route path={paths.organizer.activity} element={<OrganizerActivityPage />} />
-        </Route>
-
-
-        {/* FALLBACK */}
-
-        <Route
-          path="*"
-          element={<Navigate to={paths.home} replace />}
-        />
-
-      </Routes>
+        </Routes>
       </SessionProvider>
     </BrowserRouter>
   );
