@@ -1,3 +1,4 @@
+import { RealParticipantDashboard } from './RealParticipantDashboard';
 import { DEMO } from '../../api';
 import { ArrowUpRight, Clock3, FileText, Users } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -6,6 +7,9 @@ import { deadlineLabel } from '../../participant/data';
 import { paths } from '../../routes';
 
 export function ParticipantDashboard() {
+  return DEMO ? <DemoParticipantDashboard /> : <RealParticipantDashboard />;
+}
+function DemoParticipantDashboard() {
   const { snapshot, locked } = useParticipant();
   const event = snapshot?.event;
   const team = snapshot?.team;

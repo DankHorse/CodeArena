@@ -38,6 +38,8 @@ console.log('PASS sidebar real/demo separation; token acceptance with absent/clo
   };
   let ApiError;
   const data = {
+    registrationKnown: () => false,
+    eventKey: user => user, writeContext: () => {},
     projectReadOnly: () => false,
     loadParticipant: async () => { loaded++; return { event, team: hasTeam ? { id: 'authoritative-team' } : null, recovery: '', data: { memberships: [] } }; },
     registerParticipant: async () => { registered = true; },
@@ -55,5 +57,9 @@ console.log('PASS sidebar real/demo separation; token acceptance with absent/clo
   await value.createTeam('Team'); value = render(); assert.match(value.error, /Register for this event/);
   const before = loaded; await value.registerCurrentEvent(); value = render(); assert(loaded > before); assert.equal(value.registrationConfirmed, true);
   await value.createTeam('Team'); value = render(); assert.equal(value.snapshot.team.id, 'authoritative-team'); assert.equal(value.error, '');
+  data.loadParticipant = async () => { throw new ApiError('Event forbidden', 403); };
+  const switching = value.selectEvent('new-event');
+  assert.equal(render().snapshot, null); assert.equal(render().loading, true);
+  await switching; value = render(); assert.equal(value.snapshot, null); assert.equal(value.loading, false); assert.match(value.error, /Event forbidden/);
   console.log('PASS provider: unknown registration, actionable 403 recovery, register-refresh, create-refresh authoritative team.');
 })().catch(error => { console.error(error); process.exitCode = 1; });
