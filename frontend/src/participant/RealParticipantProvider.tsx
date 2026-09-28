@@ -6,7 +6,7 @@ import { useSession } from '../auth/SessionProvider';
 import { errorMessage } from '../auth/types';
 import { Context } from './ParticipantProvider';
 import type { Snapshot } from './ParticipantProvider';
-import { acceptInvitation, registerParticipant, createRealTeam, eventKey, loadParticipant, projectKey, projectReadOnly, readContext, saveRealProject, submitRealProject, writeContext } from './realData';
+import { acceptInvitation, registrationKnown, registerParticipant, createRealTeam, eventKey, loadParticipant, projectKey, projectReadOnly, readContext, saveRealProject, submitRealProject, writeContext } from './realData';
 
 export function RealParticipantProvider({ children }: { children: ReactNode }) {
   const { user } = useSession();
@@ -22,12 +22,14 @@ export function RealParticipantProvider({ children }: { children: ReactNode }) {
   const load = useCallback(async () => {
     if (!user) return;
     const generation = ++version.current;
-    const next = await loadParticipant(user.id);
+    let next;
+    try { next = await loadParticipant(user.id); }
+    catch (error) { if (generation === version.current) { setSnapshot(null); setRecovery(''); } throw error; }
     if (generation === version.current) { setSnapshot(next); setRecovery(next.recovery); }
     return next;
   }, [user?.id]);
   const refresh = useCallback(async () => {
-    setLoading(true); setError('');
+    setLoading(true); setError(''); setSnapshot(null); setRecovery('');
     try { await load(); } catch (error) { setSnapshot(null); setError(errorMessage(error)); }
     finally { setLoading(false); }
   }, [load]);
@@ -42,14 +44,19 @@ export function RealParticipantProvider({ children }: { children: ReactNode }) {
   }
   const locked = projectReadOnly(snapshot?.event ?? null, snapshot?.team ?? null, snapshot?.project ?? null, user?.id ?? '');
   return <Context.Provider value={{ snapshot, loading, busy, error, message, locked, refresh, recovery,
-    registrationConfirmed: !!snapshot?.team || (!!snapshot?.event && registeredEvent === snapshot.event.id),
+    registrationConfirmed: !!snapshot?.team || (!!snapshot?.event && (registeredEvent === snapshot.event.id || (!!user && registrationKnown(user.id, snapshot.event.id)))),
     registerCurrentEvent: () => run(async () => {
       if (!user || !snapshot?.event) throw Error('Select an event from Browse Events first.');
       await registerParticipant(user.id, snapshot.event.id);
       setRegisteredEvent(snapshot.event.id);
       await load();
     }, 'Event registration confirmed. You can create your team.'),
-    selectEvent: id => run(async () => { if (!user) return; writeContext(eventKey(user.id), id); await load(); }, ''),
+    selectEvent: id => run(async () => {
+      if (!user) return;
+      setSnapshot(null); setRecovery(''); setRegisteredEvent(null); setLoading(true);
+      writeContext(eventKey(user.id), id);
+      try { await load(); } finally { setLoading(false); }
+    }, ''),
     selectTeam: async () => {},
     createTeam: name => run(async () => {
       if (!snapshot?.event) throw Error('Select an event from Browse Events first.');

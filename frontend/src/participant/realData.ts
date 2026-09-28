@@ -3,6 +3,9 @@ import { getEvent } from '../data/events';
 import type { BackendEvent } from '../data/events';
 import type { ParticipantEvent, ParticipantTeam, ParticipantProject, SubmissionFields } from './data';
 
+const confirmedRegistrations = new Set<string>();
+export const registrationKnown = (user: string, event: string) => confirmedRegistrations.has(`${user}:${event}`);
+
 const memory = new Map<string, string>();
 export function readContext(key: string) { try { return localStorage.getItem(key) ?? memory.get(key); } catch { return memory.get(key); } }
 export function writeContext(key: string, id?: string) {
@@ -14,6 +17,7 @@ export const projectKey = (user: string, event: string, team: string) => `codear
 export async function registerParticipant(user: string, event: string) {
   try { await api(`/api/v1/events/${encodeURIComponent(event)}/registrations`, 'POST'); }
   catch (error) { if (!(error instanceof ApiError && error.code === 'ALREADY_REGISTERED')) throw error; }
+  confirmedRegistrations.add(`${user}:${event}`);
   writeContext(eventKey(user), event);
 }
 interface TeamRecord { id: string; event_id: string; name: string; captain_id: string }
