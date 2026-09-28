@@ -3036,3 +3036,173 @@ EOf npm --prefix frontend run build
 .judge-entry-summary dl > div { display: flex; align-items: center; gap: 12px; }
 .judge-entry-summary dd { margin: 0; color: var(--text-primary); font: bold 18px var(--font-mono); }
 @media (max-width: 850px) { .judge-entry-composition { grid-template-columns: minmax(0, 1fr); } .judge-entry-actions { margin-left: 0; } }
+
+/* CodeArena product landing: all rules scoped to the public page. */
+.arena-landing { --landing-section-gap: clamp(52px, 7vw, 100px); color: var(--text-primary); overflow-x: clip; }
+.arena-landing a, .arena-landing a * { text-decoration: none; }
+.arena-landing a:focus-visible { outline: 2px solid var(--accent-pink); outline-offset: 5px; }
+.arena-landing .landing-container { width: min(1400px, 100%); margin-inline: auto; padding-inline: clamp(20px, 5vw, 80px); }
+.arena-landing .landing-nav { position: sticky; top: 0; z-index: 10; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 20px; padding: 20px clamp(20px, 4vw, 64px); background: var(--bg-secondary); border-bottom: 1px solid var(--border-default); }
+.arena-landing .landing-nav nav { display: flex; flex-wrap: wrap; gap: 12px 20px; font: 10px/1.8 var(--font-mono); text-transform: uppercase; }
+.arena-landing .landing-nav nav a { position: relative; padding-block: 8px; color: var(--text-secondary); transition: color 180ms; }
+.arena-landing .landing-nav nav a::after { content: ''; position: absolute; bottom: 0; left: 0; width: 16px; height: 2px; background: var(--accent-pink); transform: scaleX(0); transform-origin: left; transition: transform 180ms; }
+.arena-landing .landing-nav nav a:hover, .arena-landing .landing-nav nav a:focus-visible { color: var(--accent-cyan); }
+.arena-landing .landing-nav nav a:hover::after, .arena-landing .landing-nav nav a:focus-visible::after { transform: scaleX(1); }
+.arena-landing .landing-hero { display: grid; grid-template-columns: minmax(0, 1.65fr) minmax(0, 1fr); gap: clamp(24px, 5vw, 72px); align-items: center; min-height: 82svh; padding-block: 80px 100px; position: relative; isolation: isolate; }
+.arena-landing .landing-hero::before { content: ''; position: absolute; inset: 0; pointer-events: none; z-index: -1; background: repeating-linear-gradient(90deg, transparent 0 79px, #20dce508 79px 80px); }
+.arena-landing .landing-hero::after { content: ''; position: absolute; inset: 24% 5% auto; height: 1px; pointer-events: none; background: linear-gradient(90deg, transparent, #20dce533, transparent); animation: landing-scan 15s ease-in-out 2; }
+.arena-landing .landing-hero h1 { font-size: clamp(42px, 6.1vw, 90px); line-height: .96; letter-spacing: -.055em; margin: 24px 0; }
+.arena-landing .landing-lead { color: var(--text-secondary); max-width: 700px; font-size: 16px; line-height: 1.85; margin-block: 24px; }
+.arena-landing .landing-actions { display: flex; flex-wrap: wrap; gap: 20px 28px; align-items: center; margin-top: 28px; }
+.arena-landing .landing-text-link { display: inline-flex; align-items: center; gap: 12px; min-height: 44px; font: 11px/1.7 var(--font-mono); text-transform: uppercase; color: var(--text-secondary); }
+.arena-landing .landing-text-link:hover { color: var(--accent-cyan); }
+.arena-landing .landing-actions .button { white-space: normal; }
+.arena-landing .landing-text-link > span, .arena-landing .landing-actions .button > span { transition: transform 200ms; }
+.arena-landing .landing-text-link:hover > span, .arena-landing .landing-actions .button:hover > span { transform: translateX(5px); }
+.arena-landing .landing-meta-strip { display: flex; flex-wrap: wrap; gap: 12px 24px; font: 9px/1.8 var(--font-mono); color: var(--text-muted); margin-top: 32px; letter-spacing: .07em; }
+.arena-landing .landing-dossier { margin: 0; padding-left: 24px; position: relative; border-left: 1px solid var(--border-bright); }
+.arena-landing .landing-dossier::before { content: '+'; position: absolute; top: -16px; left: -8px; color: var(--accent-cyan); font: 24px var(--font-mono); }
+.arena-landing .landing-dossier-number { display: block; font-size: clamp(120px, 18vw, 250px); line-height: 1; letter-spacing: -.09em; color: var(--accent-pink); }
+.arena-landing .landing-dossier > .metadata { color: var(--text-muted); line-height: 1.8; }
+.arena-landing .landing-dossier-roles { display: grid; gap: 16px; margin-block: 28px; padding-block: 24px; border-block: 1px solid var(--border-default); font: 11px var(--font-mono); color: var(--accent-cyan); }
+.arena-landing .landing-dossier p { font-size: 28px; line-height: 1.1; font-weight: 900; margin-bottom: 24px; }
+/* Adjacent sections each contribute half of the inter-section breathing room. */
+.arena-landing .landing-section { padding-block: calc(var(--landing-section-gap) / 2); border-top: 1px solid var(--border-default); scroll-margin-top: 110px; }
+.arena-landing .landing-audience { padding-bottom: calc(var(--landing-section-gap) * .45); }
+.arena-landing .landing-audience + .landing-role-story { padding-top: calc(var(--landing-section-gap) * .45); }
+.arena-landing h2 { font-size: clamp(30px, 4.6vw, 68px); line-height: 1.07; letter-spacing: -.04em; margin-block: 24px 36px; overflow-wrap: break-word; }
+.arena-landing .landing-purpose { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 64px; align-items: center; }
+.arena-landing .landing-audience { padding-left: clamp(20px, 10vw, 140px); }
+.arena-landing .landing-role-divider { display: flex; flex-wrap: wrap; gap: 0 32px; border-block: 1px solid var(--border-bright); margin-top: 40px; }
+.arena-landing .landing-role-divider a { display: flex; flex: 1; min-width: 190px; align-items: center; gap: 16px; padding-block: 28px; font-size: 17px; font-weight: 800; }
+.arena-landing .landing-role-divider a > span { color: var(--accent-pink); font: 12px var(--font-mono); }
+.arena-landing .landing-role-divider a:hover { color: var(--accent-cyan); }
+.arena-landing .landing-role-story { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(40px, 8vw, 120px); align-items: center; }
+.arena-landing .landing-role-copy h2 { font-size: clamp(46px, 6vw, 86px); line-height: .94; }
+.arena-landing .landing-role-copy h2 > span { display: block; }
+.arena-landing .landing-role-copy h3 { font-size: 21px; line-height: 1.45; }
+.arena-landing .landing-role-description { color: var(--text-secondary); font-size: 14px; line-height: 1.8; }
+.arena-landing .landing-role-capabilities { padding: 0; margin: 28px 0; list-style: none; }
+.arena-landing .landing-role-capabilities li { padding: 9px 0; border-bottom: 1px solid var(--border-default); font: 10px/1.7 var(--font-mono); text-transform: uppercase; color: var(--text-secondary); }
+.arena-landing .landing-role-capabilities li::before { content: '/'; color: var(--accent-cyan); margin-right: 12px; }
+.arena-landing .landing-role-entry { color: var(--accent-pink); }
+.arena-landing .landing-role-reverse .landing-role-copy { grid-column: 2; grid-row: 1; }
+.arena-landing .landing-role-reverse figure { grid-column: 1; grid-row: 1; }
+.arena-landing .landing-product-visual { position: relative; isolation: isolate; margin: 0; min-width: 0; padding-block: 48px; }
+.arena-landing .landing-product-visual figcaption { color: var(--text-muted); font-size: 9px; line-height: 1.8; margin-bottom: 40px; }
+.arena-landing .landing-visual-number { position: absolute; z-index: -1; right: 0; top: 0; font-size: clamp(120px, 22vw, 300px); font-weight: 900; line-height: 1; letter-spacing: -.09em; color: var(--accent-cyan); opacity: .055; pointer-events: none; }
+.arena-landing .landing-fragments > p:first-child { color: var(--accent-cyan); padding: 16px 0; border-top: 1px solid var(--accent-cyan); }
+.arena-landing .landing-project-fragment { margin: 20px 0 0 32px; padding: 24px; background: var(--bg-panel); border-left: 2px solid var(--accent-pink); }
+.arena-landing .landing-project-fragment strong { display: block; font-size: 34px; line-height: 1.1; margin-block: 28px; }
+.arena-landing .landing-project-fragment p { line-height: 1.9; color: var(--text-muted); }
+.arena-landing .landing-final-fragment { margin-top: 28px; margin-left: 24px; padding-block: 20px; border-bottom: 1px solid var(--border-bright); font: 12px/1.9 var(--font-mono); color: var(--accent-pink); }
+.arena-landing .landing-scoring > p:first-child { padding-bottom: 24px; border-bottom: 1px solid var(--accent-cyan); color: var(--accent-cyan); }
+.arena-landing .landing-score-row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 12px; padding: 26px 0; border-bottom: 1px solid var(--border-default); font: 10px var(--font-mono); }
+.arena-landing .landing-score-markers { display: flex; gap: 4px; }
+.arena-landing .landing-score-markers i { width: 9px; height: 22px; border: 1px solid var(--border-bright); transform-origin: bottom; transition: transform 800ms; }
+.arena-landing .landing-score-markers .filled { background: var(--accent-cyan); }
+.arena-landing .landing-scoring > .metadata { margin-top: 24px; }
+.arena-landing .landing-command > div { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 26px 0; border-bottom: 1px solid var(--border-default); font: 12px var(--font-mono); }
+.arena-landing .landing-command > div:first-child { border-top: 1px solid var(--accent-cyan); }
+.arena-landing .landing-command strong { color: var(--accent-cyan); }
+.arena-landing .landing-command > div:nth-child(3) { margin-left: 24px; }
+.arena-landing .landing-demo-meter { display: block; flex: 1; height: 4px; background: var(--border-default); }
+.arena-landing .landing-demo-meter i { display: block; width: 68%; height: 100%; background: var(--accent-pink); transform-origin: left; transition: transform 1100ms; }
+.arena-landing .landing-why h2 { font-size: clamp(36px, 6.5vw, 94px); }
+.arena-landing .landing-consolidation { display: flex; align-items: center; gap: 32px; margin-top: 56px; padding-block: 32px; border-block: 1px solid var(--border-bright); }
+.arena-landing .landing-consolidation > div { display: flex; flex: 1; flex-wrap: wrap; gap: 16px 28px; color: var(--text-muted); font: 14px var(--font-mono); }
+.arena-landing .landing-consolidation > strong { font-size: clamp(24px, 4vw, 56px); letter-spacing: -.04em; }
+.arena-landing .landing-consolidation strong span { display: block; margin-top: 16px; color: var(--accent-cyan); letter-spacing: .06em; }
+.arena-landing .landing-connector { color: var(--accent-pink); font-size: 40px; }
+.arena-landing .landing-capability { display: flex; gap: 20px; align-items: center; padding: 24px 0; border-bottom: 1px solid var(--border-default); transition: background 180ms, color 180ms; }
+.arena-landing .landing-capability h3 { font: 12px/1.7 var(--font-mono); text-transform: uppercase; }
+.arena-landing .landing-dot-leader { flex: 1; border-bottom: 1px dotted var(--border-bright); }
+.arena-landing .landing-ready { color: var(--accent-cyan); }
+.arena-landing .landing-capability:hover { color: var(--accent-cyan); background: var(--bg-panel); }
+.arena-landing .landing-principles { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; }
+.arena-landing .landing-principles dl { margin: 0; }
+.arena-landing .landing-principles dl > div { padding-block: 24px; border-bottom: 1px solid var(--border-default); }
+.arena-landing .landing-principles dt { font: 12px var(--font-mono); text-transform: uppercase; color: var(--accent-cyan); }
+.arena-landing .landing-principles dd { margin: 12px 0 0; color: var(--text-secondary); font-size: 14px; line-height: 1.8; }
+.arena-landing .landing-finale { padding-block: calc(var(--landing-section-gap) / 2); border-top: 1px solid var(--border-default); }
+.arena-landing .landing-finale h2 { font-size: clamp(36px, 7vw, 104px); }
+.arena-landing .landing-footer { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 20px; padding-block: 28px; border-top: 1px solid var(--border-default); font: 10px/1.7 var(--font-mono); color: var(--text-muted); }
+.arena-landing .landing-footer a:hover { color: var(--accent-cyan); }
+.arena-landing .reveal-ready { transition: opacity 700ms, translate 700ms; }
+.arena-landing .reveal-ready:not(.is-revealed):not(:target):not(:focus-within) { opacity: .3; translate: 0 20px; }
+.arena-landing .reveal-ready:not(.is-revealed) .landing-score-markers .filled { transform: scaleY(0); }
+.arena-landing .reveal-ready:not(.is-revealed) .landing-demo-meter i { transform: scaleX(0); }
+.arena-landing .is-revealed .landing-fragments > *, .arena-landing .is-revealed .landing-score-row, .arena-landing .is-revealed .landing-command > div, .arena-landing .is-revealed .landing-capability { animation: landing-arrive 650ms both; }
+.arena-landing .is-revealed :is(.landing-fragments > *, .landing-score-row, .landing-command > div, .landing-capability):nth-child(2) { animation-delay: 100ms; }
+.arena-landing .is-revealed :is(.landing-fragments > *, .landing-score-row, .landing-command > div, .landing-capability):nth-child(n+3) { animation-delay: 200ms; }
+@keyframes landing-scan { 50% { top: 75%; opacity: .3; } }
+@keyframes landing-arrive { from { opacity: .3; transform: translateX(12px); } to { opacity: 1; transform: none; } }
+@media (max-width: 900px) {
+  .arena-landing .landing-hero, .arena-landing .landing-purpose, .arena-landing .landing-role-story, .arena-landing .landing-principles { grid-template-columns: minmax(0, 1fr); }
+  .arena-landing .landing-nav { position: relative; }
+  .arena-landing .landing-dossier { max-width: 500px; margin: 24px 0 0 10%; }
+  .arena-landing .landing-dossier-number { font-size: 160px; }
+  .arena-landing .landing-role-reverse .landing-role-copy, .arena-landing .landing-role-reverse figure { grid-column: auto; grid-row: auto; }
+  .arena-landing .landing-product-visual { width: 100%; max-width: 560px; padding-block: 24px; }
+  .arena-landing .landing-hero h1 { font-size: clamp(40px, 8vw, 72px); }
+  .arena-landing .landing-section { scroll-margin-top: 24px; }
+}
+@media (max-width: 550px) {
+  .arena-landing .landing-nav .brand-wordmark { font-size: 22px; }
+  .arena-landing .landing-hero { padding-block: 48px; }
+  .arena-landing .landing-hero h1 { font-size: clamp(34px, 8.7vw, 48px); }
+  .arena-landing { --landing-section-gap: 52px; }
+  .arena-landing .landing-audience { padding-bottom: 24px; }
+  .arena-landing .landing-audience + .landing-role-story { padding-top: 24px; }
+  .arena-landing .landing-role-copy h2 { font-size: 46px; }
+  .arena-landing .landing-consolidation { flex-direction: column; align-items: flex-start; }
+  .arena-landing .landing-consolidation .landing-connector { transform: rotate(90deg); }
+  .arena-landing .landing-capability { gap: 12px; }
+  .arena-landing .landing-capability h3 { flex: 1; min-width: 0; font-size: 10px; }
+  .arena-landing .landing-dot-leader { display: none; }
+  .arena-landing .landing-project-fragment { margin-left: 12px; padding: 20px; }
+  .arena-landing .landing-score-row { gap: 8px; font-size: 9px; }
+  .arena-landing .landing-score-markers { gap: 3px; }
+  .arena-landing .landing-score-markers i { width: 7px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .arena-landing *, .arena-landing *::before, .arena-landing *::after { animation: none !important; transition: none !important; }
+  .arena-landing .reveal-ready { opacity: 1 !important; translate: none !important; }
+  .arena-landing .landing-score-markers .filled, .arena-landing .landing-demo-meter i { transform: none !important; }
+}
+
+/* Product-purpose map: role branches on a shared event connection. */
+.arena-landing .landing-platform-map { margin: 0; min-width: 0; padding: 28px 0; background: linear-gradient(0deg, transparent, #10182780, transparent); }
+.arena-landing .landing-platform-map figcaption { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; margin-bottom: 36px; color: var(--text-muted); }
+.arena-landing .landing-platform-map figcaption .metadata { font-size: 9px; line-height: 1.7; }
+.arena-landing .landing-map-branches { position: relative; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; padding-top: 24px; }
+.arena-landing .landing-map-branches::before { content: ''; position: absolute; top: 0; left: 8%; right: 8%; height: 1px; background: var(--accent-cyan); opacity: .55; transform-origin: left; transition: transform 900ms ease; }
+.arena-landing .landing-map-branch { position: relative; min-width: 0; }
+.arena-landing .landing-map-branch::before { content: ''; position: absolute; left: 50%; top: -24px; height: 24px; width: 1px; background: var(--border-bright); }
+.arena-landing .landing-map-role { display: flex; flex-direction: column; position: relative; gap: 12px; padding: 16px 8px 20px; border-top: 2px solid var(--accent-cyan); background: var(--bg-panel); transition: background 180ms, border-color 180ms; }
+.arena-landing .landing-map-role .metadata { color: var(--text-muted); font-size: 8px; letter-spacing: .04em; }
+.arena-landing .landing-map-role strong { font-size: clamp(13px, 1.3vw, 19px); overflow-wrap: anywhere; }
+.arena-landing .landing-map-arrow { color: var(--accent-pink); transition: transform 180ms; }
+.arena-landing .landing-map-branch:hover .landing-map-role, .arena-landing .landing-map-branch:focus-within .landing-map-role { background: var(--bg-panel-hover); border-color: var(--accent-pink); }
+.arena-landing .landing-map-role:hover .landing-map-arrow, .arena-landing .landing-map-role:focus-visible .landing-map-arrow { transform: translateX(4px); }
+.arena-landing .landing-map-nodes { list-style: none; margin: 0 0 0 12px; padding: 20px 0 0 12px; border-left: 1px solid var(--border-bright); }
+.arena-landing .landing-map-nodes li { position: relative; padding: 12px 0; color: var(--text-secondary); font: 10px/1.6 var(--font-mono); }
+.arena-landing .landing-map-nodes li::before { content: ''; position: absolute; left: -12px; top: 20px; width: 8px; height: 1px; background: var(--accent-cyan); opacity: .6; }
+.arena-landing .landing-map-nodes li > span { display: inline-block; width: 4px; height: 4px; margin-right: 6px; background: var(--accent-cyan); vertical-align: middle; }
+.arena-landing .landing-map-branch:hover .landing-map-nodes li, .arena-landing .landing-map-branch:focus-within .landing-map-nodes li { color: var(--text-primary); }
+.arena-landing .landing-map-note { border-top: 1px solid var(--border-default); margin-top: 28px; padding-top: 20px; color: var(--text-muted); font: 10px/1.8 var(--font-mono); }
+.arena-landing .landing-map-note > span { color: var(--accent-pink); margin-right: 8px; }
+.arena-landing .reveal-ready:not(.is-revealed) .landing-map-branches::before { transform: scaleX(0); }
+.arena-landing .is-revealed .landing-map-branch { animation: landing-arrive 600ms both; }
+.arena-landing .is-revealed .landing-map-branch:nth-child(2) { animation-delay: 120ms; }
+.arena-landing .is-revealed .landing-map-branch:nth-child(3) { animation-delay: 240ms; }
+@media (max-width: 550px) {
+  .arena-landing .landing-map-branches { grid-template-columns: minmax(0, 1fr); gap: 24px; padding: 0 0 0 16px; border-left: 1px solid var(--accent-cyan); }
+  .arena-landing .landing-map-branches::before { display: none; }
+  .arena-landing .landing-map-branch::before { left: -16px; top: 28px; width: 16px; height: 1px; }
+  .arena-landing .landing-map-role { padding: 16px; }
+  .arena-landing .landing-map-role strong { font-size: 19px; }
+  .arena-landing .landing-map-arrow { position: absolute; right: 16px; top: 22px; }
+  .arena-landing .landing-map-nodes { display: flex; flex-wrap: wrap; gap: 8px 20px; padding-top: 8px; }
+}
+@media (prefers-reduced-motion: reduce) { .arena-landing .landing-map-branches::before { transform: none !important; } }
