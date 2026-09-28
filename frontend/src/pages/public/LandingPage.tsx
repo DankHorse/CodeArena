@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { useSession } from '../../auth/SessionProvider';
 import { Link } from 'react-router-dom';
 import { usePublicCatalog } from '../../data/usePublicCatalog';
 import { eventStatus, formatDeadline } from '../../data/publicData';
@@ -18,7 +19,19 @@ const principles = [
 ];
 export function LandingPage() {
   const { catalog, loading, error, refresh } = usePublicCatalog(true);
+  const session = useSession();
+  const logoutStarted = useRef(false);
   const root = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!session.user || logoutStarted.current) return;
+
+    logoutStarted.current = true;
+
+    void session.logout().finally(() => {
+      logoutStarted.current = false;
+    });
+  }, [session.user?.id]);
   useEffect(() => {
     if (!root.current || !('IntersectionObserver' in window) || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     const sections = root.current.querySelectorAll<HTMLElement>('[data-reveal]');
@@ -36,7 +49,7 @@ export function LandingPage() {
     </header>
     <main id="landing-main">
       <section className="landing-hero landing-container">
-        <div><p className="eyebrow">[ PLATFORM / CODEARENA ]</p><h1>THE PLATFORM<br />HACKATHONS<br />RUN ON<span className="heading-period">.</span></h1><p className="landing-lead">CodeArena is a self-hostable hackathon platform that brings event management, teams, project submissions, judging, scoring, results, and operations into one connected system.</p><div className="landing-actions"><a className="button button-primary landing-major-cta" href="#workspaces">Enter the arena <span aria-hidden="true">→</span></a><Link className="landing-text-link" to={paths.events}>Explore public events <span aria-hidden="true">↗</span></Link></div><p className="landing-meta-strip">SELF-HOSTABLE <span>ROLE-BASED</span> BUILT FOR REAL EVENTS</p></div>
+        <div><p className="eyebrow">[ PLATFORM / CODEARENA ]</p><h1>THE PLATFORM<br />HACKATHONS<br />RUN ON<span className="heading-period">.</span></h1><p className="landing-lead">CodeArena is a self-hostable hackathon platform that brings event management, teams, project submissions, judging, scoring, results, and operations into one connected system.</p><div className="landing-actions"><Link className="button button-primary landing-major-cta" to={paths.register}>Enter the arena <span aria-hidden="true">→</span></Link><Link className="landing-text-link" to={paths.events}>Explore public events <span aria-hidden="true">↗</span></Link></div><p className="landing-meta-strip">SELF-HOSTABLE <span>ROLE-BASED</span> BUILT FOR REAL EVENTS</p></div>
         <figure className="landing-dossier"><figcaption className="metadata">SYS / CODEARENA · FIG. 01</figcaption><strong className="landing-dossier-number">03</strong><span className="metadata">WORKSPACES</span><div className="landing-dossier-roles">{roles.map((role,i)=><span key={role.id}>0{i+1} / {role.name.toUpperCase()}</span>)}</div><p>ONE EVENT.<br />ONE SYSTEM.</p><span className="metadata">ACCESS / ROLE-BASED<br />MODE / SELF-HOSTED</span></figure>
       </section>
       <section className="landing-section landing-container" id="platform" data-reveal>
@@ -56,7 +69,15 @@ export function LandingPage() {
       </section>
       <section className="landing-section landing-audience landing-container" id="workspaces" data-reveal><p className="eyebrow">[ 02 / PEOPLE + RESPONSIBILITIES ]</p><h2>BUILT FOR EVERY SIDE<br />OF THE HACKATHON.</h2><p className="landing-lead">Builders create. Judges evaluate. Organizers make the whole event possible. Each has a workspace built around their responsibility.</p><nav className="landing-role-divider" aria-label="Explore workspaces">{roles.map((role,i)=><a key={role.id} href={`#${role.id === 'judge' ? 'judges' : role.id+'s'}`}><span>0{i+1}</span>{role.name.toUpperCase()}<span aria-hidden="true">↘</span></a>)}</nav></section>
       {roles.map((role,i)=><section className={`landing-section landing-container landing-role-story${role.id==='judge'?' landing-role-reverse':''}`} id={role.id==='judge'?'judges':role.id+'s'} key={role.id} data-reveal>
-        <div className="landing-role-copy"><p className="eyebrow">0{i+1} / {role.name.toUpperCase()}</p><h2>{role.heading.map(line=><span key={line}>{line}</span>)}</h2><h3>{role.subtitle}</h3><p className="landing-lead">{role.audience}</p><p className="landing-role-description">{role.description}</p><ul className="landing-role-capabilities">{role.capabilities.map(item=><li key={item}>{item}</li>)}</ul><Link className="landing-text-link landing-role-entry landing-major-link" to={paths.login} state={{ workspace:role.id }}>Enter {role.name} {role.id==='organizer'?'Console':'Workspace'} <span aria-hidden="true">→</span></Link></div>
+        <div className="landing-role-copy"><p className="eyebrow">0{i+1} / {role.name.toUpperCase()}</p><h2>{role.heading.map(line=><span key={line}>{line}</span>)}</h2><h3>{role.subtitle}</h3><p className="landing-lead">{role.audience}</p><p className="landing-role-description">{role.description}</p><ul className="landing-role-capabilities">{role.capabilities.map(item=><li key={item}>{item}</li>)}</ul><Link className="landing-text-link landing-role-entry landing-major-link" to={paths.login} state={{
+  workspace: role.id,
+  from:
+    role.id === 'judge'
+      ? paths.judge.home
+      : role.id === 'organizer'
+        ? paths.organizer.home
+        : paths.participant.home,
+}}>Enter {role.name} {role.id==='organizer'?'Console':'Workspace'} <span aria-hidden="true">→</span></Link></div>
         <figure className={`landing-product-visual landing-product-${role.id}`}><figcaption className="metadata">DEMO / {role.name.toUpperCase()} SYSTEM VIEW<br />ILLUSTRATIVE INTERFACE · NOT LIVE DATA</figcaption><span className="landing-visual-number" aria-hidden="true">0{i+1}</span>
           {role.id==='participant' ? <div className="landing-fragments"><p className="metadata">TEAM / HYPERION</p><div className="landing-project-fragment"><span className="metadata">PROJECT / READY</span><strong>BUILT WITH<br />INTENT.</strong><p className="metadata">REPOSITORY / ATTACHED<br />DEMO / ATTACHED</p></div><p className="landing-final-fragment">✓ SUBMISSION / FINAL<br /><span className="metadata">STATUS / SUBMITTED</span></p></div> : role.id==='judge' ? <div className="landing-scoring"><p className="metadata">PROJECT / ASSIGNED</p>{[['FUNCTIONALITY',4],['QUALITY',5],['INNOVATION',4]].map(([label,value])=><div className="landing-score-row" key={label}><span>{label}</span><span className="landing-score-markers" aria-hidden="true">{Array.from({length:5},(_,n)=><i key={n} className={n<Number(value)?'filled':''} />)}</span><strong>{value} / 5</strong></div>)}<p className="metadata">FEEDBACK / READY</p><p className="landing-final-fragment">EVALUATION / COMPLETE</p></div> : <div className="landing-command"><div><span>EVENT</span><strong>● ACTIVE</strong></div><div><span>PROJECTS</span><strong>READY</strong></div><div><span>RUBRIC</span><strong>V2</strong></div><div className="landing-command-meter"><span>JUDGING</span><span className="landing-demo-meter" aria-label="Illustrative judging progress"><i /></span></div><p className="landing-final-fragment">RESULTS / PENDING</p></div>}
         </figure>

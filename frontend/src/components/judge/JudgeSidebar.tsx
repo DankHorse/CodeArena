@@ -1,6 +1,6 @@
 import { useLocation } from 'react-router-dom';
 import { judgePath, judgeEventId } from '../../judge/navigation';
-import { useJudge } from '../../judge/JudgeProvider';
+import { useOptionalJudge } from '../../judge/JudgeProvider';
 import {
   ClipboardCheck,
   LayoutDashboard,
@@ -30,7 +30,10 @@ const navigation = [
 
 export function JudgeSidebar() {
   const eventId = judgeEventId(useLocation().search);
-  const { snapshot, loading, busy, selectEvent } = useJudge();
+  const judge = useOptionalJudge();
+  const snapshot = judge?.snapshot ?? null;
+  const loading = judge?.loading ?? false;
+  const busy = judge?.busy ?? false;
   return (
     <aside className="sidebar">
       <div className="brand" aria-label="CodeArena">
@@ -45,7 +48,14 @@ export function JudgeSidebar() {
 
       <div className="event-context">
         <label className="metadata" htmlFor="judge-event">CURRENT EVENT</label>
-        <select id="judge-event" value={snapshot?.event?.id ?? ''} disabled={loading || busy || !snapshot?.events.length} onChange={event => void selectEvent(event.target.value)}>
+        <select
+          id="judge-event"
+          value={snapshot?.event?.id ?? ''}
+          disabled={!judge || loading || busy || !snapshot?.events.length}
+          onChange={event => {
+            if (judge) void judge.selectEvent(event.target.value);
+          }}
+        >
           {!snapshot?.events.length && <option value="">No event available</option>}
           {snapshot?.events.map(event => <option key={event.id} value={event.id}>{event.name}</option>)}
         </select>

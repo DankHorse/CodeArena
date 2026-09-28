@@ -3653,3 +3653,270 @@ EOf npm --prefix frontend run build
     margin: -12px 0 22px;
   }
 }
+
+/* Auth workspace selector */
+.auth-workspace-picker {
+  margin: 28px 0 30px;
+}
+
+.auth-workspace-label {
+  margin: 0 0 10px;
+  color: var(--text-secondary);
+  font: 600 11px/1.4 var(--font-mono);
+  letter-spacing: 0.09em;
+}
+
+.auth-workspace-options {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.auth-workspace-option {
+  min-height: 82px;
+  padding: 15px 14px;
+  border: 1px solid var(--border-default);
+  background: transparent;
+  color: var(--text-primary);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 150ms ease,
+    background 150ms ease,
+    transform 150ms ease;
+}
+
+.auth-workspace-option strong {
+  display: block;
+  margin-bottom: 7px;
+  font: 700 12px/1.2 var(--font-mono);
+  letter-spacing: 0.04em;
+}
+
+.auth-workspace-option span {
+  display: block;
+  color: var(--text-secondary);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.auth-workspace-option:hover {
+  border-color: var(--accent-pink);
+  transform: translateY(-1px);
+}
+
+.auth-workspace-option.is-selected {
+  border-color: var(--accent-pink);
+  background: rgba(255, 47, 125, 0.1);
+}
+
+.auth-workspace-option.is-selected strong {
+  color: var(--accent-pink);
+}
+
+.auth-workspace-option:focus-visible {
+  outline: 2px solid var(--accent-cyan);
+  outline-offset: 3px;
+}
+
+.auth-workspace-option:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.auth-workspace-prompt {
+  margin: 0 0 28px;
+  padding: 18px;
+  border: 1px dashed var(--border-default);
+  color: var(--text-secondary);
+  font: 500 12px/1.6 var(--font-mono);
+}
+
+.auth-organizer-access {
+  margin-bottom: 28px;
+  padding: 20px;
+  border: 1px solid var(--border-default);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.auth-organizer-access .metadata {
+  margin: 0 0 10px;
+  color: var(--accent-cyan);
+}
+
+.auth-organizer-access > p:not(.metadata) {
+  margin: 0 0 20px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+@media (max-width: 700px) {
+  .auth-workspace-options {
+    grid-template-columns: 1fr;
+  }
+
+  .auth-workspace-option {
+    min-height: 68px;
+  }
+}
+
+
+/* AUTH ACCESS SELECTOR — SEGMENTED */
+.auth-access-selector {
+  margin: 28px 0 30px;
+}
+
+.auth-access-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 9px;
+
+  color: var(--text-secondary);
+  font: 600 10px/1.4 var(--font-mono);
+  letter-spacing: 0.12em;
+}
+
+.auth-access-heading span:last-child {
+  color: var(--accent-pink);
+}
+
+.auth-access-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border: 1px solid var(--border-default);
+  background: rgba(7, 12, 25, 0.38);
+}
+
+.auth-access-tab {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 10px;
+
+  min-width: 0;
+  min-height: 68px;
+  padding: 13px 14px;
+
+  border: 0;
+  border-right: 1px solid var(--border-default);
+  background: transparent;
+  color: var(--text-primary);
+
+  text-align: left;
+  cursor: pointer;
+
+  transition:
+    background 150ms ease,
+    color 150ms ease;
+}
+
+.auth-access-tab:last-child {
+  border-right: 0;
+}
+
+.auth-access-tab::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: -1px;
+  left: 0;
+  height: 2px;
+  background: transparent;
+}
+
+.auth-access-tab:hover {
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.auth-access-tab:hover .auth-access-number {
+  color: var(--accent-cyan);
+}
+
+.auth-access-tab.is-active {
+  background: rgba(255, 47, 125, 0.07);
+}
+
+.auth-access-tab.is-active::after {
+  background: var(--accent-pink);
+}
+
+.auth-access-number {
+  color: var(--text-secondary);
+  font: 600 9px/1 var(--font-mono);
+  letter-spacing: 0.08em;
+}
+
+.auth-access-content {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.auth-access-content strong {
+  color: var(--text-primary);
+  font: 700 11px/1.1 var(--font-mono);
+  letter-spacing: 0.055em;
+}
+
+.auth-access-content small {
+  overflow: hidden;
+  color: var(--text-secondary);
+  font-size: 11px;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.auth-access-tab.is-active .auth-access-content strong,
+.auth-access-tab.is-active .auth-access-number {
+  color: var(--accent-pink);
+}
+
+.auth-access-indicator {
+  color: var(--text-secondary);
+  font: 700 11px/1 var(--font-mono);
+}
+
+.auth-access-tab.is-active .auth-access-indicator {
+  color: var(--accent-pink);
+}
+
+.auth-access-tab:focus-visible {
+  z-index: 1;
+  outline: 1px solid var(--accent-cyan);
+  outline-offset: -3px;
+}
+
+.auth-access-tab:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+@media (max-width: 700px) {
+  .auth-access-tabs {
+    grid-template-columns: 1fr;
+  }
+
+  .auth-access-tab {
+    border-right: 0;
+    border-bottom: 1px solid var(--border-default);
+  }
+
+  .auth-access-tab:last-child {
+    border-bottom: 0;
+  }
+}
+
+/* Keep selected workspace visually focused on the pink active state */
+.auth-access-tab.is-active:focus-visible {
+  outline: none;
+}
+
+.auth-access-tab:not(.is-active):focus-visible {
+  z-index: 1;
+  outline: 1px solid var(--accent-cyan);
+  outline-offset: -3px;
+}

@@ -5,6 +5,7 @@ const flat = n => Array.isArray(n) ? n.flatMap(flat) : n && typeof n === 'object
 let publicState = { catalog: null, loading: true, error: '', refresh: () => {} };
 const load = runtime(false, () => { throw Error('Landing must not fetch'); }, {
  '../../data/usePublicCatalog': { usePublicCatalog: eventsOnly => { assert.equal(eventsOnly, true); return publicState; } },
+ '../../auth/SessionProvider': { useSession: () => ({ user: null, logout: async () => {} }) },
  react: { useRef: () => ({ current: null }), useEffect: () => {} },
  'react/jsx-runtime': { jsx, jsxs: jsx }, 'react-router-dom': { Link:'Link' },
  '../../components/brand/CodeArenaMark': { CodeArenaMark:'Mark' },
@@ -13,8 +14,10 @@ const nodes = flat(load('pages/public/LandingPage.tsx').LandingPage());
 const entries = nodes.filter(n=>n.type==='Link'&&n.props.state);
 assert.equal(entries.length,3);
 assert.deepEqual(entries.map(n=>n.props.state.workspace),['participant','judge','organizer']);
+assert.deepEqual(entries.map(n=>n.props.state.from),['/participant','/judge','/organizer']);
 assert(entries.every(n=>n.props.to==='/login'));
-for (const id of ['platform','participants','judges','organizers','capabilities','workspaces']) {
+assert(nodes.some(n => n.type === 'Link' && n.props.to === '/register' && n.props.className?.includes('landing-major-cta')));
+for (const id of ['platform','participants','judges','organizers','capabilities']) {
  assert(nodes.some(n=>n.props.id===id));
  assert(nodes.some(n=>n.type==='a' && n.props.href==='#'+id));
 }

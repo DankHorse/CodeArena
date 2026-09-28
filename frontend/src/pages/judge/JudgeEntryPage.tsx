@@ -1,49 +1,149 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
+import { ClipboardCheck, CheckCircle2, Clock3 } from 'lucide-react';
 import { useSession } from '../../auth/SessionProvider';
 import { errorMessage } from '../../auth/types';
 import { discoverJudgeEvents } from '../../judge/discovery';
 import type { JudgeEventChoice } from '../../judge/discovery';
 import { judgePath } from '../../judge/navigation';
 import { paths } from '../../routes';
+import { JudgeSidebar } from '../../components/judge/JudgeSidebar';
+import { JudgeTopbar } from '../../components/judge/JudgeTopbar';
 
 export function JudgeEntryPage() {
   const { user } = useSession();
+
   const [events, setEvents] = useState<JudgeEventChoice[]>([]);
-  const [loading, setLoading] = useState(true), [error, setError] = useState(''), [attempt, setAttempt] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
   useEffect(() => {
     let current = true;
-    setEvents([]); setLoading(true); setError('');
-    if (!user) { setLoading(false); return; }
-    void discoverJudgeEvents(user.id).then(value => { if (current) setEvents(value); }).catch(error => { if (current) setError(errorMessage(error)); }).finally(() => { if (current) setLoading(false); });
-    return () => { current = false; };
-  }, [user?.id, attempt]);
-  return <main className="workspace judge-entry" id="main-content">
-    <section className="workspace-intro"><div><p className="eyebrow">[ CODEARENA / JUDGE ACCESS ]</p><h1>YOUR JUDGING EVENTS<span className="heading-period">.</span></h1><p className="workspace-description">Select an event to enter your review workspace.</p></div></section>
-    <div className="judge-entry-composition">
-    <div className="judge-entry-grid" aria-busy={loading}>
-      {loading ? <section className="judge-entry-state" role="status"><p className="metadata">ASSIGNMENTS / LOADING</p><p>Checking your judging events…</p></section>
-        : error ? <section className="judge-entry-state" role="alert"><p className="metadata">ASSIGNMENTS / UNAVAILABLE</p><p>{error}</p></section>
-        : events.length ? events.map(({ event, assignmentCount }, index) => <section className="judge-entry-card" key={event.id} aria-labelledby={`judge-event-${event.id}`}>
-          <header><p className="metadata">EVENT / {String(index + 1).padStart(2, '0')}</p>{event.lifecycle && <span className="badge badge-cyan">{event.lifecycle}</span>}</header>
-          <h2 id={`judge-event-${event.id}`}>{event.name}</h2>
-          <p className="judge-entry-count"><strong>{assignmentCount}</strong><span className="metadata">OWN ASSIGNMENTS</span></p>
-          <Link className="button button-primary" to={judgePath(paths.judge.home, event.id)}>Open Judge Workspace →</Link>
-        </section>)
-        : <section className="judge-entry-state"><p className="metadata">ASSIGNMENTS / EMPTY</p><h2>No judging assignments available.</h2><p>Your assigned events will appear here when available.</p></section>}
+
+    if (!user) {
+      setLoading(false);
+      return;
+    }
+
+    void discoverJudgeEvents(user.id)
+      .then(value => {
+        if (current) setEvents(value);
+      })
+      .catch(error => {
+        if (current) setError(errorMessage(error));
+      })
+      .finally(() => {
+        if (current) setLoading(false);
+      });
+
+    return () => {
+      current = false;
+    };
+  }, [user?.id]);
+
+  if (loading) {
+    return (
+      <div className="session-state" role="status">
+        CODEARENA / Loading judge workspace…
+      </div>
+    );
+  }
+
+  if (events.length > 0) {
+    return (
+      <Navigate
+        to={judgePath(paths.judge.home, events[0].event.id)}
+        replace
+      />
+    );
+  }
+
+  return (
+    <div className="app-shell">
+      <JudgeSidebar />
+
+      <div className="shell-workspace">
+        <JudgeTopbar />
+
+        <main className="workspace" id="main-content">
+          {error && (
+            <p className="team-message" role="alert">
+              {error}
+            </p>
+          )}
+
+          <section className="workspace-intro">
+            <div>
+              <p className="eyebrow">[ JUDGE WORKSPACE ]</p>
+
+              <h1>
+                REVIEW DESK
+                <span className="heading-period">.</span>
+              </h1>
+
+              <p className="workspace-description">
+                Review your assigned projects independently and track your progress.
+              </p>
+            </div>
+          </section>
+
+          <section className="judge-status-panel">
+            <div>
+              <span className="badge badge-cyan">NO ASSIGNMENTS</span>
+
+              <p className="metadata judge-status-label">
+                CURRENT EVENT
+              </p>
+
+              <h2>No assigned judging event</h2>
+
+              <p>
+                Projects assigned to you will appear here automatically.
+              </p>
+            </div>
+
+            <div className="judge-progress">
+              <p className="metadata">YOUR REVIEW PROGRESS</p>
+              <strong>0 / 0</strong>
+              <progress
+                value={0}
+                max={1}
+                aria-label="Your review completion"
+              />
+              <p>0 reviews remaining</p>
+            </div>
+          </section>
+
+          <div className="judge-metrics">
+            {[
+              { label: 'ASSIGNED', value: 0, icon: ClipboardCheck },
+              { label: 'COMPLETED', value: 0, icon: CheckCircle2 },
+              { label: 'REMAINING', value: 0, icon: Clock3 },
+            ].map(({ label, value, icon: Icon }) => (
+              <article key={label}>
+                <Icon size={20} aria-hidden="true" />
+                <p className="metadata">{label}</p>
+                <strong>{value}</strong>
+              </article>
+            ))}
+          </div>
+
+          <section className="judge-assignment-preview">
+            <div className="judge-section-heading">
+              <div>
+                <p className="metadata">CURRENT QUEUE</p>
+                <h2>ASSIGNED PROJECTS</h2>
+              </div>
+            </div>
+
+            <div className="judge-assignment-list">
+              <p className="team-message">
+                No projects are assigned to you yet.
+              </p>
+            </div>
+          </section>
+        </main>
+      </div>
     </div>
-    <aside className="judge-entry-protocol" aria-labelledby="judging-protocol-title">
-      <h2 className="metadata" id="judging-protocol-title">JUDGING PROTOCOL</h2>
-      <ol>{['Open your assigned workspace', 'Review only your assigned projects', 'Score every rubric criterion', 'Submit to lock your review'].map((step, index) => <li key={step}><span aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>{step}</li>)}</ol>
-      <p>Reviews are private. Only your assigned projects are visible.</p>
-    </aside>
-    </div>
-    <section className="judge-entry-summary" aria-label="Judging event summary">
-      <dl><div><dt className="metadata">JUDGING EVENTS</dt><dd>{loading || error ? '—' : events.length}</dd></div><div><dt className="metadata">OWN ASSIGNMENTS</dt><dd>{loading || error ? '—' : events.reduce((sum, event) => sum + event.assignmentCount, 0)}</dd></div></dl>
-    <nav className="judge-entry-actions" aria-label="Judge entry controls">
-      <button type="button" disabled={loading} onClick={() => setAttempt(value => value + 1)}>Refresh assignments</button>
-      <Link to={paths.events}>Browse public events →</Link>
-    </nav>
-    </section>
-  </main>;
+  );
 }

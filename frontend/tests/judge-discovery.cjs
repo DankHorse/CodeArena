@@ -29,17 +29,24 @@ const flatten = n => Array.isArray(n) ? n.flatMap(flatten) : n && typeof n === '
  const user = { id: 'user', role: 'participant' };
  const renderLoad = runtime(false, () => {}, {
   react: { useState: initial => { const i = cursor++; if (!(i in slots)) slots[i] = initial; return [slots[i], v => slots[i] = typeof v === 'function' ? v(slots[i]) : v]; }, useEffect: fn => effects.push(fn) },
-  'react/jsx-runtime': { jsx, jsxs: jsx }, 'react-router-dom': { Link: 'Link' },
+  'react/jsx-runtime': { jsx, jsxs: jsx }, 'react-router-dom': { Link: 'Link', Navigate: 'Navigate' },
+  'lucide-react': {
+   ClipboardCheck: 'ClipboardCheck',
+   CheckCircle2: 'CheckCircle2',
+   Clock3: 'Clock3',
+  },
+  '../../components/judge/JudgeSidebar': { JudgeSidebar: 'JudgeSidebar' },
+  '../../components/judge/JudgeTopbar': { JudgeTopbar: 'JudgeTopbar' },
   '../../auth/SessionProvider': { useSession: () => ({ user }) }, '../../judge/discovery': { discoverJudgeEvents: async () => found },
  });
  const Page = renderLoad('pages/judge/JudgeEntryPage.tsx').JudgeEntryPage;
  const render = () => { cursor = 0; effects = []; return Page(); };
- assert(JSON.stringify(render()).includes('Checking your judging events'));
+ assert(JSON.stringify(render()).includes('Loading judge workspace'));
  effects[0](); await new Promise(resolve => setImmediate(resolve));
  let nodes = flatten(render()); assert(nodes.some(n => n.props?.to === `/judge?event=${uuid(1)}`));
  assert.equal(user.role, 'participant');
  found = []; effects[0](); await new Promise(resolve => setImmediate(resolve));
- assert(JSON.stringify(render()).includes('No judging assignments available.'));
+ assert(JSON.stringify(render()).includes('No projects are assigned to you yet.'));
  const counts = load('judge/data.ts').reviewCounts(['pending','in_progress','submitted'].map(status => ({ assignment: { status } })));
  assert.equal(counts.completed, 1); assert.equal(counts.remaining, 2);
  console.log('PASS judge discovery: own assignments, excluded zero/revoked/401/403, exact event links, entry states, login, no peer calls, unchanged role.');

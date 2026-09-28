@@ -84,4 +84,12 @@ export function JudgeProvider({ children, eventId }: { children: ReactNode; even
   }
   return <Context.Provider value={{ snapshot, loading, busy, error, message, refresh, selectEvent, save }}>{children}</Context.Provider>;
 }
-export function useJudge() { const context = useContext(Context); if (!context) throw new Error('JudgeProvider is required.'); return context; }
+export function useOptionalJudge() {
+  return useContext(Context);
+}
+
+export function useJudge() {
+  const context = useOptionalJudge();
+  if (!context) throw new Error('JudgeProvider is required.');
+  return context;
+}

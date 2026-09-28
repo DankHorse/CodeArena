@@ -90,7 +90,16 @@ function providerHarness(demo, eventId, result, failure) {
       '../../auth/SessionProvider': { useSession: () => ({ user: { id: 'user' } }) },
       './JudgeEntryPage': { JudgeEntryPage: 'JudgeEntry' },
     '../../components/judge/JudgeSidebar': {}, '../../components/judge/JudgeTopbar': {},
-      '../../judge/JudgeProvider': { JudgeProvider: 'Provider', useJudge: () => ({ snapshot: currentSnapshot, loading: false }) },
+      '../../judge/JudgeProvider': {
+        JudgeProvider: 'Provider',
+        useJudge: () => ({ snapshot: currentSnapshot, loading: false }),
+        useOptionalJudge: () => ({
+          snapshot: currentSnapshot,
+          loading: false,
+          busy: false,
+          selectEvent: async () => {},
+        }),
+      },
     });
     const components = [
       ['components/judge/JudgeSidebar.tsx', 'JudgeSidebar', ['/judge', '/judge/assignments', '/judge/rubric']],
