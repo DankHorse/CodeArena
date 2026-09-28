@@ -56,17 +56,7 @@ export async function loadRealOrganizerT2(eventId: string): Promise<RealOrganize
   if (DEMO) throw new Error('The real organizer T2 adapter is unavailable in demo mode.');
   if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(eventId)) throw new Error('Provide an explicit event UUID.');
   const base = `/api/v1/events/${encodeURIComponent(eventId)}`;
-  const versions = await api<{ items: RubricResponse[] }>(`${base}/rubrics`);
-  assertEvent(eventId, versions.items);
-  let activeRubric: RealActiveRubric;
-  try {
-    const active = await api<RubricResponse>(`${base}/rubric`);
-    assertEvent(eventId, [active]);
-    activeRubric = { state: 'available', data: rubric(active) };
-  } catch (error) {
-    if (!(error instanceof ApiError && error.status === 409 && error.code === 'ACTIVE_RUBRIC_REQUIRED')) throw error;
-    activeRubric = { state: 'not_active', error };
-  }
+  const { rubrics, activeRubric } = await loadRealRubrics(eventId);
   const { items: assignments } = await api<{ items: RealOrganizerAssignment[] }>(`${base}/judge-assignments`);
   assertEvent(eventId, assignments);
   const progress = await api<ProgressResponse>(`${base}/judging/progress`);
@@ -80,6 +70,59 @@ export async function loadRealOrganizerT2(eventId: string): Promise<RealOrganize
     if (!(error instanceof ApiError && error.status === 404 && error.code === 'RESULTS_NOT_CALCULATED')) throw error;
     results = { state: 'not_calculated', error };
   }
-  return { eventId, rubrics: versions.items.map(rubric), activeRubric, assignments,
+  return { eventId, rubrics, activeRubric, assignments,
     progress: { ...progress, completion_percentage: numeric(progress.completion_percentage), judges: progress.judges.map(judge => ({ ...judge, completion_percentage: numeric(judge.completion_percentage) })) }, results };
+}
+
+export interface RealRubricCreateInput {
+  title: string;
+  criteria: { name: string; description?: string; weight: Decimal; max_score: Decimal; position: number }[];
+}
+
+function requireRealUuid(value: string, label: string) {
+  if (DEMO) throw new Error('The real organizer T2 adapter is unavailable in demo mode.');
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value)) throw new Error(`Provide an explicit ${label} UUID.`);
+}
+
+// Creation never activates or alters an existing version. Decimal strings can be
+// passed without losing precision; validation and version allocation belong to the backend.
+export async function createRealRubricVersion(eventId: string, input: RealRubricCreateInput): Promise<RealRubric> {
+  requireRealUuid(eventId, 'event');
+  const body: RealRubricCreateInput = {
+    title: input.title,
+    criteria: input.criteria.map(criterion => ({
+      name: criterion.name,
+      ...(criterion.description === undefined ? {} : { description: criterion.description }),
+      weight: criterion.weight, max_score: criterion.max_score, position: criterion.position,
+    })),
+  };
+  const response = await api<RubricResponse>(`/api/v1/events/${encodeURIComponent(eventId)}/rubrics`, 'POST', body);
+  assertEvent(eventId, [response]);
+  return rubric(response);
+}
+
+export async function activateRealRubric(eventId: string, rubricId: string): Promise<RealRubric> {
+  requireRealUuid(eventId, 'event');
+  requireRealUuid(rubricId, 'rubric');
+  const response = await api<RubricResponse>(`/api/v1/events/${encodeURIComponent(eventId)}/rubrics/${encodeURIComponent(rubricId)}/activate`, 'POST');
+  assertEvent(eventId, [response]);
+  if (response.id !== rubricId) throw new Error('Activation response does not match the requested rubric.');
+  return rubric(response);
+}
+
+export async function loadRealRubrics(eventId: string): Promise<{ rubrics: RealRubric[]; activeRubric: RealActiveRubric }> {
+  requireRealUuid(eventId, 'event');
+  const base = `/api/v1/events/${encodeURIComponent(eventId)}`;
+  const versions = await api<{ items: RubricResponse[] }>(`${base}/rubrics`);
+  assertEvent(eventId, versions.items);
+  let activeRubric: RealActiveRubric;
+  try {
+    const active = await api<RubricResponse>(`${base}/rubric`);
+    assertEvent(eventId, [active]);
+    activeRubric = { state: 'available', data: rubric(active) };
+  } catch (error) {
+    if (!(error instanceof ApiError && error.status === 409 && error.code === 'ACTIVE_RUBRIC_REQUIRED')) throw error;
+    activeRubric = { state: 'not_active', error };
+  }
+  return { rubrics: versions.items.map(rubric), activeRubric };
 }

@@ -16,7 +16,7 @@ function runtime(demo, fetch, overrides = {}, storage = new Map()) {
     const exports = {}; cache.set(file, exports);
     const source = fs.readFileSync(file, 'utf8').replaceAll('import.meta.env.VITE_DEMO', JSON.stringify(String(demo)));
     vm.runInNewContext(ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, jsx: ts.JsxEmit.ReactJSX, esModuleInterop: true } }).outputText, {
-      exports, require: name => overrides[name] ?? load(path.resolve(path.dirname(file), name)), fetch, URL, URLSearchParams, Error,
+      exports, require: name => overrides[name] ?? load(path.resolve(path.dirname(file), name)), fetch, URL, URLSearchParams, Error, FormData: overrides.FormData ?? FormData,
       crypto: require('node:crypto').webcrypto,
       localStorage: { getItem: key => storage.get(key) ?? null, setItem: (key, value) => storage.set(key, value), removeItem: key => storage.delete(key) },
     }, { filename: file });
