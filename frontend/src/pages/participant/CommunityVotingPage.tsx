@@ -1,10 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useParticipant } from '../../participant/ParticipantProvider';
 import {
+  addProjectComment,
   castCommunityVote,
   communityBallot,
   communityVoteStatus,
+  projectComments,
   type CommunityProject,
+  type ProjectComment,
 } from '../../data/community';
 import { errorMessage } from '../../auth/types';
 
@@ -14,6 +17,9 @@ export function CommunityVotingPage() {
 
   const [projects, setProjects] = useState<CommunityProject[]>([]);
   const [voted, setVoted] = useState<Record<string, boolean>>({});
+  const [comments, setComments] = useState<Record<string, ProjectComment[]>>({});
+  const [commentDrafts, setCommentDrafts] = useState<Record<string, string>>({});
+  const [commentBusy, setCommentBusy] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState('');
@@ -31,6 +37,21 @@ export function CommunityVotingPage() {
         if (!active) return;
 
         setProjects(ballot);
+
+        const commentEntries = await Promise.all(
+          ballot.map(async project => {
+            try {
+              const result = await projectComments(eventId, project.id);
+              return [project.id, result] as const;
+            } catch {
+              return [project.id, []] as const;
+            }
+          }),
+        );
+
+        if (active) {
+          setComments(Object.fromEntries(commentEntries));
+        }
 
         const statuses = await Promise.all(
           ballot.map(async project => {
@@ -72,6 +93,29 @@ export function CommunityVotingPage() {
       setError(errorMessage(err));
     } finally {
       setBusy(null);
+    }
+  }
+
+  async function submitComment(projectId: string) {
+    if (!eventId || commentBusy) return;
+
+    const body = (commentDrafts[projectId] ?? '').trim();
+    if (!body) return;
+
+    setCommentBusy(projectId);
+    setError('');
+
+    try {
+      const created = await addProjectComment(eventId, projectId, body);
+      setComments(current => ({
+        ...current,
+        [projectId]: [...(current[projectId] ?? []), created],
+      }));
+      setCommentDrafts(current => ({ ...current, [projectId]: '' }));
+    } catch (err) {
+      setError(errorMessage(err));
+    } finally {
+      setCommentBusy(null);
     }
   }
 
@@ -166,6 +210,46 @@ export function CommunityVotingPage() {
                         ? 'Recording…'
                         : 'Vote for project'}
                   </button>
+                </div>
+
+                <div className="team-message" style={{ marginTop: '1rem' }}>
+                  <strong>COMMENTS</strong>
+                  <div style={{ marginTop: '0.75rem' }}>
+                    {(comments[project.id] ?? []).length === 0 ? (
+                      <p className="metadata">No comments yet.</p>
+                    ) : (
+                      (comments[project.id] ?? []).map(comment => (
+                        <p key={comment.id}>{comment.body}</p>
+                      ))
+                    )}
+                  </div>
+
+                  <div className="public-actions" style={{ marginTop: '0.75rem' }}>
+                    <input
+                      aria-label={`Comment on ${project.title}`}
+                      value={commentDrafts[project.id] ?? ''}
+                      onChange={event =>
+                        setCommentDrafts(current => ({
+                          ...current,
+                          [project.id]: event.target.value,
+                        }))
+                      }
+                      placeholder="Leave a comment"
+                      maxLength={2000}
+                      disabled={commentBusy !== null}
+                    />
+                    <button
+                      className="button public-secondary"
+                      type="button"
+                      disabled={
+                        commentBusy !== null ||
+                        !(commentDrafts[project.id] ?? '').trim()
+                      }
+                      onClick={() => void submitComment(project.id)}
+                    >
+                      {commentBusy === project.id ? 'Posting…' : 'Post comment'}
+                    </button>
+                  </div>
                 </div>
               </div>
             </article>
