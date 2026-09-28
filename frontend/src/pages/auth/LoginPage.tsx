@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
-import { Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { AuthShell } from './AuthShell';
 import { DEMO } from '../../api';
 import { useSession } from '../../auth/SessionProvider';
@@ -17,7 +17,22 @@ export function LoginPage() {
   const [error, setError] = useState('');
   const [demoRole, setDemoRole] = useState<Role>('participant');
   const state: unknown = location.state;
-  const registered = !!state && typeof state === 'object' && 'registered' in state && state.registered === true;
+
+  const workspace =
+    state &&
+    typeof state === 'object' &&
+    'workspace' in state &&
+    (state.workspace === 'participant' ||
+      state.workspace === 'judge' ||
+      state.workspace === 'organizer')
+      ? state.workspace
+      : undefined;
+
+  const registered =
+    !!state &&
+    typeof state === 'object' &&
+    'registered' in state &&
+    state.registered === true;
   if (session.user) return <Navigate to={loginDestination(session.user.role, state)} replace />;
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -30,7 +45,20 @@ export function LoginPage() {
     finally { setBusy(false); }
   }
   return (
-    <AuthShell eyebrow="[ ACCESS / LOGIN ]" title="WELCOME BACK." description="Authenticate to enter your CodeArena workspace." footerText="New to CodeArena?" footerLinkLabel="Create account ↗" footerLinkTo={paths.register}>
+    <AuthShell
+      eyebrow={workspace ? `[ CODEARENA / ${workspace.toUpperCase()} ACCESS ]` : '[ ACCESS / LOGIN ]'}
+      title={workspace ? `${workspace.toUpperCase()} LOGIN` : 'WELCOME BACK.'}
+      description="Authenticate to enter your CodeArena workspace."
+      footerText="New to CodeArena?"
+      footerLinkLabel="Create account ↗"
+      footerLinkTo={paths.register}
+    >
+      {workspace && (
+        <Link className="auth-workspace-switch" to={paths.home}>
+          ← Choose another workspace
+        </Link>
+      )}
+
       {registered && <p className="auth-message" role="status">Account created. {DEMO ? 'Choose a sample role to explore the preview.' : 'Sign in with your email and password.'}</p>}
       <form className="auth-form" onSubmit={handleSubmit} aria-busy={busy}>
         {DEMO ? <><p className="auth-message">Demo preview: choose a sample workspace. No real credentials are needed.</p><label><span>PREVIEW ROLE</span><select value={demoRole} onChange={event => { if (isRole(event.target.value)) setDemoRole(event.target.value); }} disabled={busy}><option value="participant">Participant</option><option value="judge">Judge</option><option value="organizer">Organizer</option></select></label></> : <>

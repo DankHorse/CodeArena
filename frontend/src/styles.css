@@ -3610,3 +3610,46 @@ EOf npm --prefix frontend run build
     font-size: 13px;
   }
 }
+
+/* Login workspace switch */
+.auth-workspace-switch {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: max-content;
+  min-height: 42px;
+  margin: -14px 0 24px auto;
+  padding: 10px 16px;
+
+  border: 1px solid var(--border-default);
+  background: transparent;
+  color: var(--text-secondary);
+
+  font: 600 11px/1.4 var(--font-mono);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-decoration: none;
+
+  transition:
+    color 160ms ease,
+    border-color 160ms ease,
+    background 160ms ease;
+}
+
+.auth-workspace-switch:hover {
+  color: var(--accent-cyan);
+  border-color: var(--accent-cyan);
+  background: rgba(50, 230, 220, 0.05);
+  text-decoration: none;
+}
+
+.auth-workspace-switch:focus-visible {
+  outline: 2px solid var(--accent-cyan);
+  outline-offset: 3px;
+}
+
+@media (max-width: 700px) {
+  .auth-workspace-switch {
+    margin: -12px 0 22px;
+  }
+}
