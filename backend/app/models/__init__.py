@@ -42,4 +42,7 @@ __all__ = [
     "TeamMember",
     "User",
     "Vote",
+    "VotingAuditLog",
 ]
+
+from app.models.voting_audit import VotingAuditLog

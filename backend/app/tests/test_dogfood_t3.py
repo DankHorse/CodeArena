@@ -14,6 +14,7 @@ from app.models.project import ProjectSubmission
 from app.models.team import Team, TeamInvitation, TeamMember
 from app.models.user import User
 from app.models.voting import Vote
+from app.models.voting_audit import VotingAuditLog
 
 
 @pytest.fixture(autouse=True)
@@ -141,6 +142,17 @@ def test_cast_vote_success_and_persistence(client: TestClient):
         assert str(saved_vote.event_id) == event["id"]
         assert saved_vote.voter_id == voter.id
 
+        audit = db.scalar(
+            select(VotingAuditLog).where(
+                VotingAuditLog.event_id == event["id"],
+                VotingAuditLog.project_id == project["id"],
+                VotingAuditLog.voter_id == voter.id,
+                VotingAuditLog.action == "vote",
+                VotingAuditLog.outcome == "accepted",
+            )
+        )
+        assert audit is not None
+
 
 def test_prevent_duplicate_votes(client: TestClient):
     organizer = make_user("organizer")
@@ -166,6 +178,17 @@ def test_prevent_duplicate_votes(client: TestClient):
             select(Vote).where(Vote.project_id == project["id"], Vote.voter_id == voter.id)
         )
         assert vote_count is not None
+
+        duplicate_audit = db.scalar(
+            select(VotingAuditLog).where(
+                VotingAuditLog.event_id == event["id"],
+                VotingAuditLog.project_id == project["id"],
+                VotingAuditLog.voter_id == voter.id,
+                VotingAuditLog.action == "vote",
+                VotingAuditLog.outcome == "duplicate",
+            )
+        )
+        assert duplicate_audit is not None
 
 
 def test_enforce_voting_window_too_early(client: TestClient):
@@ -810,4 +833,92 @@ def test_community_ballot_rejects_non_participant(client: TestClient):
     auth(client, organizer)
 
     response = client.get(f"/api/v1/events/{event['id']}/ballot")
+    assert response.status_code == 403
+
+
+def test_community_voting_rate_limit(client: TestClient):
+    organizer = make_user("organizer")
+    voter = make_user("participant")
+
+    event = create_event(
+        client,
+        organizer,
+        voting_opens_at=(datetime.now(timezone.utc) - timedelta(minutes=5)).isoformat(),
+        voting_ends_at=(datetime.now(timezone.utc) + timedelta(hours=2)).isoformat(),
+    )
+
+    projects = []
+    for index in range(11):
+        builder = make_user("participant")
+        projects.append(
+            create_project(
+                client,
+                event["id"],
+                builder,
+                title=f"Rate Limit Project {index}",
+            )
+        )
+
+    auth(client, voter)
+
+    responses = [
+        client.post(
+            f"/api/v1/events/{event['id']}/projects/{project['id']}/vote"
+        )
+        for project in projects
+    ]
+
+    assert all(response.status_code == 201 for response in responses[:10])
+    assert responses[10].status_code == 429
+    assert responses[10].json()["error"]["code"] == "VOTE_RATE_LIMITED"
+
+    with SessionLocal(bind=get_engine()) as db:
+        rate_limit_audit = db.scalar(
+            select(VotingAuditLog).where(
+                VotingAuditLog.event_id == event["id"],
+                VotingAuditLog.project_id == projects[10]["id"],
+                VotingAuditLog.voter_id == voter.id,
+                VotingAuditLog.action == "vote",
+                VotingAuditLog.outcome == "rate_limited",
+            )
+        )
+        assert rate_limit_audit is not None
+
+
+def test_community_voting_audit_is_visible_to_event_organizer(client: TestClient):
+    organizer = make_user("organizer")
+    voter = make_user("participant")
+    builder = make_user("participant")
+
+    event = create_event(client, organizer)
+    project = create_project(client, event["id"], builder)
+
+    auth(client, voter)
+    vote = client.post(
+        f"/api/v1/events/{event['id']}/projects/{project['id']}/vote"
+    )
+    assert vote.status_code == 201, vote.text
+
+    auth(client, organizer)
+    response = client.get(f"/api/v1/events/{event['id']}/voting/audit")
+
+    assert response.status_code == 200, response.text
+    items = response.json()
+    assert len(items) == 1
+    assert items[0]["event_id"] == event["id"]
+    assert items[0]["project_id"] == project["id"]
+    assert items[0]["voter_id"] == str(voter.id)
+    assert items[0]["action"] == "vote"
+    assert items[0]["outcome"] == "accepted"
+
+
+def test_community_voting_audit_rejects_participant(client: TestClient):
+    organizer = make_user("organizer")
+    participant = make_user("participant")
+
+    event = create_event(client, organizer)
+
+    auth(client, participant)
+    response = client.get(f"/api/v1/events/{event['id']}/voting/audit")
+
     assert response.status_code == 403

@@ -12,7 +12,34 @@ from app.models.project import ProjectSubmission
 from app.models.team import TeamMember
 from app.models.user import User
 from app.models.voting import Vote
+from app.models.voting_audit import VotingAuditLog
 from app.services.events import utc_now
+
+
+_VOTE_RATE_LIMIT = 10
+_VOTE_RATE_WINDOW_SECONDS = 60
+_vote_attempts: dict[tuple[UUID, UUID], list[datetime]] = {}
+
+
+def _check_vote_rate_limit(actor: User, event_id: UUID, now: datetime) -> None:
+    key = (actor.id, event_id)
+    cutoff = now.timestamp() - _VOTE_RATE_WINDOW_SECONDS
+
+    attempts = [
+        timestamp
+        for timestamp in _vote_attempts.get(key, [])
+        if timestamp.timestamp() > cutoff
+    ]
+
+    if len(attempts) >= _VOTE_RATE_LIMIT:
+        raise APIError(
+            429,
+            "VOTE_RATE_LIMITED",
+            "Too many vote attempts; please try again later",
+        )
+
+    attempts.append(now)
+    _vote_attempts[key] = attempts
 
 
 def _get_project_and_event(
@@ -45,6 +72,26 @@ def _check_voting_window(event: Event, current_time: datetime) -> None:
         raise APIError(409, "VOTING_CLOSED", "Voting has closed for this event")
 
 
+def _record_voting_audit(
+    db: Session,
+    *,
+    event_id: UUID,
+    project_id: UUID | None,
+    voter_id: UUID,
+    outcome: str,
+) -> None:
+    db.add(
+        VotingAuditLog(
+            event_id=event_id,
+            project_id=project_id,
+            voter_id=voter_id,
+            action="vote",
+            outcome=outcome,
+        )
+    )
+    db.commit()
+
+
 def cast_vote(
     db: Session,
     *,
@@ -68,6 +115,18 @@ def cast_vote(
     current_time = now or utc_now()
     _check_voting_window(event, current_time)
 
+    try:
+        _check_vote_rate_limit(actor, event.id, current_time)
+    except APIError:
+        _record_voting_audit(
+            db,
+            event_id=event.id,
+            project_id=project.id,
+            voter_id=actor.id,
+            outcome="rate_limited",
+        )
+        raise
+
     # Prevent team members from voting on their own project
     is_team_member = db.scalar(
         select(TeamMember.user_id).where(
@@ -86,6 +145,13 @@ def cast_vote(
         )
     )
     if existing is not None:
+        _record_voting_audit(
+            db,
+            event_id=event.id,
+            project_id=project.id,
+            voter_id=actor.id,
+            outcome="duplicate",
+        )
         raise APIError(409, "ALREADY_VOTED", "You have already voted for this project")
 
     vote = Vote(
@@ -94,6 +160,15 @@ def cast_vote(
         voter_id=actor.id,
     )
     db.add(vote)
+    db.add(
+        VotingAuditLog(
+            event_id=event.id,
+            project_id=project.id,
+            voter_id=actor.id,
+            action="vote",
+            outcome="accepted",
+        )
+    )
     try:
         db.commit()
     except IntegrityError as exc:
@@ -258,4 +333,41 @@ def get_ballot_projects(
             "submitted_at": project.submitted_at,
         }
         for project, event in rows
+    ]
+
+
+def list_voting_audit_logs(
+    db: Session,
+    *,
+    event_id: UUID,
+    actor: User,
+) -> list[dict]:
+    event = db.get(Event, event_id)
+    if event is None:
+        raise APIError(404, "EVENT_NOT_FOUND", "Event was not found")
+
+    if actor.role not in {"organizer", "admin"} or event.organizer_id != actor.id:
+        raise APIError(
+            403,
+            "FORBIDDEN",
+            "Only this event's organizer can view voting audit logs",
+        )
+
+    rows = db.scalars(
+        select(VotingAuditLog)
+        .where(VotingAuditLog.event_id == event_id)
+        .order_by(VotingAuditLog.created_at.desc(), VotingAuditLog.id)
+    ).all()
+
+    return [
+        {
+            "id": row.id,
+            "event_id": row.event_id,
+            "project_id": row.project_id,
+            "voter_id": row.voter_id,
+            "action": row.action,
+            "outcome": row.outcome,
+            "created_at": row.created_at,
+        }
+        for row in rows
     ]

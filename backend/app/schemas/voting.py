@@ -54,3 +54,13 @@ class BallotProjectResponse(BaseModel):
     repository_url: str | None
     demo_url: str | None
     submitted_at: datetime
+
+
+class VotingAuditLogResponse(BaseModel):
+    id: UUID
+    event_id: UUID
+    project_id: UUID | None
+    voter_id: UUID
+    action: str
+    outcome: str
+    created_at: datetime

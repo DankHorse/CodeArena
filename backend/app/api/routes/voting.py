@@ -14,6 +14,7 @@ from app.schemas.voting import (
     VoteListResponse,
     VoteResponse,
     BallotProjectResponse,
+    VotingAuditLogResponse,
 )
 from app.services.voting import (
     cast_vote,
@@ -23,6 +24,7 @@ from app.services.voting import (
     list_user_votes,
     retract_vote,
     get_ballot_projects,
+    list_voting_audit_logs,
 )
 
 router = APIRouter()
@@ -211,3 +213,16 @@ def event_ballot(
     db: Session = Depends(get_db),
 ):
     return get_ballot_projects(db, event_id=event_id, actor=actor)
+
+
+@router.get(
+    "/events/{event_id}/voting/audit",
+    response_model=list[VotingAuditLogResponse],
+    summary="View community voting audit logs",
+)
+def event_voting_audit(
+    event_id: UUID,
+    actor: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    return list_voting_audit_logs(db, event_id=event_id, actor=actor)
