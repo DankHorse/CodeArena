@@ -4,6 +4,7 @@ import {
   FileText,
   Images,
   LayoutDashboard,
+  Settings,
   Users,
 } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
@@ -14,6 +15,7 @@ const navigation = [
   { label: 'Team', icon: Users, to: '/participant/team' },
   { label: 'Submission', icon: FileText, to: '/participant/submission' },
   { label: 'Project gallery', icon: Images, to: '/gallery' },
+  { label: 'Settings', icon: Settings, to: '/participant/settings' },
 ];
 
 export function ParticipantSidebar() {

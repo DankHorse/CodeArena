@@ -20,8 +20,17 @@ export function RealTeamPage() {
     try { setInvitation(await inviteMember(team.id, id)); } catch (error) { setError(errorMessage(error)); } finally { setSending(false); }
   }
   return <>
-    <section className="workspace-intro"><div><p className="eyebrow">[ PARTICIPANT / TEAM ]</p><h1>TEAM CONTROL<span className="heading-period">.</span></h1><p className="workspace-description">{event?.name ?? 'Select an event to begin.'}</p></div><Link to={paths.participant.home}>← Dashboard</Link></section>
-    {team && <section className="team-workspace-panel"><h2>{team.name}</h2><p className="metadata">CAPTAIN / {team.captain_id}</p><p className="metadata">MEMBERS / {team.members.length}</p>{team.members.map(member => <p key={member.id}>{member.id}</p>)}<Link to={paths.participant.submission}>Open submission ↗</Link></section>}
+    <section className="workspace-intro"><div><p className="eyebrow">[ PARTICIPANT / TEAM ]</p><h1>TEAM CONTROL<span className="heading-period">.</span></h1><p className="workspace-description">{event?.name ?? 'Select an event to begin.'}</p></div>
+    </section>
+    {team && <section className="team-workspace-panel"><h2>{team.name}</h2><p className="metadata">CAPTAIN / {team.captain_id}</p><p className="metadata">MEMBERS / {team.members.length}</p>{team.members.map(member => <p key={member.id}>{member.id}</p>)}<div className="participant-panel-actions">
+        <Link
+          className="button button-primary"
+          to={paths.participant.submission}
+        >
+          Open submission ↗
+        </Link>
+      </div>
+    </section>}
     {closed && <p className="team-message">Team changes require a published event within its registration deadline.</p>}
     <div className="team-actions-grid">{!team && <section className="team-action-panel"><h2>CREATE A TEAM</h2><form className="team-form" onSubmit={e => { e.preventDefault(); void createTeam(String(new FormData(e.currentTarget).get('name') ?? '')); }}><label><span>TEAM NAME</span><input name="name" required maxLength={100} disabled={busy || !event} /></label><button className="button button-primary" disabled={busy || !event}>Create team ↗</button></form></section>}
       <section className="team-action-panel"><h2>ACCEPT INVITATION</h2><form className="team-form" onSubmit={e => { e.preventDefault(); void joinTeam(String(new FormData(e.currentTarget).get('token') ?? '')); }}><label><span>RECIPIENT-SPECIFIC TOKEN</span><input name="token" required minLength={32} maxLength={128} disabled={busy} /></label><p>Use the token your captain created for your account.</p><button className="button team-join-button" disabled={busy}>Accept invitation ↗</button></form></section></div>

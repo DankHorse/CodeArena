@@ -20,6 +20,7 @@ import { ParticipantDashboard } from './pages/participant/ParticipantDashboard';
 import { ParticipantLayout } from './pages/participant/ParticipantLayout';
 import { TeamPage } from './pages/participant/TeamPage';
 import { SubmissionPage } from './pages/participant/SubmissionPage';
+import { ParticipantSettingsPage } from './pages/participant/ParticipantSettingsPage';
 import { JudgeDashboard } from './pages/judge/JudgeDashboard';
 import { JudgeAssignmentsPage } from './pages/judge/JudgeAssignmentsPage';
 import { JudgeReviewPage } from './pages/judge/JudgeReviewPage';
@@ -70,6 +71,11 @@ export default function App() {
           <Route path={paths.participant.team} element={<TeamPage />} />
 
           <Route path={paths.participant.submission} element={<SubmissionPage />} />
+
+          <Route
+            path={paths.participant.settings}
+            element={<ParticipantSettingsPage />}
+          />
         </Route>
 
 

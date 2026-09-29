@@ -12,7 +12,10 @@ export const paths = {
   login: '/login',
   register: '/register',
   participant: {
-    home: '/participant', team: '/participant/team', submission: '/participant/submission',
+    home: '/participant',
+    team: '/participant/team',
+    submission: '/participant/submission',
+    settings: '/participant/settings',
   },
   judge: {
     home: '/judge', assignments: '/judge/assignments', rubric: '/judge/rubric',

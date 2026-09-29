@@ -31,10 +31,16 @@ export function SubmissionPage() {
     const form = new FormData(event.currentTarget);
     void saveSubmission({ title: String(form.get('title') ?? '').trim(), summary: String(form.get('summary') ?? '').trim(), track_id: String(form.get('track') ?? ''), repo_url: String(form.get('repoUrl') ?? '').trim(), demo_url: String(form.get('demoUrl') ?? '').trim() }, submit);
   }
-  if (!team || !event) return <section className="team-state-panel"><div><h1>TEAM REQUIRED.</h1><p>Create or join a team before creating a submission.</p><div className="public-actions"><Link className="button button-primary" to={paths.participant.team}>Create or join team ↗</Link><Link to={paths.participant.home}>← Dashboard</Link></div></div></section>;
+  if (!team || !event) return <section className="team-state-panel"><div><h1>TEAM REQUIRED.</h1><p>Create or join a team before creating a submission.</p><div className="public-actions"><Link className="button button-primary" to={paths.participant.team}>
+        Create or join team ↗
+      </Link></div></div></section>;
   const state = !DEMO && project?.state === 'submitted' ? 'SUBMITTED' : locked ? 'LOCKED' : project?.state.toUpperCase() ?? 'NO SUBMISSION';
   return <>
-    <section className="workspace-intro"><div><p className="eyebrow">[ PARTICIPANT / SUBMISSION ]</p><h1>PROJECT SUBMISSION<span className="heading-period">.</span></h1><p className="workspace-description">{team.name} / {event.name}</p></div><Link to={paths.participant.home}>← Dashboard</Link><span className="badge badge-cyan">{state}</span></section>
+    <section className="workspace-intro"><div><p className="eyebrow">[ PARTICIPANT / SUBMISSION ]</p><h1>PROJECT SUBMISSION<span className="heading-period">.</span></h1><p className="workspace-description">{team.name} / {event.name}</p></div>
+      <div className="participant-intro-actions">
+        <span className="badge badge-cyan">{state}</span>
+      </div>
+    </section>
     <section className="submission-deadline-panel"><Clock3 size={20} aria-hidden="true" /><div><p className="metadata">SUBMISSION WINDOW</p><strong>{locked ? 'LOCKED' : 'OPEN'}</strong><span>Deadline: {deadlineLabel(event)}</span></div></section>
     <form className="submission-form" key={`${event.id}:${team.id}:${project?.id ?? 'new'}`} onSubmit={save} aria-busy={busy}>
       <fieldset className="participant-fieldset" disabled={locked || busy}>

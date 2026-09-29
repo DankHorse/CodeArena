@@ -11,8 +11,13 @@ export function LogoutButton() {
   const [error, setError] = useState('');
   async function handleLogout() {
     setBusy(true); setError('');
-    try { await logout(); navigate(paths.home, { replace: true }); }
-    catch (error) { setError(errorMessage(error)); setBusy(false); }
+    try {
+      navigate(paths.home, { replace: true });
+      await logout();
+    } catch (error) {
+      setError(errorMessage(error));
+      setBusy(false);
+    }
   }
   return <div className="logout-control"><button className="public-site" type="button" onClick={handleLogout} disabled={busy}>{busy ? 'SIGNING OUT…' : 'LOG OUT ↗'}</button>{error && <p className="auth-message" role="alert">{error}</p>}</div>;
 }

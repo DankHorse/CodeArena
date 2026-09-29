@@ -1,10 +1,10 @@
-import { LogoutButton } from '../common/LogoutButton';
 import { useLocation } from 'react-router-dom';
 
 const labels: Record<string, string> = {
   '/participant': 'Dashboard',
   '/participant/team': 'Team',
   '/participant/submission': 'Submission',
+  '/participant/settings': 'Settings',
 };
 
 export function ParticipantTopbar() {
@@ -20,7 +20,6 @@ export function ParticipantTopbar() {
       </p>
 
       <div className="topbar-controls">
-        <LogoutButton />
         <span className="badge badge-cyan">PARTICIPANT</span>
       </div>
     </header>
