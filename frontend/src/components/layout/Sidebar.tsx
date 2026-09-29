@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { CodeArenaMark } from '../brand/CodeArenaMark';
+import { LogoutButton } from '../common/LogoutButton';
 
 const navigation = [
   { label: 'Arena control', icon: LayoutDashboard, to: '/organizer', end: true },
@@ -78,6 +79,10 @@ export function Sidebar() {
           ))}
         </ul>
       </nav>
+
+      <div className="organizer-sidebar-logout">
+        <LogoutButton />
+      </div>
 
       <div className="sidebar-footer">
         <span className="status-dot" /> ORGANIZER CONSOLE

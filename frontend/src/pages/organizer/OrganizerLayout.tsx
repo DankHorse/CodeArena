@@ -21,10 +21,8 @@ function OrganizerWorkspace() {
   const {
     snapshot,
     loading,
-    busy,
     error,
     message,
-    refresh,
   } = useOrganizer();
 
   let content;
@@ -67,16 +65,6 @@ function OrganizerWorkspace() {
 
   return (
     <AppShell>
-      <div className="organizer-refresh">
-        <button
-          className="public-site"
-          type="button"
-          disabled={loading || busy}
-          onClick={() => void refresh()}
-        >
-          REFRESH EVENT ↻
-        </button>
-      </div>
 
       {error && (
         <p className="team-message" role="alert">

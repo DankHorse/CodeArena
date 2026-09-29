@@ -20,9 +20,9 @@
   --space-6: 1.5rem;
   --space-8: 2rem;
   --space-12: 3rem;
-  --font-body: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
-  --font-display: "Arial Black", "Helvetica Neue", Arial, sans-serif;
+  --font-body: var(--font-mono);
+  --font-mono: "JetBrains Mono", "SFMono-Regular", Menlo, Consolas, "Liberation Mono", monospace;
+  --font-display: "Space Grotesk", "Helvetica Neue", Arial, sans-serif;
   font-family: var(--font-body);
   color: var(--text-primary);
   background: var(--bg-primary);
@@ -69,7 +69,7 @@ h1, h2, h3, p { margin: 0; }
 .sidebar-footer { margin: auto 20px 0; padding: 28px 0; color: var(--accent-cyan); font: 10px/1.6 var(--font-mono); }
 .sidebar-footer p { margin-top: 10px; color: var(--text-muted); font-size: 9px; }
 .status-dot { display: inline-block; width: 5px; height: 5px; background: var(--accent-cyan); margin-right: 6px; }
-.shell-workspace { min-width: 0; background-image: linear-gradient(#738bab07 1px, transparent 1px), linear-gradient(90deg, #738bab07 1px, transparent 1px); background-size: 32px 32px; }
+.shell-workspace { min-width: 0; background-image: linear-gradient(#738bab07 1px, transparent 1px), linear-gradient(90deg, #738bab07 1px, transparent 1px); background-size: 40px 40px; }
 .topbar { min-height: 72px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; padding: 18px 36px; background: var(--bg-secondary); border-bottom: 1px solid var(--border-default); }
 .breadcrumb { font-size: 12px; color: var(--text-muted); }
 .breadcrumb span { margin: 0 12px; color: var(--accent-pink); }
@@ -325,7 +325,7 @@ EOf npm --prefix frontend run build
 
   color: var(--accent-cyan);
 
-  font-family: monospace;
+  font-family: var(--font-mono);
   font-size: 0.75rem;
   letter-spacing: 0.08em;
 }
@@ -372,7 +372,7 @@ EOf npm --prefix frontend run build
 .auth-form label > span {
   color: var(--text-muted);
 
-  font-family: monospace;
+  font-family: var(--font-mono);
   font-size: 0.75rem;
   letter-spacing: 0.09em;
 }
@@ -427,7 +427,7 @@ EOf npm --prefix frontend run build
   background: var(--bg-panel);
   color: var(--accent-cyan);
 
-  font-family: monospace;
+  font-family: var(--font-mono);
   font-size: 0.78rem;
   line-height: 1.5;
 }
@@ -492,7 +492,7 @@ EOf npm --prefix frontend run build
   border: 1px solid var(--border-default);
   background: var(--bg-panel);
   color: var(--text-primary);
-  font-family: monospace;
+  font-family: var(--font-mono);
   font-size: 0.8rem;
 }
 
@@ -536,7 +536,7 @@ EOf npm --prefix frontend run build
 }
 
 .participant-deadline strong {
-  font-family: monospace;
+  font-family: var(--font-mono);
   font-size: 1.25rem;
 }
 
@@ -680,7 +680,7 @@ EOf npm --prefix frontend run build
 
 .team-form label > span {
   color: var(--text-muted);
-  font-family: monospace;
+  font-family: var(--font-mono);
   font-size: 0.75rem;
   letter-spacing: 0.09em;
 }
@@ -708,7 +708,7 @@ EOf npm --prefix frontend run build
   border-left: 3px solid var(--accent-cyan);
   background: var(--bg-panel);
   color: var(--accent-cyan);
-  font-family: monospace;
+  font-family: var(--font-mono);
   font-size: 0.8rem;
 }
 
@@ -803,7 +803,7 @@ EOf npm --prefix frontend run build
   display: block;
   margin: 16px 0 22px;
   color: var(--accent-cyan);
-  font-family: monospace;
+  font-family: var(--font-mono);
   font-size: 1.5rem;
   letter-spacing: 0.08em;
 }
@@ -894,7 +894,7 @@ EOf npm --prefix frontend run build
 
 .submission-field > span {
   color: var(--text-muted);
-  font-family: monospace;
+  font-family: var(--font-mono);
   font-size: 0.75rem;
   letter-spacing: 0.09em;
 }
@@ -1048,7 +1048,7 @@ EOf npm --prefix frontend run build
 
 .gallery-header-actions > a:first-child {
   color: var(--text-secondary);
-  font-family: monospace;
+  font-family: var(--font-mono);
   font-size: 0.78rem;
   letter-spacing: 0.08em;
   text-decoration: none;
@@ -1134,7 +1134,7 @@ EOf npm --prefix frontend run build
 
 .gallery-card-number {
   color: var(--accent-pink);
-  font-family: monospace;
+  font-family: var(--font-mono);
   font-size: 0.8rem;
 }
 
@@ -1168,7 +1168,7 @@ EOf npm --prefix frontend run build
   justify-content: space-between;
   gap: 24px;
   color: var(--text-muted);
-  font-family: monospace;
+  font-family: var(--font-mono);
   font-size: 0.72rem;
 }
 
@@ -1244,7 +1244,7 @@ EOf npm --prefix frontend run build
   display: block;
   margin: 16px 0;
   color: var(--accent-cyan);
-  font-family: monospace;
+  font-family: var(--font-mono);
   font-size: 2.2rem;
 }
 
@@ -1263,7 +1263,7 @@ EOf npm --prefix frontend run build
 
 .judge-progress > p:last-child {
   margin-top: 12px;
-  font-family: monospace;
+  font-family: var(--font-mono);
   font-size: 0.78rem;
 }
 
@@ -1325,7 +1325,7 @@ EOf npm --prefix frontend run build
 
 .judge-section-heading > a {
   color: var(--accent-cyan);
-  font-family: monospace;
+  font-family: var(--font-mono);
   font-size: 0.78rem;
   text-decoration: none;
 }
@@ -1350,7 +1350,7 @@ EOf npm --prefix frontend run build
 
 .judge-assignment-number {
   color: var(--accent-pink);
-  font-family: monospace;
+  font-family: var(--font-mono);
 }
 
 .judge-assignment-row strong {
@@ -1367,7 +1367,7 @@ EOf npm --prefix frontend run build
   padding: 7px 10px;
   border: 1px solid var(--border-default);
   color: var(--accent-cyan);
-  font-family: monospace;
+  font-family: var(--font-mono);
   font-size: 0.72rem;
 }
 
@@ -1453,7 +1453,7 @@ EOf npm --prefix frontend run build
   padding: 0 22px;
   border-bottom: 1px solid var(--border-default);
   color: var(--text-muted);
-  font-family: monospace;
+  font-family: var(--font-mono);
   font-size: 0.72rem;
   letter-spacing: 0.07em;
 }
@@ -1477,7 +1477,7 @@ EOf npm --prefix frontend run build
   align-items: center;
   gap: 7px;
   color: var(--accent-cyan) !important;
-  font-family: monospace;
+  font-family: var(--font-mono);
   font-size: 0.75rem;
 }
 
@@ -1487,7 +1487,7 @@ EOf npm --prefix frontend run build
   justify-content: flex-end;
   gap: 6px;
   color: var(--accent-pink);
-  font-family: monospace;
+  font-family: var(--font-mono);
   font-size: 0.78rem;
   text-decoration: none;
 }
@@ -1528,7 +1528,7 @@ EOf npm --prefix frontend run build
   align-items: center;
   gap: 7px;
   color: var(--accent-cyan);
-  font-family: monospace;
+  font-family: var(--font-mono);
   font-size: 0.78rem;
   text-decoration: none;
 }
@@ -1575,7 +1575,7 @@ EOf npm --prefix frontend run build
   border: 1px solid var(--border-default);
   background: transparent;
   color: var(--text-muted);
-  font-family: monospace;
+  font-family: var(--font-mono);
 }
 
 .review-isolation-note {
@@ -1638,7 +1638,7 @@ EOf npm --prefix frontend run build
 
 .review-criterion-number {
   color: var(--accent-pink);
-  font-family: monospace;
+  font-family: var(--font-mono);
   font-size: 0.8rem;
 }
 
@@ -1660,7 +1660,7 @@ EOf npm --prefix frontend run build
 .review-score-field > span,
 .review-comment-field > span {
   color: var(--text-muted);
-  font-family: monospace;
+  font-family: var(--font-mono);
   font-size: 0.72rem;
   letter-spacing: 0.08em;
 }
@@ -1838,7 +1838,7 @@ EOf npm --prefix frontend run build
   padding: 0 26px;
   border-bottom: 1px solid var(--border-default);
   color: var(--text-muted);
-  font-family: monospace;
+  font-family: var(--font-mono);
   font-size: 0.72rem;
   letter-spacing: 0.08em;
 }
@@ -1861,7 +1861,7 @@ EOf npm --prefix frontend run build
 
 .scoring-guide-name > span {
   color: var(--accent-pink);
-  font-family: monospace;
+  font-family: var(--font-mono);
   font-size: 0.8rem;
 }
 
@@ -1873,12 +1873,12 @@ EOf npm --prefix frontend run build
 
 .scoring-guide-weight {
   color: var(--accent-cyan);
-  font-family: monospace;
+  font-family: var(--font-mono);
   font-size: 1.1rem;
 }
 
 .scoring-guide-max {
-  font-family: monospace;
+  font-family: var(--font-mono);
   font-size: 1.1rem;
 }
 
@@ -1966,7 +1966,7 @@ EOf npm --prefix frontend run build
 
 .event-field > span {
   color: var(--text-muted);
-  font-family: monospace;
+  font-family: var(--font-mono);
   font-size: 0.72rem;
   letter-spacing: 0.08em;
 }
@@ -2018,7 +2018,7 @@ EOf npm --prefix frontend run build
 
 .event-track-item > span {
   color: var(--accent-pink);
-  font-family: monospace;
+  font-family: var(--font-mono);
   font-size: 0.78rem;
 }
 
@@ -2129,7 +2129,7 @@ EOf npm --prefix frontend run build
   padding: 0 24px;
   border-bottom: 1px solid var(--border-default);
   color: var(--text-muted);
-  font-family: monospace;
+  font-family: var(--font-mono);
   font-size: 0.72rem;
   letter-spacing: 0.08em;
 }
@@ -2152,7 +2152,7 @@ EOf npm --prefix frontend run build
 
 .organizer-team-name > span {
   color: var(--accent-pink);
-  font-family: monospace;
+  font-family: var(--font-mono);
 }
 
 .organizer-team-name p {
@@ -2241,7 +2241,7 @@ EOf npm --prefix frontend run build
   padding: 0 24px;
   border-bottom: 1px solid var(--border-default);
   color: var(--text-muted);
-  font-family: monospace;
+  font-family: var(--font-mono);
   font-size: 0.72rem;
   letter-spacing: 0.08em;
 }
@@ -2268,7 +2268,7 @@ EOf npm --prefix frontend run build
 
 .organizer-project-name > span {
   color: var(--accent-pink);
-  font-family: monospace;
+  font-family: var(--font-mono);
 }
 
 .organizer-project-draft {
@@ -2276,7 +2276,7 @@ EOf npm --prefix frontend run build
   padding: 6px 9px;
   border: 1px solid var(--border-default);
   color: var(--text-muted);
-  font-family: monospace;
+  font-family: var(--font-mono);
   font-size: 0.7rem;
 }
 
@@ -2287,7 +2287,7 @@ EOf npm --prefix frontend run build
   border: 0;
   background: transparent;
   color: var(--text-muted);
-  font-family: monospace;
+  font-family: var(--font-mono);
 }
 
 @media (max-width: 900px) {
@@ -2364,7 +2364,7 @@ EOf npm --prefix frontend run build
   padding: 0 26px;
   border-bottom: 1px solid var(--border-default);
   color: var(--text-muted);
-  font-family: monospace;
+  font-family: var(--font-mono);
   font-size: 0.72rem;
   letter-spacing: 0.08em;
 }
@@ -2387,7 +2387,7 @@ EOf npm --prefix frontend run build
 
 .organizer-rubric-name > span {
   color: var(--accent-pink);
-  font-family: monospace;
+  font-family: var(--font-mono);
   font-size: 0.8rem;
 }
 
@@ -2407,7 +2407,7 @@ EOf npm --prefix frontend run build
   background: var(--bg-secondary);
   color: var(--text-primary);
   font: inherit;
-  font-family: monospace;
+  font-family: var(--font-mono);
   font-size: 1rem;
 }
 
@@ -2438,13 +2438,13 @@ EOf npm --prefix frontend run build
 
 .rubric-total-valid {
   color: var(--accent-cyan);
-  font-family: monospace;
+  font-family: var(--font-mono);
   font-size: 1.5rem;
 }
 
 .rubric-total-invalid {
   color: var(--accent-pink);
-  font-family: monospace;
+  font-family: var(--font-mono);
   font-size: 1.5rem;
 }
 
@@ -2452,7 +2452,7 @@ EOf npm --prefix frontend run build
   padding: 6px 9px;
   border: 1px solid var(--accent-pink);
   color: var(--accent-pink);
-  font-family: monospace;
+  font-family: var(--font-mono);
   font-size: 0.7rem;
 }
 
@@ -2513,7 +2513,7 @@ EOf npm --prefix frontend run build
 }
 
 .organizer-judge-metrics strong {
-  font-family: monospace;
+  font-family: var(--font-mono);
   font-size: 2rem;
   color: var(--text-primary);
 }
@@ -2563,7 +2563,7 @@ EOf npm --prefix frontend run build
   padding: 0 24px;
   border-bottom: 1px solid var(--border-default);
   color: var(--text-muted);
-  font-family: monospace;
+  font-family: var(--font-mono);
   font-size: 0.72rem;
   letter-spacing: 0.08em;
 }
@@ -2590,7 +2590,7 @@ EOf npm --prefix frontend run build
 
 .organizer-judge-name > span {
   color: var(--accent-pink);
-  font-family: monospace;
+  font-family: var(--font-mono);
 }
 
 .organizer-judge-name > div {
@@ -2625,7 +2625,7 @@ EOf npm --prefix frontend run build
 .organizer-judge-progress > span {
   min-width: 42px;
   color: var(--accent-cyan);
-  font-family: monospace;
+  font-family: var(--font-mono);
 }
 
 @media (max-width: 900px) {
@@ -2679,7 +2679,7 @@ EOf npm --prefix frontend run build
 }
 
 .organizer-result-metrics strong {
-  font-family: monospace;
+  font-family: var(--font-mono);
   font-size: 2rem;
 }
 
@@ -2736,7 +2736,7 @@ EOf npm --prefix frontend run build
   padding: 0 24px;
   border-bottom: 1px solid var(--border-default);
   color: var(--text-muted);
-  font-family: monospace;
+  font-family: var(--font-mono);
   font-size: 0.7rem;
   letter-spacing: 0.08em;
 }
@@ -2760,7 +2760,7 @@ EOf npm --prefix frontend run build
   align-items: center;
   gap: 8px;
   color: var(--accent-pink);
-  font-family: monospace;
+  font-family: var(--font-mono);
 }
 
 .organizer-result-rank svg {
@@ -2769,7 +2769,7 @@ EOf npm --prefix frontend run build
 
 .organizer-normalized-score {
   color: var(--accent-cyan);
-  font-family: monospace;
+  font-family: var(--font-mono);
 }
 
 .organizer-normalization-note {
@@ -2865,7 +2865,7 @@ EOf npm --prefix frontend run build
   padding: 0 24px;
   border-bottom: 1px solid var(--border-default);
   color: var(--text-muted);
-  font-family: monospace;
+  font-family: var(--font-mono);
   font-size: 0.72rem;
   letter-spacing: 0.08em;
 }
@@ -2882,7 +2882,7 @@ EOf npm --prefix frontend run build
 
 .organizer-activity-number {
   color: var(--accent-pink);
-  font-family: monospace;
+  font-family: var(--font-mono);
 }
 
 .organizer-activity-row > div {
@@ -2895,7 +2895,7 @@ EOf npm --prefix frontend run build
   padding: 4px 7px;
   border: 1px solid var(--border-default);
   color: var(--accent-cyan);
-  font-family: monospace;
+  font-family: var(--font-mono);
   font-size: 0.65rem;
 }
 
@@ -2907,7 +2907,7 @@ EOf npm --prefix frontend run build
 
 .organizer-activity-row > span:last-child {
   color: var(--text-muted);
-  font-family: monospace;
+  font-family: var(--font-mono);
   font-size: 0.8rem;
 }
 
@@ -4745,4 +4745,419 @@ EOf npm --prefix frontend run build
 .judge-sidebar-session .logout-control > button:focus-visible {
   outline: 2px solid var(--accent-cyan);
   outline-offset: 3px;
+}
+
+/* Reference visual foundation. Presentation only; existing layout breakpoints remain. */
+body {
+  background-color: var(--bg-primary);
+  background-image: linear-gradient(#738bab07 1px, transparent 1px), linear-gradient(90deg, #738bab07 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+h1, h2, h3 { font-family: var(--font-display); }
+h1 { font-weight: 700; letter-spacing: -.04em; }
+button, input, select, textarea { border-radius: 0; }
+button, .button { transition: color 160ms ease, background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease; }
+.button { font-family: var(--font-mono); font-size: 11px; letter-spacing: .05em; text-decoration: none; }
+.button-primary { color: var(--bg-primary); box-shadow: 0 0 18px #ff398618; }
+.button-primary:hover:not(:disabled) { box-shadow: 0 0 22px #ff398630; }
+.button:disabled { box-shadow: none; }
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]), select, textarea {
+  font-family: var(--font-mono);
+}
+input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px solid var(--accent-cyan); outline-offset: 2px; }
+.metadata, .eyebrow, .nav-label, .badge { text-transform: uppercase; }
+.eyebrow { line-height: 1.7; }
+.panel, .metric-strip { border-color: var(--border-default); box-shadow: none; border-radius: 0; }
+.panel-header h2 { font-family: var(--font-mono); font-size: 12px; letter-spacing: .04em; }
+.badge { border-radius: 0; padding: 4px 7px; }
+.sidebar { background: var(--bg-secondary); }
+.topbar { background: var(--bg-secondary); }
+.nav-item { font-family: var(--font-mono); font-size: 11px; letter-spacing: .02em; }
+.breadcrumb { font-family: var(--font-mono); font-size: 11px; }
+.workspace { padding: clamp(20px, 3vw, 40px); }
+table { border-collapse: collapse; }
+th { color: var(--text-muted); font: 500 10px/1.6 var(--font-mono); letter-spacing: .06em; text-transform: uppercase; }
+td { font-family: var(--font-mono); }
+.auth-form-wrap { border-top: 1px solid var(--border-bright); padding-top: 28px; }
+.auth-form-wrap h2 { font-weight: 700; letter-spacing: -.04em; }
+.team-message, .auth-message { line-height: 1.8; }
+
+/* Editorial landing: retain every section, link and live-data state. */
+.arena-landing .landing-container { width: min(1280px, 100%); }
+.arena-landing .landing-nav { background: var(--bg-secondary); }
+.arena-landing .landing-hero { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); }
+.arena-landing .landing-hero h1 { font-family: var(--font-display); font-weight: 700; letter-spacing: -.055em; line-height: .96; }
+.arena-landing .landing-hero::before { background: none; }
+.arena-landing .landing-hero::after { display: none; }
+.arena-landing .landing-lead { font-size: 13px; line-height: 1.85; }
+.arena-landing .landing-dossier { padding: clamp(24px, 3vw, 40px); border: 1px solid var(--border-default); background: var(--bg-panel); }
+.arena-landing .landing-dossier-number { font: 700 clamp(96px, 10vw, 144px)/1 var(--font-display); text-align: center; margin-block: 32px; letter-spacing: -.06em; }
+.arena-landing .landing-dossier p { font-family: var(--font-display); }
+.arena-landing .landing-dossier-roles { font-size: 10px; gap: 12px; }
+.arena-landing .landing-meta-strip { border-top: 1px solid var(--border-default); padding-top: 24px; }
+.arena-landing h2 { font-weight: 700; }
+.arena-landing .landing-platform-map { padding: 24px; border: 1px solid var(--border-default); background: var(--bg-panel); }
+.arena-landing .landing-product-visual { padding: 28px; border: 1px solid var(--border-default); background: var(--bg-panel); }
+.arena-landing .landing-product-visual figcaption { padding-bottom: 20px; border-bottom: 1px solid var(--border-default); }
+.arena-landing .landing-role-copy h2 { font-size: clamp(40px, 5vw, 72px); }
+.arena-landing .landing-role-copy h3 { font: 700 14px/1.7 var(--font-mono); }
+.arena-landing .landing-role-description { font-size: 12px; }
+.arena-landing .landing-project-fragment strong { font-family: var(--font-display); }
+.arena-landing .landing-live-state { border: 1px solid var(--border-default); padding: 24px; background: var(--bg-panel); }
+@media (max-width: 900px) {
+  .arena-landing .landing-hero { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 550px) {
+  .arena-landing .landing-platform-map, .arena-landing .landing-product-visual { padding: 20px; }
+  .arena-landing .landing-dossier { margin-left: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  button, .button { transition: none; }
+}
+
+/* Action hierarchy: retain navigation semantics and the original palette. */
+a { text-decoration: none; }
+a:hover { text-decoration: none; }
+a:focus-visible { outline: 2px solid var(--accent-cyan); outline-offset: 4px; }
+/* Plain prose links remain identifiable without becoming controls. */
+p a:not([class]) { color: var(--accent-cyan); }
+p a:not([class]):hover { text-decoration: underline; }
+.judge-entry-actions a, .judge-entry-actions button { text-decoration: none; }
+.judge-entry-actions a:hover, .judge-entry-actions button:hover:not(:disabled) { color: var(--accent-cyan); }
+
+.panel-header > a:not(.button), .judge-section-heading > a:not(.button) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 34px;
+  max-width: 100%;
+  margin-left: auto;
+  padding: 7px 10px;
+  border: 1px solid var(--border-bright);
+  border-radius: 0;
+  background: var(--bg-secondary);
+  color: var(--accent-cyan);
+  font: 600 10px/1.6 var(--font-mono);
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+  transition: color 160ms ease, background-color 160ms ease, border-color 160ms ease;
+}
+.panel-header > a:not(.button):hover, .judge-section-heading > a:not(.button):hover {
+  color: var(--text-primary);
+  background: var(--bg-panel-hover);
+  border-color: var(--accent-cyan);
+}
+.event-summary > a:not(.button), .participant-metrics article > a:not(.button),
+.participant-card-link, .workspace-intro > a:not(.button),
+.team-state-panel > a:not(.button), .judge-review-back a,
+.review-isolation-note a, .judge-assignment-row a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 100%;
+  min-height: 36px;
+  padding: 6px 8px;
+  color: var(--accent-cyan);
+  font-weight: 600;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+  transition: color 160ms ease, background-color 160ms ease;
+}
+.event-summary > a:not(.button), .participant-metrics article > a:not(.button), .team-state-panel > a:not(.button) { margin-top: 16px; }
+.event-summary > a:not(.button):hover, .participant-metrics article > a:not(.button):hover,
+.participant-card-link:hover, .workspace-intro > a:not(.button):hover,
+.team-state-panel > a:not(.button):hover, .judge-review-back a:hover,
+.review-isolation-note a:hover, .judge-assignment-row a:hover {
+  color: var(--text-primary);
+  background: var(--bg-panel-hover);
+}
+/* Single-content dashboard cards should use their complete interior width. */
+.dashboard-lower .event-status-body > .event-summary:only-child { grid-column: 1 / -1; min-width: 0; }
+.dashboard-lower .event-summary h3 { overflow-wrap: anywhere; }
+.dashboard-lower + .panel { margin-top: 24px; }
+
+/* Only actionable Next Moves rows receive command styling; demo notes stay notes. */
+.next-moves li:has(> a) { position: relative; align-items: center; padding: 0; gap: 0; }
+.next-moves li:has(> a) > .move-number { position: absolute; left: 20px; top: 20px; color: var(--accent-pink); pointer-events: none; }
+.next-moves li > a {
+  display: block;
+  flex: 1;
+  min-width: 0;
+  min-height: 60px;
+  padding: 18px 20px 18px 58px;
+  color: var(--text-primary);
+  font: 600 12px/2 var(--font-mono);
+  text-decoration: none;
+  overflow-wrap: anywhere;
+  transition: background-color 160ms ease, box-shadow 160ms ease;
+}
+.next-moves li > a:hover { background: var(--bg-panel-hover); box-shadow: inset 2px 0 var(--accent-cyan); }
+.next-moves li > a:focus-visible { outline-offset: -3px; background: var(--bg-panel-hover); }
+@media (max-width: 650px) {
+  .panel-header > a:not(.button), .judge-section-heading > a:not(.button) { margin-left: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .panel-header > a, .judge-section-heading > a, .event-summary > a,
+  .participant-metrics article > a, .participant-card-link, .workspace-intro > a,
+  .team-state-panel > a, .judge-review-back a, .review-isolation-note a,
+  .judge-assignment-row a, .next-moves li > a { transition: none; }
+}
+
+
+/* ORGANIZER SIDEBAR LOGOUT */
+
+.organizer-sidebar-logout {
+  margin-top: auto;
+  padding: 18px 20px 0;
+  border-top: 1px solid var(--border-default);
+}
+
+.organizer-sidebar-logout + .sidebar-footer {
+  margin-top: 14px;
+}
+
+.organizer-sidebar-logout > * {
+  width: 100%;
+}
+
+.organizer-sidebar-logout button,
+.organizer-sidebar-logout a {
+  width: 100%;
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+
+  padding: 10px 12px;
+
+  border: 1px solid var(--border-default);
+  background: transparent;
+  color: var(--text-secondary);
+
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+
+  cursor: pointer;
+
+  transition:
+    color 160ms ease,
+    border-color 160ms ease,
+    background 160ms ease;
+}
+
+.organizer-sidebar-logout button:hover:not(:disabled),
+.organizer-sidebar-logout a:hover {
+  color: var(--accent-pink);
+  border-color: var(--accent-pink);
+  background: var(--bg-panel-hover);
+}
+
+.organizer-sidebar-logout button:focus-visible,
+.organizer-sidebar-logout a:focus-visible {
+  outline: 2px solid var(--accent-pink);
+  outline-offset: 3px;
+}
+
+.organizer-sidebar-logout button:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+
+.organizer-sidebar-logout .auth-message {
+  margin: 8px 0 0;
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+/* ORGANIZER SIDEBAR — FIXED LOGOUT POSITION + HIGHLIGHT */
+
+.sidebar {
+  height: 100dvh;
+  min-height: 100dvh;
+  max-height: 100dvh;
+  position: sticky;
+  top: 0;
+  align-self: start;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.sidebar-nav {
+  flex: 0 0 auto;
+}
+
+.organizer-sidebar-logout {
+  margin-top: auto;
+  padding: 18px 20px 0;
+  flex-shrink: 0;
+}
+
+.organizer-sidebar-logout button,
+.organizer-sidebar-logout a {
+  width: 100%;
+  min-height: 44px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 11px 14px;
+
+  color: var(--accent-pink);
+  background: rgba(255, 57, 134, 0.08);
+  border: 1px solid var(--accent-pink);
+
+  box-shadow:
+    inset 3px 0 0 var(--accent-pink),
+    0 0 0 1px rgba(255, 57, 134, 0.05);
+
+  font-weight: 700;
+  letter-spacing: 0.1em;
+
+  transition:
+    background 160ms ease,
+    color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+.organizer-sidebar-logout button:hover:not(:disabled),
+.organizer-sidebar-logout a:hover {
+  color: var(--bg-primary);
+  background: var(--accent-pink);
+
+  box-shadow:
+    inset 3px 0 0 var(--accent-pink),
+    0 0 20px rgba(255, 57, 134, 0.16);
+
+  transform: translateX(2px);
+}
+
+.organizer-sidebar-logout + .sidebar-footer {
+  flex-shrink: 0;
+  margin-top: 14px;
+}
+
+/* REAL ORGANIZER RUBRIC — STRUCTURED CRITERIA */
+
+.real-rubric-details {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.real-rubric-title-row h3 {
+  margin: 0 0 8px;
+}
+
+.real-rubric-criteria {
+  border: 1px solid var(--border-default);
+  background: rgba(9, 13, 23, 0.26);
+}
+
+.real-rubric-criterion {
+  display: grid;
+  grid-template-columns: 54px minmax(0, 1fr) 130px 130px;
+  align-items: stretch;
+  min-height: 92px;
+}
+
+.real-rubric-criterion + .real-rubric-criterion {
+  border-top: 1px solid var(--border-default);
+}
+
+.real-rubric-criterion:hover {
+  background: var(--bg-panel-hover);
+}
+
+.real-rubric-index {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-right: 1px solid var(--border-default);
+
+  color: var(--accent-pink);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.real-rubric-copy {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 7px;
+
+  min-width: 0;
+  padding: 18px 22px;
+}
+
+.real-rubric-copy > strong {
+  color: var(--text-primary);
+  font-family: var(--font-display);
+  font-size: 18px;
+  line-height: 1.2;
+}
+
+.real-rubric-copy > span {
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.real-rubric-metric {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+
+  padding: 18px;
+
+  border-left: 1px solid var(--border-default);
+}
+
+.real-rubric-metric > span {
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.09em;
+}
+
+.real-rubric-metric > strong {
+  color: var(--accent-cyan);
+  font-family: var(--font-mono);
+  font-size: 20px;
+}
+
+@media (max-width: 800px) {
+  .real-rubric-criterion {
+    grid-template-columns: 44px 1fr;
+  }
+
+  .real-rubric-metric {
+    grid-column: 2;
+    border-left: 0;
+    border-top: 1px solid var(--border-default);
+    padding: 12px 18px;
+  }
+}
+
+.rubric-empty-version {
+  margin: 0;
+  padding: 22px;
+  border: 1px dashed var(--border-default);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.04em;
 }

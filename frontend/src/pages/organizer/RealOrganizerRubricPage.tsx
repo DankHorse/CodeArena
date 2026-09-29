@@ -65,7 +65,42 @@ export function RealOrganizerRubricPage() {
     {error && <p role="alert" className="team-message">{error}</p>}{message && <p role="status" className="team-message">{message}</p>}
     {loading ? <p role="status">Loading rubric versions…</p> : data && <>
       <section className="event-settings-card"><header className="event-settings-card-header"><h2>ACTIVE RUBRIC</h2></header><div className="event-settings-fields">{active ? <RubricDetails rubric={active} /> : <p>No active rubric. Create a draft version, then activate it.</p>}</div></section>
-      <section className="event-settings-card"><header className="event-settings-card-header"><h2>AVAILABLE VERSIONS</h2></header><div className="event-settings-fields">{data.rubrics.map(rubric => <article key={rubric.id}><RubricDetails rubric={rubric} />{rubric.status === 'draft' && <button className="button button-primary" disabled={busy} onClick={() => void run(() => activateRealRubric(event.id, rubric.id), 'Rubric activation confirmed by the backend.')}>Activate version {rubric.version}</button>}</article>)}{!data.rubrics.length && <p>No rubric versions yet.</p>}</div></section>
+      <section className="event-settings-card">
+        <header className="event-settings-card-header">
+          <h2>AVAILABLE VERSIONS</h2>
+        </header>
+
+        <div className="event-settings-fields">
+          {data.rubrics
+            .filter(rubric => rubric.id !== active?.id)
+            .map(rubric => (
+              <article key={rubric.id}>
+                <RubricDetails rubric={rubric} />
+
+                {rubric.status === 'draft' && (
+                  <button
+                    className="button button-primary"
+                    disabled={busy}
+                    onClick={() =>
+                      void run(
+                        () => activateRealRubric(event.id, rubric.id),
+                        'Rubric activation confirmed by the backend.',
+                      )
+                    }
+                  >
+                    Activate version {rubric.version}
+                  </button>
+                )}
+              </article>
+            ))}
+
+          {!data.rubrics.some(rubric => rubric.id !== active?.id) && (
+            <p className="rubric-empty-version">
+              No additional rubric versions.
+            </p>
+          )}
+        </div>
+      </section>
       <form className="event-settings-form" onSubmit={create} key={formKey} aria-busy={busy}><fieldset className="organizer-fields" disabled={busy}>
         <section className="event-settings-card"><header className="event-settings-card-header"><h2>CREATE NEW VERSION</h2></header><div className="event-settings-fields">
           <label className="event-field"><span>RUBRIC TITLE</span><input name="title" required maxLength={160} /></label>
@@ -78,5 +113,45 @@ export function RealOrganizerRubricPage() {
   </>;
 }
 function RubricDetails({ rubric }: { rubric: RealRubric }) {
-  return <><h3>{rubric.title} / Version {rubric.version}</h3><p className="metadata">{rubric.status.toUpperCase()}</p><ul>{rubric.criteria.map(c => <li key={c.id}><strong>{c.name}</strong> — weight {c.weight}% / max {c.max_score}{c.description && <p>{c.description}</p>}</li>)}</ul></>;
+  return (
+    <div className="real-rubric-details">
+      <div className="real-rubric-title-row">
+        <div>
+          <h3>{rubric.title} / Version {rubric.version}</h3>
+          <p className="metadata">{rubric.status.toUpperCase()}</p>
+        </div>
+      </div>
+
+      <div className="real-rubric-criteria">
+        {rubric.criteria.map((criterion, index) => (
+          <article
+            className="real-rubric-criterion"
+            key={criterion.id}
+          >
+            <span className="real-rubric-index">
+              {String(index + 1).padStart(2, '0')}
+            </span>
+
+            <div className="real-rubric-copy">
+              <strong>{criterion.name}</strong>
+
+              {criterion.description && (
+                <span>{criterion.description}</span>
+              )}
+            </div>
+
+            <div className="real-rubric-metric">
+              <span>WEIGHT</span>
+              <strong>{criterion.weight}%</strong>
+            </div>
+
+            <div className="real-rubric-metric">
+              <span>MAX SCORE</span>
+              <strong>{criterion.max_score}</strong>
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+  );
 }

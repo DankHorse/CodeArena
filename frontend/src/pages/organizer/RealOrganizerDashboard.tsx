@@ -312,44 +312,7 @@ export function RealOrganizerDashboard() {
       </div>
 
 
-      <section className="panel">
-        <header className="panel-header">
-          <h2>
-            <span>//</span> Next Moves
-          </h2>
-        </header>
 
-        <ol className="next-moves">
-          {[
-            {
-              title: 'Review event settings',
-              to: paths.organizer.events,
-            },
-            {
-              title: 'Configure scoring rubric',
-              to: paths.organizer.rubric,
-            },
-            {
-              title: 'Manage judge assignments',
-              to: paths.organizer.judges,
-            },
-            {
-              title: 'Review judging results',
-              to: paths.organizer.results,
-            },
-          ].map((item, index) => (
-            <li key={item.to}>
-              <span className="move-number">
-                {String(index + 1).padStart(2, '0')}
-              </span>
-
-              <Link to={item.to}>
-                {item.title} ↗
-              </Link>
-            </li>
-          ))}
-        </ol>
-      </section>
     </>
   );
 }

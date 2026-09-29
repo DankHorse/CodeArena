@@ -1,9 +1,6 @@
 import { DEMO } from '../../api';
 import { useOrganizer } from '../../organizer/OrganizerProvider';
-import { LogoutButton } from '../common/LogoutButton';
-import { paths } from '../../routes';
-import { ArrowUpRight } from 'lucide-react';
-import { Link, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 
 const breadcrumbLabels: Record<string, string> = {
   '/organizer': 'Arena control',
@@ -32,15 +29,10 @@ export function Topbar() {
       </p>
 
       <div className="topbar-controls">
-        <LogoutButton />
         <span className="badge badge-cyan">
           {!DEMO ? snapshot?.event?.real?.status.toUpperCase() ?? 'REAL MODE' : snapshot?.event?.practice ? 'PRACTICE EVENT' : 'FIXTURE EVENT'}
         </span>
 
-        <Link className="public-site" to={paths.home}>
-          PUBLIC SITE
-          <ArrowUpRight size={15} aria-hidden="true" />
-        </Link>
       </div>
     </header>
   );
