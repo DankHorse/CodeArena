@@ -26,7 +26,7 @@ async function readUser(): Promise<AuthUser | null> {
     return { ...bootstrap.user, display_name: bootstrap.user.name, role, is_active: true };
   }
   try {
-    const user = await api<AuthUser>('/api/auth/me');
+    const user = await api<AuthUser>('/api/v1/auth/me');
     if (!user || !isBackendRole(user.role)) throw new Error('This account has no supported workspace role.');
     if (!user.is_active) throw new Error('This account is inactive.');
     return user;
@@ -57,7 +57,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   async function login(credentials: Credentials, demoRole: Role = 'participant') {
     const version = ++requestVersion.current;
     if (DEMO) await api('/api/auth/demo', 'POST', { role: demoRole });
-    else await api('/api/auth/login', 'POST', credentials);
+    else await api('/api/v1/auth/login', 'POST', credentials);
     const user = await readUser();
     if (!user) throw new Error('Sign-in did not establish a session. Please try again.');
     if (version === requestVersion.current) setSession({ user, status: 'authenticated', error: '' });
@@ -65,7 +65,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   }
   async function register(registration: Registration) {
     if (!DEMO) {
-      await api('/api/auth/register', 'POST', registration);
+      await api('/api/v1/auth/register', 'POST', registration);
       return;
     }
     // The existing preview creates and signs in a user; sign out without clearing its database.
@@ -76,7 +76,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   }
   async function logout() {
     requestVersion.current++;
-    try { await api('/api/auth/logout', 'POST'); }
+    try { await api(DEMO ? '/api/auth/logout' : '/api/v1/auth/logout', 'POST'); }
     catch (error) { if (!(error instanceof ApiError && error.status === 401)) throw error; }
     setSession({ user: null, status: 'anonymous', error: '' });
   }

@@ -126,3 +126,76 @@ export async function loadRealRubrics(eventId: string): Promise<{ rubrics: RealR
   }
   return { rubrics: versions.items.map(rubric), activeRubric };
 }
+
+
+export interface RealJudgeEventAssignment {
+  event_id: string;
+  judge_id: string;
+  status: string;
+  created_at: string;
+}
+
+
+export async function addRealEventJudge(
+  eventId: string,
+  judgeId: string,
+): Promise<RealJudgeEventAssignment> {
+  requireRealUuid(eventId, 'event');
+  requireRealUuid(judgeId, 'judge');
+
+  const response = await api<RealJudgeEventAssignment>(
+    `/api/v1/events/${encodeURIComponent(eventId)}/judges`,
+    'POST',
+    { judge_id: judgeId },
+  );
+
+  if (response.event_id !== eventId) {
+    throw new Error(
+      'Judge assignment response does not match the requested event.',
+    );
+  }
+
+  if (response.judge_id !== judgeId) {
+    throw new Error(
+      'Judge assignment response does not match the requested judge.',
+    );
+  }
+
+  return response;
+}
+
+
+export async function createRealJudgeAssignment(
+  eventId: string,
+  projectId: string,
+  judgeId: string,
+): Promise<RealOrganizerAssignment> {
+  requireRealUuid(eventId, 'event');
+  requireRealUuid(projectId, 'project');
+  requireRealUuid(judgeId, 'judge');
+
+  const response = await api<RealOrganizerAssignment>(
+    `/api/v1/events/${encodeURIComponent(eventId)}/judge-assignments`,
+    'POST',
+    {
+      project_id: projectId,
+      judge_id: judgeId,
+    },
+  );
+
+  assertEvent(eventId, [response]);
+
+  if (response.project_id !== projectId) {
+    throw new Error(
+      'Assignment response does not match the requested project.',
+    );
+  }
+
+  if (response.judge_id !== judgeId) {
+    throw new Error(
+      'Assignment response does not match the requested judge.',
+    );
+  }
+
+  return response;
+}
