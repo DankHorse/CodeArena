@@ -52,6 +52,8 @@ def _user(db: Session, email: str, name: str, role: str) -> User:
     normalized = email.strip().casefold()
     user = db.scalar(select(User).where(User.email == normalized))
     if user is None:
+        user = db.get(User, _id("user", normalized))
+    if user is None:
         user = User(
             id=_id("user", normalized),
             email=normalized,
