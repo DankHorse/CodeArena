@@ -86,7 +86,9 @@ function providerHarness(demo, eventId, result, failure) {
     const renderRuntime = runtime(demoMode, () => { throw Error('No render fetch'); }, {
       'react/jsx-runtime': jsx,
       'react-router-dom': { useLocation: () => ({ search: currentSearch }), useParams: () => ({ projectId }), Link: 'Link', NavLink: 'NavLink' },
-      'lucide-react': {}, '../brand/CodeArenaMark': {},
+      'lucide-react': {},
+      '../brand/CodeArenaMark': {},
+      '../common/LogoutButton': { LogoutButton: 'LogoutButton' },
       '../../auth/SessionProvider': { useSession: () => ({ user: { id: 'user' } }) },
       './JudgeEntryPage': { JudgeEntryPage: 'JudgeEntry' },
     '../../components/judge/JudgeSidebar': {}, '../../components/judge/JudgeTopbar': {},

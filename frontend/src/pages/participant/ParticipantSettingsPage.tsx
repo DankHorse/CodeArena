@@ -194,7 +194,7 @@ export function ParticipantSettingsPage() {
             onClick={() => void signOut()}
           >
             <LogOut size={16} aria-hidden="true" />
-            {signingOut ? 'Signing out…' : 'Sign out'}
+            {signingOut ? 'Logging out…' : 'Log out'}
           </button>
 
           {signOutError && (

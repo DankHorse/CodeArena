@@ -26,10 +26,15 @@ const flatten = n => Array.isArray(n) ? n.flatMap(flatten) : n && typeof n === '
  assert.equal(load('auth/destination.ts').loginDestination('participant', { from: '/judge' }), '/judge');
  assert.equal(load('auth/destination.ts').loginDestination('participant', null), '/participant');
  let slots = [], cursor = 0, effects = [], found = choices;
+ let pathname = '/judge';
  const user = { id: 'user', role: 'participant' };
  const renderLoad = runtime(false, () => {}, {
   react: { useState: initial => { const i = cursor++; if (!(i in slots)) slots[i] = initial; return [slots[i], v => slots[i] = typeof v === 'function' ? v(slots[i]) : v]; }, useEffect: fn => effects.push(fn) },
-  'react/jsx-runtime': { jsx, jsxs: jsx }, 'react-router-dom': { Link: 'Link', Navigate: 'Navigate' },
+  'react/jsx-runtime': { jsx, jsxs: jsx }, 'react-router-dom': {
+   Link: 'Link',
+   Navigate: 'Navigate',
+   useLocation: () => ({ pathname, search: '' }),
+  },
   'lucide-react': {
    ClipboardCheck: 'ClipboardCheck',
    CheckCircle2: 'CheckCircle2',
@@ -45,9 +50,30 @@ const flatten = n => Array.isArray(n) ? n.flatMap(flatten) : n && typeof n === '
  effects[0](); await new Promise(resolve => setImmediate(resolve));
  let nodes = flatten(render()); assert(nodes.some(n => n.props?.to === `/judge?event=${uuid(1)}`));
  assert.equal(user.role, 'participant');
- found = []; effects[0](); await new Promise(resolve => setImmediate(resolve));
- assert(JSON.stringify(render()).includes('No projects are assigned to you yet.'));
+ found = [];
+ effects[0]();
+ await new Promise(resolve => setImmediate(resolve));
+
+ function emptyStateName() {
+  const tree = render();
+  const component = flatten(tree).find(
+   node => typeof node.type === 'function' &&
+    node.type.name.startsWith('EmptyJudge')
+  );
+  assert(component, 'Expected a route-specific judge empty state.');
+  return component.type.name;
+ }
+
+ pathname = '/judge';
+ assert.equal(emptyStateName(), 'EmptyJudgeDashboard');
+
+ pathname = '/judge/assignments';
+ assert.equal(emptyStateName(), 'EmptyJudgeAssignments');
+
+ pathname = '/judge/rubric';
+ assert.equal(emptyStateName(), 'EmptyJudgeScoringGuide');
+
  const counts = load('judge/data.ts').reviewCounts(['pending','in_progress','submitted'].map(status => ({ assignment: { status } })));
  assert.equal(counts.completed, 1); assert.equal(counts.remaining, 2);
- console.log('PASS judge discovery: own assignments, excluded zero/revoked/401/403, exact event links, entry states, login, no peer calls, unchanged role.');
+ console.log('PASS judge discovery: own assignments, route-specific empty states, excluded zero/revoked/401/403, exact event links, login, no peer calls, unchanged role.');
 })().catch(error => { console.error(error); process.exitCode = 1; });

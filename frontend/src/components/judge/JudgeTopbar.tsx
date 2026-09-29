@@ -1,4 +1,3 @@
-import { LogoutButton } from '../common/LogoutButton';
 import { useLocation } from 'react-router-dom';
 
 const labels: Record<string, string> = {
@@ -25,7 +24,6 @@ export function JudgeTopbar() {
       </p>
 
       <div className="topbar-controls">
-        <LogoutButton />
         <span className="badge badge-cyan">JUDGE</span>
       </div>
     </header>

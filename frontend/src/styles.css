@@ -4639,3 +4639,110 @@ EOf npm --prefix frontend run build
     width: 100%;
   }
 }
+
+/* Judge route-specific empty states */
+
+.judge-empty-route-state {
+  padding: 34px 26px;
+}
+
+.judge-empty-route-state .metadata {
+  margin: 0 0 10px;
+  color: var(--accent-cyan);
+}
+
+.judge-empty-route-state h2 {
+  margin: 0 0 8px;
+}
+
+.judge-empty-route-state > p:last-child {
+  max-width: 620px;
+  margin: 0;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+/* Judge sidebar session control */
+
+.judge-sidebar-session {
+  margin-top: auto;
+  padding: 0 20px 18px;
+}
+
+.judge-sidebar-session .logout-control {
+  width: 100%;
+}
+
+.judge-sidebar-session .logout-control > button {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid var(--border-default);
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-decoration: none;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.judge-sidebar-session .logout-control > button:hover:not(:disabled) {
+  border-color: var(--accent-pink);
+  color: var(--accent-pink);
+  background: rgba(255, 59, 141, 0.05);
+}
+
+.judge-sidebar-session .auth-message {
+  margin: 8px 0 0;
+  font-size: 0.72rem;
+}
+
+.judge-sidebar-session + .sidebar-footer {
+  margin-top: 0;
+}
+
+/* Judge sidebar logout — stronger visibility */
+
+.judge-sidebar-session {
+  margin-top: auto;
+  padding: 0 20px 22px;
+}
+
+.judge-sidebar-session .logout-control > button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 100%;
+  min-height: 48px;
+  padding: 0 18px;
+
+  border: 1px solid var(--accent-pink);
+  background: rgba(255, 59, 141, 0.09);
+  color: var(--accent-pink);
+
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+
+  cursor: pointer;
+  transition:
+    background 160ms ease,
+    color 160ms ease,
+    border-color 160ms ease;
+}
+
+.judge-sidebar-session .logout-control > button:hover:not(:disabled) {
+  border-color: var(--accent-pink);
+  background: var(--accent-pink);
+  color: var(--bg-primary);
+}
+
+.judge-sidebar-session .logout-control > button:focus-visible {
+  outline: 2px solid var(--accent-cyan);
+  outline-offset: 3px;
+}

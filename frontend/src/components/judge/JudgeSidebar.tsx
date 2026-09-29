@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { CodeArenaMark } from '../brand/CodeArenaMark';
+import { LogoutButton } from '../common/LogoutButton';
 
 const navigation = [
   {
@@ -94,6 +95,10 @@ export function JudgeSidebar() {
           ))}
         </ul>
       </nav>
+
+      <div className="judge-sidebar-session">
+        <LogoutButton />
+      </div>
 
       <div className="sidebar-footer">
         <span className="status-dot" /> JUDGE CONSOLE
