@@ -69,7 +69,13 @@ export function LandingPage() {
       </section>
       <section className="landing-section landing-audience landing-container" id="workspaces" data-reveal><p className="eyebrow">[ 02 / PEOPLE + RESPONSIBILITIES ]</p><h2>BUILT FOR EVERY SIDE<br />OF THE HACKATHON.</h2><p className="landing-lead">Builders create. Judges evaluate. Organizers make the whole event possible. Each has a workspace built around their responsibility.</p><nav className="landing-role-divider" aria-label="Explore workspaces">{roles.map((role,i)=><a key={role.id} href={`#${role.id === 'judge' ? 'judges' : role.id+'s'}`}><span>0{i+1}</span>{role.name.toUpperCase()}<span aria-hidden="true">↘</span></a>)}</nav></section>
       {roles.map((role,i)=><section className={`landing-section landing-container landing-role-story${role.id==='judge'?' landing-role-reverse':''}`} id={role.id==='judge'?'judges':role.id+'s'} key={role.id} data-reveal>
-        <div className="landing-role-copy"><p className="eyebrow">0{i+1} / {role.name.toUpperCase()}</p><h2>{role.heading.map(line=><span key={line}>{line}</span>)}</h2><h3>{role.subtitle}</h3><p className="landing-lead">{role.audience}</p><p className="landing-role-description">{role.description}</p><ul className="landing-role-capabilities">{role.capabilities.map(item=><li key={item}>{item}</li>)}</ul><Link className="landing-text-link landing-role-entry landing-major-link" to={paths.login} state={{
+        <div className="landing-role-copy"><p className="eyebrow">0{i+1} / {role.name.toUpperCase()}</p><h2>{role.heading.map(line=><span key={line}>{line}</span>)}</h2><h3>{role.subtitle}</h3><p className="landing-lead">{role.audience}</p><p className="landing-role-description">{role.description}</p><ul className="landing-role-capabilities">{role.capabilities.map(item=><li key={item}>{item}</li>)}</ul><Link className="landing-text-link landing-role-entry landing-major-link" to={
+  role.id === 'judge'
+    ? paths.judgeLogin
+    : role.id === 'organizer'
+      ? paths.organizerLogin
+      : paths.participantLogin
+} state={{
   workspace: role.id,
   from:
     role.id === 'judge'
