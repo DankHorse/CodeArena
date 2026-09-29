@@ -11,6 +11,7 @@ import {
 import { RealEventSettings } from './RealEventSettings';
 import { RealOrganizerDashboard } from './RealOrganizerDashboard';
 import { RealOrganizerJudgeAssignmentsPage } from './RealOrganizerJudgeAssignmentsPage';
+import { RealOrganizerResultsPage } from './RealOrganizerResultsPage';
 import { RealOrganizerRubricPage } from './RealOrganizerRubricPage';
 
 
@@ -48,6 +49,10 @@ function OrganizerWorkspace() {
     } else if (location.pathname === '/organizer/judges') {
       content = (
         <RealOrganizerJudgeAssignmentsPage key={snapshot?.event?.id} />
+      );
+    } else if (location.pathname === '/organizer/results') {
+      content = (
+        <RealOrganizerResultsPage key={snapshot?.event?.id} />
       );
     } else {
       content = (

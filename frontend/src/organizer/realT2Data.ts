@@ -1,4 +1,4 @@
-import { api, ApiError, DEMO } from '../api';
+import { api, apiPath, ApiError, DEMO } from '../api';
 
 type Decimal = number | string;
 export interface RealRubricCriterion {
@@ -198,4 +198,63 @@ export async function createRealJudgeAssignment(
   }
 
   return response;
+}
+
+export interface RealJudgingRecalculation {
+  snapshot_id: string;
+  status: string;
+  method: string;
+  method_version: string;
+  source_evaluation_count: number;
+  insufficient_reason: string | null;
+}
+
+export async function recalculateRealJudgingResults(
+  eventId: string,
+): Promise<RealJudgingRecalculation> {
+  requireRealUuid(eventId, 'event');
+
+  return api<RealJudgingRecalculation>(
+    `/api/v1/events/${encodeURIComponent(eventId)}/judging/results/recalculate`,
+    'POST',
+  );
+}
+
+export async function exportRealJudgingResultsCsv(
+  eventId: string,
+): Promise<void> {
+  requireRealUuid(eventId, 'event');
+
+  const response = await fetch(
+    apiPath(
+      `/api/v1/events/${encodeURIComponent(eventId)}/judging/results.csv`,
+    ),
+    {
+      credentials: 'include',
+      headers: {
+        'X-CodeArena-Request': '1',
+      },
+    },
+  );
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+
+    throw new ApiError(
+      body.error?.message || 'CSV export failed.',
+      response.status,
+      body.error?.code,
+      body.error?.details,
+    );
+  }
+
+  const blob = await response.blob();
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement('a');
+
+  anchor.href = url;
+  anchor.download = `codearena-${eventId}-judging-results.csv`;
+  anchor.click();
+
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
