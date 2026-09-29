@@ -14,7 +14,7 @@ interface Bootstrap { user: { id: string } | null; memberships: { event_id: stri
 function supported() { if (!DEMO) throw new Error('Organizer event, judging and results APIs are not connected in real mode yet.'); }
 export async function loadOrganizer(userId: string, eventId?: string): Promise<OrganizerSnapshot> {
   if (!DEMO) {
-    let knownId = eventId;
+    let knownId: string | undefined = eventId ?? 'f6ed6dbe-23e8-5d7c-8b9c-7f82c993861d';
     if (!knownId) { try { knownId = localStorage.getItem(`codearena-event:${userId}`) ?? undefined; } catch { /* optional navigation context */ } }
     const real = knownId ? await getEvent(knownId) : null;
     if (real && real.organizer_id !== userId) throw new Error('Only the event owner can manage this event.');
