@@ -1,5 +1,16 @@
 import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
 
+import {
+  Activity,
+  CheckCircle2,
+  Clock3,
+  GitBranch,
+  RefreshCw,
+  Search,
+  UserPlus,
+  UsersRound,
+} from 'lucide-react';
+
 import { errorMessage } from '../../auth/types';
 import { useOrganizer } from '../../organizer/OrganizerProvider';
 import {
@@ -9,6 +20,12 @@ import {
   type RealOrganizerT2Snapshot,
 } from '../../organizer/realT2Data';
 
+
+function judgeCode(id: string) {
+  const compact = id.replace(/-/g, '');
+
+  return `JDG-${compact.slice(0, 6).toUpperCase()}`;
+}
 
 export function RealOrganizerJudgeAssignmentsPage() {
   const { snapshot } = useOrganizer();
@@ -20,6 +37,7 @@ export function RealOrganizerJudgeAssignmentsPage() {
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
   const [query, setQuery] = useState('');
+  const [showAllJudges, setShowAllJudges] = useState(false);
 
   const [eventJudgeId, setEventJudgeId] = useState('');
   const [projectId, setProjectId] = useState('');
@@ -67,6 +85,11 @@ export function RealOrganizerJudgeAssignmentsPage() {
         return a.judge_id.localeCompare(b.judge_id);
       });
   }, [data?.progress.judges, query]);
+
+  const visibleJudges =
+    query.trim() || showAllJudges
+      ? judges
+      : judges.slice(0, 9);
 
 
   async function handleAddJudge(eventForm: FormEvent<HTMLFormElement>) {
@@ -142,9 +165,11 @@ export function RealOrganizerJudgeAssignmentsPage() {
 
   return (
     <>
-      <section className="workspace-intro">
+      <section className="workspace-intro judge-ops-intro">
         <div>
-          <p className="eyebrow">[ ORGANIZER / JUDGES ]</p>
+          <p className="eyebrow">
+            [ ORGANIZER / JUDGE OPERATIONS ]
+          </p>
 
           <h1>
             JUDGE ASSIGNMENTS
@@ -152,19 +177,38 @@ export function RealOrganizerJudgeAssignmentsPage() {
           </h1>
 
           <p className="workspace-description">
-            Assign submitted projects and monitor judging workload for{' '}
-            {event.name}.
+            Route projects to evaluators and monitor
+            judging workload across {event.name}.
           </p>
         </div>
 
-        <button
-          className="button"
-          type="button"
-          disabled={loading || busy}
-          onClick={() => void refresh()}
-        >
-          Refresh assignments ↻
-        </button>
+        <div className="judge-ops-actions">
+          <div className="judge-network-state">
+            <span className="judge-network-dot" />
+
+            <div>
+              <small>JUDGING NETWORK</small>
+
+              <strong>
+                {loading ? 'SYNCING' : 'CONNECTED'}
+              </strong>
+            </div>
+          </div>
+
+          <button
+            className="button button-secondary judge-refresh-button"
+            type="button"
+            disabled={loading || busy}
+            onClick={() => void refresh()}
+          >
+            <RefreshCw
+              size={14}
+              aria-hidden="true"
+            />
+
+            {loading ? 'Syncing…' : 'Sync assignments'}
+          </button>
+        </div>
       </section>
 
 
@@ -188,109 +232,184 @@ export function RealOrganizerJudgeAssignmentsPage() {
 
 
       <section
-        className="organizer-judge-metrics"
+        className="judge-status-strip"
         aria-label="Judging assignment summary"
       >
-        {[
-          {
-            label: 'ASSIGNED',
-            value: progress?.total_assignments ?? 0,
-          },
-          {
-            label: 'COMPLETED',
-            value: progress?.completed_evaluations ?? 0,
-          },
-          {
-            label: 'IN PROGRESS',
-            value: progress?.in_progress_evaluations ?? 0,
-          },
-          {
-            label: 'PENDING',
-            value: progress?.pending_evaluations ?? 0,
-          },
-          {
-            label: 'PROGRESS',
-            value: `${progress?.completion_percentage ?? 0}%`,
-          },
-        ].map(item => (
-          <article key={item.label}>
-            <p className="metadata">{item.label}</p>
-            <strong>{item.value}</strong>
-          </article>
-        ))}
-      </section>
-
-
-      <section className="panel">
-        <header className="panel-header">
+        <header className="judge-status-heading">
           <div>
-            <p className="metadata">MANUAL CONTROL</p>
-            <h2>Judge & Project Assignment</h2>
+            <p className="metadata">
+              REVIEW NETWORK
+            </p>
+
+            <h2>
+              JUDGING STATUS
+            </h2>
+          </div>
+
+          <div className="judge-status-summary">
+            <span>OVERALL COMPLETION</span>
+
+            <strong>
+              {progress?.completion_percentage ?? 0}%
+            </strong>
           </div>
         </header>
 
-        <div className="event-status-body">
-          <form className="team-form" onSubmit={handleAddJudge}>
+        <div className="judge-status-grid">
+          <article>
+            <UsersRound
+              size={17}
+              aria-hidden="true"
+            />
+
             <div>
-              <p className="metadata">STEP 01</p>
-              <h3>Add event judge</h3>
+              <span>ASSIGNED</span>
+
+              <strong>
+                {progress?.total_assignments ?? 0}
+              </strong>
+            </div>
+          </article>
+
+          <article>
+            <CheckCircle2
+              size={17}
+              aria-hidden="true"
+            />
+
+            <div>
+              <span>COMPLETED</span>
+
+              <strong>
+                {progress?.completed_evaluations ?? 0}
+              </strong>
+            </div>
+          </article>
+
+          <article>
+            <Activity
+              size={17}
+              aria-hidden="true"
+            />
+
+            <div>
+              <span>IN PROGRESS</span>
+
+              <strong>
+                {progress?.in_progress_evaluations ?? 0}
+              </strong>
+            </div>
+          </article>
+
+          <article>
+            <Clock3
+              size={17}
+              aria-hidden="true"
+            />
+
+            <div>
+              <span>PENDING</span>
+
+              <strong>
+                {progress?.pending_evaluations ?? 0}
+              </strong>
+            </div>
+          </article>
+        </div>
+
+        <div className="judge-status-progress">
+          <div>
+            <span
+              style={{
+                width: `${Math.min(
+                  progress?.completion_percentage ?? 0,
+                  100,
+                )}%`,
+              }}
+            />
+          </div>
+
+          <div className="judge-status-progress-meta">
+            <span>
+              {progress?.judges.length ?? 0} ACTIVE JUDGES
+            </span>
+
+            <span>
+              {progress?.completed_evaluations ?? 0}
+              {' / '}
+              {progress?.total_assignments ?? 0}
+              {' '}REVIEWS COMPLETE
+            </span>
+          </div>
+        </div>
+      </section>
+
+
+      <section className="judge-dispatch-console">
+        <header className="judge-dispatch-console-header">
+          <div>
+            <p className="metadata">
+              MANUAL ROUTING
+            </p>
+
+            <h2>
+              ASSIGNMENT STATION
+            </h2>
+
+            <p>
+              Add evaluators to the event, then
+              connect submitted projects to eligible
+              judges.
+            </p>
+          </div>
+
+          <GitBranch
+            size={21}
+            aria-hidden="true"
+          />
+        </header>
+
+        <div className="judge-dispatch-console-grid">
+          <form
+            className="judge-dispatch-station"
+            onSubmit={handleAddJudge}
+          >
+            <div className="judge-dispatch-number">
+              01
+            </div>
+
+            <div className="judge-dispatch-station-icon">
+              <UserPlus
+                size={21}
+                aria-hidden="true"
+              />
+            </div>
+
+            <div className="judge-dispatch-station-copy">
+              <p className="metadata">
+                ROSTER INTAKE
+              </p>
+
+              <h3>
+                ADD EVENT JUDGE
+              </h3>
+
               <p>
-                Promote an existing participant account into this event's
-                judging pool.
+                Promote an existing account into
+                this event's judging pool.
               </p>
             </div>
 
             <label>
               <span>JUDGE ACCOUNT UUID</span>
+
               <input
                 type="text"
                 value={eventJudgeId}
-                onChange={event => setEventJudgeId(event.target.value)}
-                placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-                disabled={busy}
-                required
-              />
-            </label>
-
-            <button
-              className="button button-primary"
-              type="submit"
-              disabled={busy}
-            >
-              Add judge ↗
-            </button>
-          </form>
-
-
-          <form className="team-form" onSubmit={handleCreateAssignment}>
-            <div>
-              <p className="metadata">STEP 02</p>
-              <h3>Assign project</h3>
-              <p>
-                Connect an event judge to one submitted project using the
-                backend's authoritative assignment rules.
-              </p>
-            </div>
-
-            <label>
-              <span>PROJECT UUID</span>
-              <input
-                type="text"
-                value={projectId}
-                onChange={event => setProjectId(event.target.value)}
-                placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-                disabled={busy}
-                required
-              />
-            </label>
-
-            <label>
-              <span>JUDGE UUID</span>
-              <input
-                type="text"
-                value={assignmentJudgeId}
                 onChange={event =>
-                  setAssignmentJudgeId(event.target.value)
+                  setEventJudgeId(
+                    event.target.value,
+                  )
                 }
                 placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
                 disabled={busy}
@@ -303,80 +422,272 @@ export function RealOrganizerJudgeAssignmentsPage() {
               type="submit"
               disabled={busy}
             >
-              Create assignment ↗
+              Add to judging pool ↗
+            </button>
+          </form>
+
+          <div
+            className="judge-dispatch-bridge"
+            aria-hidden="true"
+          >
+            <span />
+
+            <div>
+              <GitBranch size={17} />
+            </div>
+
+            <span />
+          </div>
+
+          <form
+            className="judge-dispatch-station is-project"
+            onSubmit={handleCreateAssignment}
+          >
+            <div className="judge-dispatch-number">
+              02
+            </div>
+
+            <div className="judge-dispatch-station-icon">
+              <GitBranch
+                size={21}
+                aria-hidden="true"
+              />
+            </div>
+
+            <div className="judge-dispatch-station-copy">
+              <p className="metadata">
+                PROJECT ROUTING
+              </p>
+
+              <h3>
+                CREATE ASSIGNMENT
+              </h3>
+
+              <p>
+                Route one submitted project to an
+                event judge using the backend's
+                assignment rules.
+              </p>
+            </div>
+
+            <div className="judge-dispatch-input-grid">
+              <label>
+                <span>PROJECT UUID</span>
+
+                <input
+                  type="text"
+                  value={projectId}
+                  onChange={event =>
+                    setProjectId(
+                      event.target.value,
+                    )
+                  }
+                  placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+                  disabled={busy}
+                  required
+                />
+              </label>
+
+              <label>
+                <span>JUDGE UUID</span>
+
+                <input
+                  type="text"
+                  value={assignmentJudgeId}
+                  onChange={event =>
+                    setAssignmentJudgeId(
+                      event.target.value,
+                    )
+                  }
+                  placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+                  disabled={busy}
+                  required
+                />
+              </label>
+            </div>
+
+            <button
+              className="button button-primary"
+              type="submit"
+              disabled={busy}
+            >
+              Route project ↗
             </button>
           </form>
         </div>
 
-        <p className="team-message">
-          The current judging API identifies judges and projects by UUID.
-          Names, emails and a zero-assignment judge roster are not exposed by
-          this endpoint, so this console does not invent them.
-        </p>
+        <footer className="judge-dispatch-console-footer">
+          <span />
+
+          <p>
+            JUDGES AND PROJECTS ARE CURRENTLY IDENTIFIED
+            BY UUID. ELIGIBILITY, DUPLICATES AND EVENT
+            CONSISTENCY REMAIN BACKEND-ENFORCED.
+          </p>
+        </footer>
       </section>
 
 
-      <section className="organizer-judge-toolbar">
-        <strong>
-          JUDGE WORKLOAD / {progress?.judges.length ?? 0} ACTIVE JUDGES
-        </strong>
+      <section className="judge-node-console">
+        <header className="judge-node-header">
+          <div>
+            <p className="metadata">
+              WORKLOAD NETWORK
+            </p>
 
-        <label className="organizer-search">
-          <input
-            type="search"
-            value={query}
-            onChange={event => setQuery(event.target.value)}
-            placeholder="Search judge UUID"
-            aria-label="Search judge UUID"
-          />
-        </label>
-      </section>
+            <h2>
+              JUDGE NODES
+            </h2>
 
+            <p>
+              {progress?.judges.length ?? 0} active evaluators
+              connected to the current judging network.
+            </p>
+          </div>
 
-      <section className="organizer-judge-table">
-        <div className="organizer-judge-header">
-          <span>JUDGE ID</span>
-          <span>ASSIGNED</span>
-          <span>COMPLETED</span>
-          <span>PENDING</span>
-          <span>PROGRESS</span>
-        </div>
-
-        {judges.map(judge => (
-          <article
-            className="organizer-judge-row"
-            key={judge.judge_id}
-          >
-            <code title={judge.judge_id}>
-              {judge.judge_id}
-            </code>
-
-            <strong>{judge.assignments}</strong>
-            <strong>{judge.completed}</strong>
-            <strong>{judge.pending}</strong>
+          <label className="judge-node-search">
+            <span>SEARCH NETWORK</span>
 
             <div>
-              <progress
-                value={judge.completed}
-                max={judge.assignments || 1}
-                aria-label={`${judge.judge_id} completion`}
+              <input
+                type="search"
+                value={query}
+                onChange={event =>
+                  setQuery(event.target.value)
+                }
+                placeholder="Search full judge UUID"
+                aria-label="Search judge UUID"
               />
-
-              <span>
-                {judge.completion_percentage}% /{' '}
-                {Math.max(judge.assignments - judge.completed, 0)} remaining
-              </span>
             </div>
-          </article>
-        ))}
+          </label>
+        </header>
+
+        <div className="judge-node-grid">
+          {visibleJudges.map((judge, index) => {
+            const remaining = Math.max(
+              judge.assignments - judge.completed,
+              0,
+            );
+
+            const state =
+              judge.assignments === 0
+                ? 'IDLE'
+                : judge.completed === judge.assignments
+                  ? 'COMPLETE'
+                  : judge.in_progress > 0
+                    ? 'ACTIVE'
+                    : 'PENDING';
+
+            return (
+              <article
+                className="judge-node-card"
+                key={judge.judge_id}
+                title={judge.judge_id}
+              >
+                <div className="judge-node-top">
+                  <span>
+                    {String(index + 1).padStart(2, '0')}
+                  </span>
+
+                  <span
+                    className={`judge-node-state is-${state.toLowerCase()}`}
+                  >
+                    {state}
+                  </span>
+                </div>
+
+                <div className="judge-node-identity">
+                  <small>EVALUATOR NODE</small>
+
+                  <h3>
+                    {judgeCode(judge.judge_id)}
+                  </h3>
+
+                  <code>
+                    ID ••••
+                    {judge.judge_id.slice(-6)}
+                  </code>
+                </div>
+
+                <div className="judge-node-load">
+                  <div>
+                    <span>ASSIGNED</span>
+                    <strong>{judge.assignments}</strong>
+                  </div>
+
+                  <div>
+                    <span>COMPLETED</span>
+                    <strong>{judge.completed}</strong>
+                  </div>
+
+                  <div>
+                    <span>REMAINING</span>
+                    <strong>{remaining}</strong>
+                  </div>
+                </div>
+
+                <div className="judge-node-progress">
+                  <div>
+                    <span
+                      style={{
+                        width: `${Math.min(
+                          judge.completion_percentage,
+                          100,
+                        )}%`,
+                      }}
+                    />
+                  </div>
+
+                  <strong>
+                    {judge.completion_percentage}%
+                  </strong>
+                </div>
+              </article>
+            );
+          })}
+        </div>
 
         {!loading && !judges.length && (
           <p className="team-message">
             No judge workload records match this search.
           </p>
         )}
+
+        {!query.trim() && judges.length > 9 && (
+          <div className="judge-node-footer">
+            <div>
+              <span>
+                SHOWING
+              </span>
+
+              <strong>
+                {showAllJudges ? judges.length : 9}
+                {' / '}
+                {judges.length}
+              </strong>
+            </div>
+
+            <button
+              className="button button-secondary"
+              type="button"
+              onClick={() =>
+                setShowAllJudges(current => !current)
+              }
+            >
+              {showAllJudges
+                ? 'Collapse network'
+                : `Show all ${judges.length} judges`}
+            </button>
+          </div>
+        )}
       </section>
 
+      <p className="judge-node-privacy">
+        <span />
+        FULL JUDGE UUIDS REMAIN AVAILABLE ON HOVER AND
+        FOR SEARCH. DISPLAY CODES ARE DERIVED FROM THE UUID
+        ONLY FOR A CLEANER OPERATOR VIEW.
+      </p>
 
       <p className="team-message">
         Assignment status only is shown here. Judge score values and evaluator
