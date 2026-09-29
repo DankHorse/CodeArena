@@ -28,6 +28,10 @@ export function safeLoginError(error: unknown): string {
 }
 
 export function safeRegisterError(error: unknown): { field: AuthField | null; message: string } {
+  if (error instanceof ApiError && error.status === 409) {
+    return { field: 'email', message: 'An account with this email already exists. Please log in.' };
+  }
+
   const field = authValidationField(error);
   if (field === 'email') return { field, message: 'Please enter a valid email address.' };
   if (field === 'password') return { field, message: 'Password must be at least 12 characters.' };

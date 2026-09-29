@@ -5,7 +5,7 @@ import { AuthShell } from './AuthShell';
 import { useSession } from '../../auth/SessionProvider';
 import { paths } from '../../routes';
 import { DEMO } from '../../api';
-import { authValidationField, isValidEmail, safeRegisterError } from './validation';
+import { isValidEmail, safeRegisterError } from './validation';
 
 export function RegisterPage() {
   const { register } = useSession();
@@ -35,7 +35,7 @@ export function RegisterPage() {
       {DEMO && <p className="auth-message">Demo registration creates a local preview profile. Use sample details, not real credentials.</p>}
       <form className="auth-form" onSubmit={handleSubmit} aria-busy={busy} noValidate>
         <label><span>NAME</span><input id="register-name" type="text" name="name" autoComplete="name" placeholder="Your name" required disabled={busy} aria-invalid={!!fieldErrors.name} aria-describedby={fieldErrors.name ? 'register-name-error' : undefined} />{fieldErrors.name && <p className="auth-message" id="register-name-error" role="alert">{fieldErrors.name}</p>}</label>
-        <label><span>EMAIL</span><input id="register-email" type="email" name="email" autoComplete="email" placeholder="you@example.com" required disabled={busy} aria-invalid={!!fieldErrors.email} aria-describedby={fieldErrors.email ? 'register-email-error' : undefined} />{fieldErrors.email && <p className="auth-message" id="register-email-error" role="alert">{fieldErrors.email}</p>}</label>
+        <label><span>EMAIL</span><input id="register-email" type="email" name="email" autoComplete="email" placeholder="you@example.com" required disabled={busy} onChange={() => setFieldErrors(current => ({ ...current, email: undefined }))} aria-invalid={!!fieldErrors.email} aria-describedby={fieldErrors.email ? 'register-email-error' : undefined} />{fieldErrors.email && <p className="auth-message" id="register-email-error" role="alert">{fieldErrors.email}</p>}</label>
         <label><span>PASSWORD / 12 CHARACTERS MINIMUM</span><input id="register-password" type="password" name="password" autoComplete="new-password" minLength={12} placeholder="Create a password" required disabled={busy} aria-invalid={!!fieldErrors.password} aria-describedby={fieldErrors.password ? 'register-password-error' : undefined} />{fieldErrors.password && <p className="auth-message" id="register-password-error" role="alert">{fieldErrors.password}</p>}</label>
         <button className="button button-primary auth-submit" type="submit" disabled={busy}>{busy ? 'Creating account…' : 'Create account ↗'}</button>
         {error && <p className="auth-message" role="alert">{error}</p>}
