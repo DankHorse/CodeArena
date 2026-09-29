@@ -258,3 +258,78 @@ export async function exportRealJudgingResultsCsv(
 
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
+
+
+export interface RealOrganizerTeam {
+  id: string;
+  event_id: string;
+  name: string;
+  captain_id: string;
+  member_ids: string[];
+  member_count: number;
+}
+
+export interface RealOrganizerProject {
+  id: string;
+  event_id: string;
+  title: string;
+  summary: string | null;
+  team_id: string;
+  team_name: string | null;
+  track_id: string | null;
+  track_name: string | null;
+  state: string;
+  status: string;
+  repo_url: string | null;
+  demo_url: string | null;
+  created_at: string;
+  updated_at: string;
+  submitted_at: string | null;
+}
+
+export interface RealOrganizerActivity {
+  id: string;
+  action: string;
+  actor_id: string;
+  target: string;
+  outcome: string;
+  created_at: string;
+}
+
+export async function loadRealOrganizerTeams(
+  eventId: string,
+): Promise<RealOrganizerTeam[]> {
+  requireRealUuid(eventId, 'event');
+
+  const response = await api<{ items: RealOrganizerTeam[] }>(
+    `/api/v1/events/${encodeURIComponent(eventId)}/teams`,
+  );
+
+  assertEvent(eventId, response.items);
+  return response.items;
+}
+
+export async function loadRealOrganizerProjects(
+  eventId: string,
+): Promise<RealOrganizerProject[]> {
+  requireRealUuid(eventId, 'event');
+
+  const response = await api<{ items: RealOrganizerProject[] }>(
+    `/api/v1/events/${encodeURIComponent(eventId)}/projects`,
+  );
+
+  assertEvent(eventId, response.items);
+  return response.items;
+}
+
+export async function loadRealOrganizerActivity(
+  eventId: string,
+): Promise<RealOrganizerActivity[]> {
+  requireRealUuid(eventId, 'event');
+
+  const response = await api<{ items: RealOrganizerActivity[] }>(
+    `/api/v1/events/${encodeURIComponent(eventId)}/activity`,
+  );
+
+  return response.items;
+}

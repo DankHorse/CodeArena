@@ -52,6 +52,12 @@ function OrganizerWorkspace() {
       content = (
         <RealOrganizerResultsPage key={snapshot?.event?.id} />
       );
+    } else if (
+      location.pathname === '/organizer/teams' ||
+      location.pathname === '/organizer/projects' ||
+      location.pathname === '/organizer/activity'
+    ) {
+      content = <Outlet key={snapshot?.event?.id} />;
     } else {
       content = (
         <p>This workspace is not connected to the real backend yet.</p>
