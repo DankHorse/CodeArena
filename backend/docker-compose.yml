@@ -35,5 +35,15 @@ services:
       - ../.dogfood.local.toml:/demo/.dogfood.local.toml
     restart: unless-stopped
 
+  frontend:
+    build:
+      context: ..
+      dockerfile: frontend/Dockerfile
+    depends_on:
+      - backend
+    ports:
+      - "127.0.0.1:8000:80"
+    restart: unless-stopped
+
 volumes:
   postgres_data:

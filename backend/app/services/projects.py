@@ -182,7 +182,7 @@ def list_gallery(
         count_query = count_query.where(criterion)
     total = db.scalar(count_query) or 0
     rows = db.execute(
-        query.order_by(ProjectSubmission.submitted_at.desc(), ProjectSubmission.id)
+        query.order_by(ProjectSubmission.submitted_at.asc(), ProjectSubmission.id)
         .offset(offset)
         .limit(limit)
     )
